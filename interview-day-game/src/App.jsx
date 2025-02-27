@@ -1,12 +1,10 @@
 import "./App.css";
-import { Button, Theme } from "@chakra-ui/react";
-import { ThemeContext } from "./context/useUserContext";
+import { Button } from "@chakra-ui/react";
+import { AppContext } from "./context/useAppContext";
 import { useContext } from "react";
 function App() {
-  const { theme, setTheme } = useContext(ThemeContext);
+  const { theme, setTheme } = useContext(AppContext);
 
-  // const { user, setUser } = useContext();
-  console.log(theme);
   return (
     <>
       <h1>{theme}</h1>
