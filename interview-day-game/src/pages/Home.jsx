@@ -1,4 +1,4 @@
-import { Heading, HStack, IconButton, Input, Stack } from "@chakra-ui/react";
+import { Flex, Heading, HStack, IconButton, Input, Stack } from "@chakra-ui/react";
 import { FiSettings } from "react-icons/fi";
 import React from "react";
 import { Button } from "@chakra-ui/react";
@@ -8,33 +8,66 @@ import { supabase } from "../supabase/supabaseClient";
 function Home() {
   const navigate = useNavigate();
   return (
-    <div>
+    <div style={{ backgroundColor: '#622A2A', width: '100vw', height: '100vh' }}>
       <div>
         <Stack 
           align="center">
-
-          {/* Heading */}
-          <Heading 
-            fontSize={100} 
-            fontFamily="inter" 
-            align="center"
-            padding={50}>
-              Interview Day
-          </Heading>
-          <Heading 
-            fontSize={100} 
-            fontFamily="inter" 
-            align="center" 
-            padding={50}>
-              At
-          </Heading>
-          <Heading 
-            fontSize={100} 
-            fontFamily="inter" 
-            align="center" 
-            padding={50}>
-              The Raikes School
-          </Heading>
+            <Flex 
+              direction="row">
+                <Flex
+                  direction="column"
+                  order="1"
+                  justify="center">
+                {/* Heading */}
+                  <Flex
+                    order="1"
+                    justify="center">
+                  <Heading 
+                    fontSize={100} 
+                    fontFamily="inter" 
+                    align="center"
+                    padding={50}>
+                      Interview Day
+                  </Heading>
+                  </Flex>
+                  <Flex
+                  order="2"
+                  justify="center">
+                  <Heading 
+                    fontSize={100} 
+                    fontFamily="inter" 
+                    align="center" 
+                    padding={50}>
+                      At
+                  </Heading>
+                  </Flex>
+                  <Flex
+                  order="3"
+                  justify="center">
+                  <Heading 
+                    fontSize={100} 
+                    fontFamily="inter" 
+                    align="center" 
+                    padding={50}>
+                      The Raikes School
+                  </Heading>
+                  </Flex>
+                </Flex>
+                    
+                {/* nav to setings */}
+                <Flex
+                  order="2"
+                  justify="flex-end"
+                  gap="80">
+                    <IconButton 
+                      aria-label="Settings"
+                      onClick={() => navigate("/settings")}
+                      rounded='full'
+                      size='xl'>
+                        <FiSettings />
+                    </IconButton>
+                </Flex>
+            </Flex>
 
           {/* Room Code Input */}
           <HStack 
@@ -44,13 +77,16 @@ function Home() {
             <Input 
               size="2xl" 
               placeholder="Enter The Room Code" 
-              maxWidth={250}/>
+              maxWidth={250}
+              maxHeight={50}
+              variant='filled'/>
 
             <Button 
               colorPalette="green"
-               size="lg"
+               size="xl"
                rounded="md"
-               variant="subtle">
+               variant="subtle"
+               onClick={() => navigate("/game")}>
               Join Room
             </Button>
           </HStack>
@@ -62,20 +98,10 @@ function Home() {
           </Heading>
 
           {/* nav to login */}
-          <Button 
-            colorScheme="teal" 
-            size="lg" 
+          <Button  
+            size="xl" 
             onClick={() => navigate("/login")}>
               Login as a Host
-          </Button>
-
-          {/* nav to setings */}
-          <Button 
-            colorScheme="teal"
-            size="lg"
-            onClick={() => navigate("/settings")}
-          >
-            Settings
           </Button>
         </Stack>
       </div>
