@@ -26,7 +26,8 @@ function Home() {
                     fontSize={100} 
                     fontFamily="inter" 
                     align="center"
-                    padding={50}>
+                    padding={50}
+                    colorPalette='white'>
                       Interview Day
                   </Heading>
                   </Flex>
@@ -37,7 +38,8 @@ function Home() {
                     fontSize={100} 
                     fontFamily="inter" 
                     align="center" 
-                    padding={50}>
+                    padding={50}
+                    colorPalette="white">
                       At
                   </Heading>
                   </Flex>
@@ -48,7 +50,8 @@ function Home() {
                     fontSize={100} 
                     fontFamily="inter" 
                     align="center" 
-                    padding={50}>
+                    padding={50}
+                    colorPalette="white">
                       The Raikes School
                   </Heading>
                   </Flex>
@@ -63,7 +66,8 @@ function Home() {
                       aria-label="Settings"
                       onClick={() => navigate("/settings")}
                       rounded='full'
-                      size='xl'>
+                      size='xl'
+                      colorPalette="white">
                         <FiSettings />
                     </IconButton>
                 </Flex>
@@ -79,7 +83,8 @@ function Home() {
               placeholder="Enter The Room Code" 
               maxWidth={250}
               maxHeight={50}
-              variant='filled'/>
+              variant='filled'
+              colorPalette="white"/>
 
             <Button 
               colorPalette="green"
@@ -100,7 +105,8 @@ function Home() {
           {/* nav to login */}
           <Button  
             size="xl" 
-            onClick={() => navigate("/login")}>
+            onClick={() => navigate("/login")}
+            colorPalette="white">
               Login as a Host
           </Button>
         </Stack>
