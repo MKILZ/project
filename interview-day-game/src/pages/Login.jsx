@@ -19,13 +19,13 @@ export default function Login() {
   }, []);
 
   if (!session) {
-    return <Auth />;
+    return <SignUp />;
   } else {
     return <div>Logged in!</div>;
   }
 }
 
-function Auth() {
+function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   async function signUpNewUser(email, password) {
