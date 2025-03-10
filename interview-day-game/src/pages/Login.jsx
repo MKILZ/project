@@ -19,10 +19,44 @@ export default function Login() {
   }, []);
 
   if (!session) {
-    return <SignUp />;
+    return <Auth />;
   } else {
     return <div>Logged in!</div>;
   }
+}
+
+function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  async function signUpNewUser(email, password) {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password,
+      options: {
+        emailRedirectTo: "https://example.com/welcome",
+      },
+    });
+  }
+
+  return (
+    <>
+      <input
+        type="text"
+        placeholder="email"
+        onChange={(e) => {
+          setEmail(e.target.value);
+        }}
+      ></input>
+      <input
+        type="password"
+        placeholder="password"
+        onChange={(e) => {
+          setPassword(e.target.value);
+        }}
+      ></input>
+      <Button onClick={() => signUpNewUser(email, password)} />
+    </>
+  );
 }
 
 function SignUp() {
