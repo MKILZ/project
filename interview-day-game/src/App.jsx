@@ -1,5 +1,4 @@
 import "./App.css";
-import { Button } from "@chakra-ui/react";
 import { AppContext } from "./context/useAppContext";
 import { useContext } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
