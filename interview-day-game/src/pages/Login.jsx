@@ -23,8 +23,8 @@ export default function Login() {
       <div>
         <h1>Sign Up</h1>
         <SignUp />
-        <h1>Login</h1>
-        <Login />
+        <h1>Sign In</h1>
+        <SignIn />
       </div>
     );
   } else {
@@ -32,7 +32,7 @@ export default function Login() {
   }
 }
 
-function Login() {
+function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   async function signUpNewUser(email, password) {
