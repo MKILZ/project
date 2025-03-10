@@ -19,7 +19,14 @@ export default function Login() {
   }, []);
 
   if (!session) {
-    return <Auth />;
+    return (
+      <div>
+        <h1>Sign Up</h1>
+        <SignUp />
+        <h1>Login</h1>
+        <Login />
+      </div>
+    );
   } else {
     return <div>Logged in!</div>;
   }
