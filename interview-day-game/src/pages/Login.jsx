@@ -19,13 +19,55 @@ export default function Login() {
   }, []);
 
   if (!session) {
-    return <Auth />;
+    return (
+      <div>
+        <h1>Sign Up</h1>
+        <SignUp />
+        <h1>Sign In</h1>
+        <SignIn />
+      </div>
+    );
   } else {
     return <div>Logged in!</div>;
   }
 }
 
-function Auth() {
+function SignIn() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  async function signUpNewUser(email, password) {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password,
+      options: {
+        emailRedirectTo: "https://example.com/welcome",
+      },
+    });
+    console.log(data, error);
+  }
+
+  return (
+    <>
+      <input
+        type="text"
+        placeholder="email"
+        onChange={(e) => {
+          setEmail(e.target.value);
+        }}
+      ></input>
+      <input
+        type="password"
+        placeholder="password"
+        onChange={(e) => {
+          setPassword(e.target.value);
+        }}
+      ></input>
+      <Button onClick={() => signUpNewUser(email, password)} />
+    </>
+  );
+}
+
+function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   async function signUpNewUser(email, password) {
@@ -36,6 +78,7 @@ function Auth() {
         emailRedirectTo: "https://example.com/welcome",
       },
     });
+    console.log(data, error);
   }
 
   return (

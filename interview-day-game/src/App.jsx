@@ -19,7 +19,7 @@ function App() {
         <Route exact path="/" element={<Home />} />
         <Route path="*" element={<Home />} />
         <Route exact path="/login" element={<Login />} />
-        <Route exact path="/lobby" element={<Lobby />} />
+        <Route path="/lobby/:lobby" element={<Lobby />} />
         <Route exact path="/game" element={<Game />} />
         <Route exact path="/rules" element={<Rules />} />
         <Route exact path="/settings" element={<Settings />} />
