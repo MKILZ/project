@@ -43,6 +43,7 @@ function SignIn() {
         emailRedirectTo: "https://example.com/welcome",
       },
     });
+    console.log(data, error);
   }
 
   return (
@@ -77,6 +78,7 @@ function SignUp() {
         emailRedirectTo: "https://example.com/welcome",
       },
     });
+    console.log(data, error);
   }
 
   return (
