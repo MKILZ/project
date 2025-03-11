@@ -8,6 +8,8 @@ function About() {
   return (
     <div style = {{ backgroundColor: '#622A2A', width: '100vw', height: '100vh' }}>
       <div>
+
+        {/* Heading */}
         <Stack>
           <Heading 
             as="h1" size="xl" fontWeight="bold"> 
@@ -17,7 +19,86 @@ function About() {
             Who are we?
           </Heading>
         </Stack>
-        <Image
+
+        {/* introductions of each person */}
+        <Box mb={6} ma={6}>
+          <Heading as="h3" size="lg" mb={2} ml={3}> 
+            Ian Kuchar
+          </Heading>
+          <Image
+            src={"https://media.licdn.com/dms/image/v2/D5603AQEPQAt1bXEh-A/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1694104002893?e=1746662400&v=beta&t=d0pLDh1XINoJPW3S1m-xkZnkvh6yrZTgTLEeBE5KuQc"
+            }
+            boxSize="200px"
+            borderRadius="full"
+            fit="cover"
+            alt="Ian Headshot"
+          />
+        <Text textStyle="md"> 
+          Ian is a sophomore computer science major in the Raikes School from Bloomfield, NE. 
+        </Text>
+        </Box>
+
+        <Box mb={6} ma={6}>
+          <Heading as="h3" size="lg" mb={2} ml={3}> 
+            Mary Kate Nussrallah
+          </Heading>
+          <Image
+            src={"https://media.licdn.com/dms/image/v2/D4E03AQGs1UWJY1jRSg/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1695250451964?e=1746662400&v=beta&t=r_bsLDZdeAw0MLaX5lBADgy-pU05KYcCk0fi4rqWUjI"
+            }
+            boxSize="200px"
+            borderRadius="full"
+            fit="cover"
+            alt="MK Headshot"
+          />
+        <Text textStyle="md"> 
+          Mary Kate is a sophomore biochemistry major in the Raikes School from Omaha, NE. 
+        </Text>
+        </Box>
+
+        <Box mb={6} ma={6}>
+          <Heading as="h3" size="lg" mb={2} ml={3}> 
+            Lucy Salyer
+          </Heading>
+          <Image
+            src={"https://media.licdn.com/dms/image/v2/D5603AQH8y1jdo8U0hg/profile-displayphoto-shrink_400_400/B56ZSwRCtzHEAg-/0/1738124045816?e=1746662400&v=beta&t=lAT4IGTBu7XbKc-64mYp4KOVeX98ZEqxWV1I0qBq3r8"
+            }
+            boxSize="200px"
+            borderRadius="full"
+            fit="cover"
+            alt="Lucy Headshot"
+          />
+        <Text textStyle="md"> 
+          Lucy is a sophomore computer science major in the Raikes School from Elko, NV. 
+        </Text>
+        </Box>
+
+        <Box mb={6} ma={6}>
+          <Heading as="h3" size="lg" mb={2} ml={3}> 
+            Zak Rab
+          </Heading>
+          <Image
+            src={"https://drive.google.com/file/d/12tQaswIam1EJubX429nnNQaeg-g7BmVY/view"
+            }
+            boxSize="200px"
+            borderRadius="full"
+            fit="cover"
+            alt="Zak Headshot"
+          />
+        <Text textStyle="md"> 
+          Zak is a sophomore computer science major in the Raikes School from Omaha, NE. 
+        </Text>
+        </Box>
+
+        <Heading as="h3" size="lg" fontStyle="semibold" > Why we are doing this </Heading>
+        <Text textStyle="md"> 
+        As college freshmen, the four of us participated in a team-building exercise that left a lasting impact. It was more than just a game—it challenged us, pushed us to think critically, and helped us grow both as individuals and as a team. Through that experience, we gained invaluable lessons about communication, problem-solving, and collaboration.
+
+        Now, as students who have come so far in our journey at the Raikes School, we wanted to create something that not only pays tribute to the game that shaped us but also to the place where we first played it. The Raikes School has been instrumental in our growth, and we owe part of our development to that very first exercise.
+
+        With Interview Day at the Raikes School, we hope to recreate the same sense of challenge, camaraderie, and discovery that we experienced. Our goal is for you to walk away having learned as much as we did—about problem-solving, teamwork, and maybe even yourself. Thank you for playing, and welcome to an experience that has meant so much to us. 
+        </Text>
+
+        {/* <Image
           // height="200px"
           src={"https://media.licdn.com/dms/image/v2/D5603AQEPQAt1bXEh-A/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1694104002893?e=1746662400&v=beta&t=d0pLDh1XINoJPW3S1m-xkZnkvh6yrZTgTLEeBE5KuQc"
           }
@@ -26,8 +107,8 @@ function About() {
           fit="cover"
           alt="Ian Headshot"
         />
-        <Text> Ian is a sophomore computer science major in the Raikes School from Bloomfield, NE. </Text>
-        <Image
+        <Text> Ian is a sophomore computer science major in the Raikes School from Bloomfield, NE. </Text> */}
+        {/* <Image
           // height="200px"
           src={
             "https://media.licdn.com/dms/image/v2/D4E03AQGs1UWJY1jRSg/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1695250451964?e=1746662400&v=beta&t=r_bsLDZdeAw0MLaX5lBADgy-pU05KYcCk0fi4rqWUjI"
@@ -38,9 +119,9 @@ function About() {
           alt="MK Headshot"
         />
         <Text> Mary Kate is a sophomore biochemistry major in the Raikes School from Omaha, NE. </Text>
-        <Image
+        <Image */}
           // height="200px"
-          src={
+          {/* src={
             "https://media.licdn.com/dms/image/v2/D5603AQH8y1jdo8U0hg/profile-displayphoto-shrink_400_400/B56ZSwRCtzHEAg-/0/1738124045816?e=1746662400&v=beta&t=lAT4IGTBu7XbKc-64mYp4KOVeX98ZEqxWV1I0qBq3r8"
           }
           boxSize="200px"
@@ -58,16 +139,16 @@ function About() {
           fit="cover"
           alt="Zak Headshot"
         />
-        <Text> Zak is a sophomore computer science major in the Raikes School from Omaha, NE. </Text>
+        <Text> Zak is a sophomore computer science major in the Raikes School from Omaha, NE. </Text> */}
 
-        <h2> Why we are doing this </h2>
+        {/* <h2> Why we are doing this </h2>
         <Text> 
         As college freshmen, the four of us participated in a team-building exercise that left a lasting impact. It was more than just a game—it challenged us, pushed us to think critically, and helped us grow both as individuals and as a team. Through that experience, we gained invaluable lessons about communication, problem-solving, and collaboration.
 
         Now, as students who have come so far in our journey at the Raikes School, we wanted to create something that not only pays tribute to the game that shaped us but also to the place where we first played it. The Raikes School has been instrumental in our growth, and we owe part of our development to that very first exercise.
 
         With Interview Day at the Raikes School, we hope to recreate the same sense of challenge, camaraderie, and discovery that we experienced. Our goal is for you to walk away having learned as much as we did—about problem-solving, teamwork, and maybe even yourself. Thank you for playing, and welcome to an experience that has meant so much to us. 
-        </Text>
+        </Text> */}
 
       </div>
     </div>
