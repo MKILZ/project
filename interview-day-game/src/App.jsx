@@ -11,7 +11,6 @@ import About from "./pages/About";
 
 function App() {
   const { theme, setTheme } = useContext(AppContext);
-
   return (
     <div data-bs-theme={theme}>
       <BrowserRouter>

@@ -18,6 +18,19 @@ export default function Login() {
           <SignIn />
         </div>
       )}
+      <div
+        className="btn btn-outline-dark mt-2 pt-2"
+        onClick={() => {
+          supabase.auth.signInWithOAuth({
+            provider: "google",
+          });
+        }}
+      >
+        <img
+          src="https://about.google/assets-products/img/glue-google-color-logo.svg"
+          style={{ width: "80px" }}
+        />
+      </div>
       <a
         className="text-primary link-underline-primary pt-1"
         onClick={() => setMakingAccount(!makingAccount)}
