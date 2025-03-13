@@ -184,11 +184,6 @@ function AuthModal(props) {
       <Modal.Body>
         <Login />
       </Modal.Body>
-      <Modal.Footer>
-        <button className="btn btn-secondary" onClick={props.onHide}>
-          Close
-        </button>
-      </Modal.Footer>
     </Modal>
   );
 }

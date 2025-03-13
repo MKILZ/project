@@ -18,12 +18,12 @@ export default function Login() {
           <SignIn />
         </div>
       )}
-      <div
+      <a
         className="text-primary link-underline-primary pt-1"
         onClick={() => setMakingAccount(!makingAccount)}
       >
         {makingAccount ? "Dont have an account?" : "Already have an account?"}
-      </div>
+      </a>
     </div>
   );
 }
