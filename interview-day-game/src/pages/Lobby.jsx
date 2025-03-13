@@ -1,54 +1,61 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "../supabase/supabaseClient";
+import { AppContext } from "../context/useAppContext";
+
 function Lobby() {
   const { lobby } = useParams();
-  const room = supabase.channel(lobby, {
-    config: {
-      broadcast: { self: true },
-    },
-  });
-  // useEffect(() => {
-  //   room
-  //     .on("presence", { event: "sync" }, () => {
-  //       const newState = room.presenceState();
-  //       console.log("sync", newState);
-  //     })
-  //     .on("presence", { event: "join" }, ({ key, newPresences }) => {
-  //       console.log("join", key, newPresences);
-  //     })
-  //     .on("presence", { event: "leave" }, ({ key, leftPresences }) => {
-  //       console.log("leave", key, leftPresences);
-  //     })
-  //     .subscribe();
-  // }, []);
+  const [players, setPlayers] = useState([]);
+  const { session, setActiveUser, activeUser } = useContext(AppContext);
 
-  room.subscribe((status) => {
-    // Wait for successful connection
-    if (status !== "SUBSCRIBED") {
-      return null;
-    }
-    // Send a message once the client is subscribed
-    room.send({
-      type: "broadcast",
-      event: "test",
-      payload: { message: "joined" },
-    });
-  });
+  useEffect(() => {
+    const fetchPlayers = async () => {
+      const { data, error } = await supabase
+        .from("games")
+        .select("players")
+        .eq("lobby", lobby);
+      if (error) {
+        console.error(error);
+      } else {
+        setPlayers(data[0].players);
+      }
+    };
 
-  function messageReceived(payload) {
-    console.log(payload);
-  }
+    fetchPlayers();
+  }, [lobby]);
+  // const room = supabase.channel(lobby).on;
 
-  // Subscribe to the Channel
-  room.on("broadcast", { event: "test" }, (payload) =>
-    messageReceived(payload)
-  );
+  // room.subscribe((status) => {
+  //   // Wait for successful connection
+  //   if (status !== "SUBSCRIBED") {
+  //     return null;
+  //   }
+  //   // Send a message once the client is subscribed
+  //   room.send({
+  //     type: "broadcast",
+  //     event: "test",
+  //     payload: { message: "joined" },
+  //   });
+  // });
 
-  console.log(lobby);
+  // function messageReceived(payload) {
+  //   console.log(payload);
+  // }
+
+  // // Subscribe to the Channel
+  // room.on("broadcast", { event: "test" }, (payload) =>
+  //   messageReceived(payload)
+  // );
+
   return (
     <div>
       Lobby <div>{lobby}</div>
+      players
+      <div>
+        {players.map((player, idx) => {
+          return <div>player {idx + 1 + " " + player}</div>;
+        })}
+      </div>
     </div>
   );
 }

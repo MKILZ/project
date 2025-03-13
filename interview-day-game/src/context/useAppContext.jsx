@@ -1,14 +1,12 @@
 import React, { createContext, useEffect, useState } from "react";
 import { supabase } from "../supabase/supabaseClient";
 
-// 1. Create a Context
 export const AppContext = createContext(null);
 
-// 2. Create a Provider component
 export function AppProvider({ children }) {
   const [theme, setTheme] = useState("light");
   const [session, setSession] = useState(null);
-  const [activePlayer, setActivePlayer] = useState(0);
+  const [activeUser, setActiveUser] = useState();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -29,8 +27,8 @@ export function AppProvider({ children }) {
       value={{
         theme,
         setTheme,
-        activePlayer,
-        setActivePlayer,
+        activeUser,
+        setActiveUser,
         session,
         setSession,
       }}

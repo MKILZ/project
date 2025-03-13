@@ -12,7 +12,8 @@ function Home() {
   const [createModelShow, setCreateModelShow] = useState(false);
   const [settingsModalShow, setSettingsModalShow] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const { theme, setTheme, session } = useContext(AppContext);
+  const { theme, setTheme, session, setActiveUser } = useContext(AppContext);
+
   return (
     <div className="d-flex flex-column justify-content-center align-items-center ">
       <h1 className="mt-5">Interview day @ Kauffman</h1>
@@ -121,6 +122,7 @@ function SettingsModal(props) {
 function CreateGameModal(props) {
   const navigate = useNavigate();
   const [roomCount, setRoomCount] = useState(1);
+  const { session, setActiveUser } = useContext(AppContext);
   return (
     <Modal
       {...props}
@@ -152,9 +154,26 @@ function CreateGameModal(props) {
           ></input>
           <button
             className="btn btn-secondary"
-            onClick={() => {
+            onClick={async () => {
               props.onHide();
-              navigate("/lobby/" + Math.floor(Math.random() * 10000));
+
+              // Create a new lobby random 6 digit number
+              const lobbyCode = Math.floor(100000 + Math.random() * 900000);
+              setActiveUser({
+                role: "Host",
+                id: session.user.id,
+              });
+              // Create a new lobby in the database
+              const { data, error } = await supabase
+                .from("games")
+                .insert([
+                  { lobby: lobbyCode, host: session.user.id, players: [] },
+                ])
+                .select();
+
+              console.log(data, error);
+
+              navigate("/lobby/" + lobbyCode);
             }}
           >
             Create Lobby
