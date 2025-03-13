@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../supabase/supabaseClient";
-import { Button } from "@chakra-ui/react";
 export default function Login() {
   const [session, setSession] = useState(null);
 
@@ -62,7 +61,7 @@ function SignIn() {
           setPassword(e.target.value);
         }}
       ></input>
-      <Button onClick={() => signUpNewUser(email, password)} />
+      <button onClick={() => signUpNewUser(email, password)} />
     </>
   );
 }
@@ -97,7 +96,7 @@ function SignUp() {
           setPassword(e.target.value);
         }}
       ></input>
-      <Button onClick={() => signUpNewUser(email, password)} />
+      <button onClick={() => signUpNewUser(email, password)} />
     </>
   );
 }
