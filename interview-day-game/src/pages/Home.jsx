@@ -3,31 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabase/supabaseClient";
 import { AppContext } from "../context/useAppContext";
 import Modal from "react-bootstrap/Modal";
-
+import Login from "./Login.jsx";
 import { useState, useEffect } from "react";
 function Home() {
   const navigate = useNavigate();
-  const [session, setSession] = useState(null);
   const [lobby, setLobby] = useState();
   const [userName, setUserName] = useState();
   const [createModelShow, setCreateModelShow] = useState(false);
   const [settingsModalShow, setSettingsModalShow] = useState(false);
-  const { theme, setTheme } = useContext(AppContext);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const { theme, setTheme, session } = useContext(AppContext);
   return (
     <div className="d-flex flex-column justify-content-center align-items-center ">
       <h1 className="mt-5">Interview day @ Kauffman</h1>
@@ -59,7 +44,14 @@ function Home() {
       </div>
       <div className="position-absolute top-0 start-0 p-2 d-flex flex-row gap-2">
         {!session ? (
-          <button onClick={() => navigate("/login")}>Login as a Host</button>
+          <button
+            className="btn btn-secondary"
+            onClick={() => {
+              setShowAuthModal(true);
+            }}
+          >
+            Login as a Host
+          </button>
         ) : (
           <button
             className="btn btn-secondary"
@@ -84,6 +76,7 @@ function Home() {
         show={settingsModalShow}
         onHide={() => setSettingsModalShow(false)}
       />
+      <AuthModal show={showAuthModal} onHide={() => setShowAuthModal(false)} />
     </div>
   );
 }
@@ -91,6 +84,7 @@ function Home() {
 export default Home;
 
 function SettingsModal(props) {
+  const { session, setSession } = useContext(AppContext);
   return (
     <Modal
       {...props}
@@ -106,6 +100,7 @@ function SettingsModal(props) {
           <h4>Account</h4>
           <button
             className="btn btn-secondary"
+            disabled={!session}
             onClick={() => {
               supabase.auth.signOut();
             }}
@@ -165,6 +160,29 @@ function CreateGameModal(props) {
             Create Lobby
           </button>
         </div>
+      </Modal.Body>
+      <Modal.Footer>
+        <button className="btn btn-secondary" onClick={props.onHide}>
+          Close
+        </button>
+      </Modal.Footer>
+    </Modal>
+  );
+}
+
+function AuthModal(props) {
+  return (
+    <Modal
+      {...props}
+      size="lg"
+      aria-labelledby="contained-modal-title-vcenter"
+      centered
+    >
+      <Modal.Header closeButton>
+        <Modal.Title id="contained-modal-title-vcenter">Login</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Login />
       </Modal.Body>
       <Modal.Footer>
         <button className="btn btn-secondary" onClick={props.onHide}>
