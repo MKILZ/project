@@ -7,7 +7,8 @@ export function AppProvider({ children }) {
   const [theme, setTheme] = useState("light");
   const [session, setSession] = useState(null);
   const [activeUser, setActiveUser] = useState();
-
+  const [players, setPlayers] = useState([]);
+  const [lobby, setLobby] = useState();
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -31,6 +32,10 @@ export function AppProvider({ children }) {
         setActiveUser,
         session,
         setSession,
+        players,
+        setPlayers,
+        lobby,
+        setLobby,
       }}
     >
       {children}

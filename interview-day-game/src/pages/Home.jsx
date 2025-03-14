@@ -13,8 +13,7 @@ function Home() {
   const [createModelShow, setCreateModelShow] = useState(false);
   const [settingsModalShow, setSettingsModalShow] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const { theme, setTheme, session, setActiveUser, lobby, setLobby } =
-    useContext(AppContext);
+  const { session, setActiveUser, lobby, setLobby } = useContext(AppContext);
 
   return (
     <div className="d-flex flex-column justify-content-center align-items-center ">
@@ -23,7 +22,7 @@ function Home() {
         <h3>Join a Room</h3>
         <input
           placeholder="Enter Your Name"
-          className="form-control w"
+          className="form-control"
           value={userName}
           onChange={(e) => setUserName(e.target.value)}
         />

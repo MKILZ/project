@@ -7,8 +7,7 @@ import Carousel from "react-bootstrap/Carousel";
 
 function Lobby() {
   const { lobby } = useParams();
-  const [players, setPlayers] = useState([]);
-  const { activeUser } = useContext(AppContext);
+  const { activeUser, players, setPlayers } = useContext(AppContext);
   const navigate = useNavigate();
 
   async function copyTextToClipboard(text) {

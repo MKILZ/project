@@ -6,15 +6,93 @@ import Modal from "react-bootstrap/Modal";
 
 function Game() {
   const { lobby } = useParams();
+  const hoursInDay = 7;
   const channel = supabase.channel(lobby + "changes");
-  const { activeUser } = useContext(AppContext);
+  const { activeUser, setActiveUser, players } = useContext(AppContext);
   const [scoreCardModal, setScoreCardModal] = useState(false);
   const [settingsModalShow, setSettingsModalShow] = useState(false);
+  const [game, setGame] = useState({
+    GreatHall: {
+      tables: 16,
+      students: 14,
+      volunteers: 14,
+      exits: 1,
+      exiting: 0,
+      staffNotAvailable: 0,
+      extraStaff: 0,
+      studentsWaiting: 0,
+    },
+    Session: {
+      tables: 8,
+      students: 8,
+      volunteers: 8,
+      exits: 3,
+      exiting: 0,
+      staffNotAvailable: 0,
+      extraStaff: 0,
+      studentsWaiting: 0,
+    },
+    Interview: {
+      tables: 4,
+      students: 4,
+      volunteers: 4,
+      exits: 2,
+      exiting: 0,
+      staffNotAvailable: 0,
+      extraStaff: 0,
+      studentsWaiting: 0,
+    },
+    Welcome: {
+      tables: 12,
+      students: 10,
+      volunteers: 10,
+      exits: 4,
+      exiting: 0,
+      staffNotAvailable: 0,
+      extraStaff: 0,
+      studentsWaiting: 0,
+    },
+  });
+
+  if (players.indexOf(activeUser.userName) === 0) {
+    setActiveUser((prev) => {
+      return { ...prev, character: "becky" };
+    });
+  } else if (players.indexOf(activeUser.userName) === 1) {
+    setActiveUser((prev) => {
+      return { ...prev, character: "adam" };
+    });
+  } else if (players.indexOf(activeUser.userName) === 2) {
+    setActiveUser((prev) => {
+      return { ...prev, character: "theresa" };
+    });
+  } else if (players.indexOf(activeUser.userName) === 3) {
+    setActiveUser((prev) => {
+      return { ...prev, character: "kenny" };
+    });
+  }
+
+  const [scoreCard, setScoreCard] = useState([
+    {
+      hour: 0,
+      parentDiversions: 0,
+      studentsInWaiting: 0,
+      extraStaff: 0,
+    },
+  ]);
 
   useEffect(() => {
     if (!activeUser) {
       // navigate("/");
     }
+    setScoreCard(
+      [...Array(hoursInDay)].map((_, i) => ({
+        hour: i,
+        parentDiversions: 0,
+        studentsInWaiting: 0,
+        extraStaff: 0,
+      }))
+    );
 
     channel
       .on(
@@ -26,7 +104,7 @@ function Game() {
           filter: "lobby=eq." + lobby,
         },
         (payload) => {
-          setPlayers(payload.new.players);
+          setGame(payload.new);
         }
       )
       .subscribe();
@@ -47,12 +125,14 @@ function Game() {
           Settings
         </button>
       </div>
-      <Board></Board>
+      <Board game={game}></Board>
+      <Actions></Actions>
       <SettingsModal
         show={settingsModalShow}
         onHide={() => setSettingsModalShow(false)}
       />
       <ScoreCardModal
+        scoreCard={scoreCard}
         show={scoreCardModal}
         onHide={() => setScoreCardModal(false)}
       />
@@ -61,6 +141,22 @@ function Game() {
 }
 
 export default Game;
+
+function Actions() {
+  return (
+    <div className="d-flex flex-row w-100 card justify-content-between h-25 gap-2 p-2 mt-2">
+      <div className="card d-flex p-2">
+        <img src />
+      </div>
+      <div>
+        <button className="btn btn-secondary">buy a volunteer</button>
+      </div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  );
+}
 
 function ScoreCard() {
   let hours = [0, 0, 0, 0, 0, 0, 0];
@@ -104,7 +200,7 @@ function ScoreCardModal(props) {
         <Modal.Title id="contained-modal-title-vcenter">ScoreCard</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <ScoreCard></ScoreCard>
+        <ScoreCard scoreCard={props.scoreCard}></ScoreCard>
       </Modal.Body>
     </Modal>
   );
