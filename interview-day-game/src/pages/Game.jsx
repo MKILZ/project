@@ -125,13 +125,13 @@ function Board() {
 
 function GreatHall() {
   const tables = 16;
-  const students = 15;
-  const volunteers = 3;
+  const students = 14;
+  const volunteers = 14;
   const exits = 1;
   const exiting = 0;
-  const staffNotAvailable = 1;
-  const extraStaff = 3;
-  const studentsWaiting = 2;
+  const staffNotAvailable = 0;
+  const extraStaff = 0;
+  const studentsWaiting = 0;
   return (
     <div
       className="w-75 card mx-auto d-flex flex-column"
@@ -155,10 +155,10 @@ function Session() {
   const students = 8;
   const volunteers = 8;
   const exits = 3;
-  const exiting = 1;
-  const staffNotAvailable = 1;
-  const extraStaff = 1;
-  const studentsWaiting = 1;
+  const exiting = 0;
+  const staffNotAvailable = 0;
+  const extraStaff = 0;
+  const studentsWaiting = 0;
   return (
     <div className="w-25 card" style={{ height: "400px" }}>
       Session
@@ -177,12 +177,12 @@ function Session() {
 function Interview() {
   const tables = 4;
   const students = 4;
-  const volunteers = 2;
+  const volunteers = 4;
   const exits = 2;
   const exiting = 0;
-  const staffNotAvailable = 3;
-  const extraStaff = 2;
-  const studentsWaiting = 1;
+  const staffNotAvailable = 0;
+  const extraStaff = 0;
+  const studentsWaiting = 0;
   return (
     <div className="w-25 card " style={{ height: "400px" }}>
       Interview
@@ -199,13 +199,13 @@ function Interview() {
 }
 function Welcome() {
   const tables = 12;
-  const students = 8;
-  const volunteers = 9;
+  const students = 10;
+  const volunteers = 10;
   const exits = 4;
-  const exiting = 4;
+  const exiting = 0;
   const staffNotAvailable = 0;
-  const extraStaff = 2;
-  const studentsWaiting = 1;
+  const extraStaff = 0;
+  const studentsWaiting = 0;
 
   return (
     <div className="w-50 card" style={{ height: "200px" }}>
