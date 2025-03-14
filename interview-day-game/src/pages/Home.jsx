@@ -5,6 +5,8 @@ import { AppContext } from "../context/useAppContext";
 import Modal from "react-bootstrap/Modal";
 import Login from "./Login.jsx";
 import { useState, useEffect } from "react";
+import Swal from "sweetalert2";
+
 function Home() {
   const navigate = useNavigate();
   const [lobby, setLobby] = useState();
@@ -33,10 +35,31 @@ function Home() {
         />
         <div className="d-flex flex-row-reverse gap-2">
           <button
-            disabled={!lobby || !userName}
+            disabled={!lobby || !userName || lobby.length !== 6}
             className="btn btn-secondary"
-            onClick={() => {
-              navigate("/lobby/" + lobby);
+            onClick={async () => {
+              // Check if the lobby exists in the database
+              const { data, error } = await supabase
+                .from("games")
+                .select("*")
+                .eq("lobby", lobby)
+                .single();
+
+              if (data) {
+                // Set the active user
+                setActiveUser({
+                  role: "Player",
+                  userName: userName,
+                });
+
+                navigate("/lobby/" + lobby);
+              } else {
+                Swal.fire({
+                  title: "Lobby doesn't exist!",
+                  icon: "error",
+                  confirmButtonText: "Oh my bad",
+                });
+              }
             }}
           >
             Join Room
@@ -170,8 +193,6 @@ function CreateGameModal(props) {
                   { lobby: lobbyCode, host: session.user.id, players: [] },
                 ])
                 .select();
-
-              console.log(data, error);
 
               navigate("/lobby/" + lobbyCode);
             }}
