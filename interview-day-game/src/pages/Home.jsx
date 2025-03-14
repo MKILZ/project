@@ -9,12 +9,12 @@ import Swal from "sweetalert2";
 
 function Home() {
   const navigate = useNavigate();
-  const [lobby, setLobby] = useState();
   const [userName, setUserName] = useState();
   const [createModelShow, setCreateModelShow] = useState(false);
   const [settingsModalShow, setSettingsModalShow] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const { theme, setTheme, session, setActiveUser } = useContext(AppContext);
+  const { theme, setTheme, session, setActiveUser, lobby, setLobby } =
+    useContext(AppContext);
 
   return (
     <div className="d-flex flex-column justify-content-center align-items-center ">
