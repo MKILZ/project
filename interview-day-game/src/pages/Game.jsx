@@ -81,6 +81,14 @@ function Game() {
     },
   ]);
 
+  function updateBoard() {
+    channel.send({
+      type: "broadcast",
+      event: "update-board",
+      payload: game,
+    });
+  }
+
   useEffect(() => {
     if (!activeUser) {
       // navigate("/");
@@ -95,20 +103,13 @@ function Game() {
     );
 
     channel
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "games",
-          filter: "lobby=eq." + lobby,
-        },
-        (payload) => {
-          setGame(payload.new);
-        }
-      )
+      .on("broadcast", { event: "update-game" }, (payload) => {
+        console.log("update-game:", payload);
+        navigate("/game/" + lobby);
+      })
       .subscribe();
   }, [lobby]);
+
   return (
     <div className="pt-2">
       <div className="position-absolute top-0 start-0 p-2 d-flex flex-column gap-2">
@@ -143,13 +144,64 @@ function Game() {
 export default Game;
 
 function Actions() {
+  function updateGame(character) {
+    if (character === "becky") {
+      () => {
+        setGame((prev) => {
+          return {
+            ...prev,
+            Welcome: {
+              ...prev.Welcome,
+              volunteers: prev.Welcome.volunteers + 1,
+            },
+          };
+        });
+      };
+    } else if (character === "adam") {
+      setGame((prev) => {
+        return {
+          ...prev,
+          Session: { ...prev.Session, volunteers: prev.Session.volunteers + 1 },
+        };
+      });
+    } else if (character === "theresa") {
+      setGame((prev) => {
+        return {
+          ...prev,
+          Interview: {
+            ...prev.Interview,
+            volunteers: prev.Interview.volunteers + 1,
+          },
+        };
+      });
+    } else if (character === "kenny") {
+      setGame((prev) => {
+        return {
+          ...prev,
+          GreatHall: {
+            ...prev.GreatHall,
+            volunteers: prev.GreatHall.volunteers + 1,
+          },
+        };
+      });
+    }
+  }
+
   return (
     <div className="d-flex flex-row w-100 card justify-content-between h-25 gap-2 p-2 mt-2">
       <div className="card d-flex p-2">
         <img src />
       </div>
       <div>
-        <button className="btn btn-secondary">buy a volunteer</button>
+        <button
+          className="btn btn-secondary"
+          onClick={(e) => {
+            e.preventDefault();
+            updateGame(activeUser.character);
+          }}
+        >
+          buy a volunteer
+        </button>
       </div>
       <div></div>
       <div></div>
@@ -162,7 +214,7 @@ function ScoreCard() {
   let hours = [0, 0, 0, 0, 0, 0, 0];
   return (
     <div className="d-flex w-100">
-      <table class="table">
+      <table className="table">
         <thead>
           <tr>
             <th scope="col">hour</th>
