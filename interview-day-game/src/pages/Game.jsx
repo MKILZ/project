@@ -54,24 +54,6 @@ function Game() {
     },
   });
 
-  if (players.indexOf(activeUser.userName) === 0) {
-    setActiveUser((prev) => {
-      return { ...prev, character: "becky" };
-    });
-  } else if (players.indexOf(activeUser.userName) === 1) {
-    setActiveUser((prev) => {
-      return { ...prev, character: "adam" };
-    });
-  } else if (players.indexOf(activeUser.userName) === 2) {
-    setActiveUser((prev) => {
-      return { ...prev, character: "theresa" };
-    });
-  } else if (players.indexOf(activeUser.userName) === 3) {
-    setActiveUser((prev) => {
-      return { ...prev, character: "kenny" };
-    });
-  }
-
   const [scoreCard, setScoreCard] = useState([
     {
       hour: 0,
@@ -82,6 +64,7 @@ function Game() {
   ]);
 
   function updateBoard() {
+    console.log("updateBoard", game);
     channel.send({
       type: "broadcast",
       event: "update-board",
@@ -93,6 +76,25 @@ function Game() {
     if (!activeUser) {
       // navigate("/");
     }
+
+    if (players.indexOf(activeUser.userName) === 0) {
+      setActiveUser((prev) => {
+        return { ...prev, character: "becky" };
+      });
+    } else if (players.indexOf(activeUser.userName) === 1) {
+      setActiveUser((prev) => {
+        return { ...prev, character: "adam" };
+      });
+    } else if (players.indexOf(activeUser.userName) === 2) {
+      setActiveUser((prev) => {
+        return { ...prev, character: "theresa" };
+      });
+    } else if (players.indexOf(activeUser.userName) === 3) {
+      setActiveUser((prev) => {
+        return { ...prev, character: "kenny" };
+      });
+    }
+
     setScoreCard(
       [...Array(hoursInDay)].map((_, i) => ({
         hour: i,
@@ -103,9 +105,9 @@ function Game() {
     );
 
     channel
-      .on("broadcast", { event: "update-game" }, (payload) => {
-        console.log("update-game:", payload);
-        navigate("/game/" + lobby);
+      .on("broadcast", { event: "update-board" }, (payload) => {
+        console.log("update-board:", payload.payload);
+        setGame(payload.payload);
       })
       .subscribe();
   }, [lobby]);
@@ -127,7 +129,13 @@ function Game() {
         </button>
       </div>
       <Board game={game}></Board>
-      <Actions></Actions>
+      {activeUser.role !== "Host" && (
+        <Actions
+          updateBoard={updateBoard}
+          game={game}
+          setGame={setGame}
+        ></Actions>
+      )}
       <SettingsModal
         show={settingsModalShow}
         onHide={() => setSettingsModalShow(false)}
@@ -143,20 +151,27 @@ function Game() {
 
 export default Game;
 
-function Actions() {
-  function updateGame(character) {
+function Actions({ updateBoard, game, setGame }) {
+  const { activeUser, players } = useContext(AppContext);
+
+  function buyVolunteer(character) {
+    console.log("buyVolunteer", character);
+
     if (character === "becky") {
-      () => {
-        setGame((prev) => {
-          return {
-            ...prev,
-            Welcome: {
-              ...prev.Welcome,
-              volunteers: prev.Welcome.volunteers + 1,
-            },
-          };
-        });
-      };
+      console.log("becky");
+      console.log(game);
+      console.log(game);
+
+      setGame((prev) => {
+        return {
+          ...prev,
+          Welcome: {
+            ...prev.Welcome,
+            volunteers: prev.Welcome.volunteers + 1,
+          },
+        };
+      });
+      console.log(game);
     } else if (character === "adam") {
       setGame((prev) => {
         return {
@@ -185,19 +200,19 @@ function Actions() {
         };
       });
     }
+
+    updateBoard();
   }
 
   return (
     <div className="d-flex flex-row w-100 card justify-content-between h-25 gap-2 p-2 mt-2">
-      <div className="card d-flex p-2">
-        <img src />
-      </div>
+      <div className="card d-flex p-2"></div>
       <div>
         <button
           className="btn btn-secondary"
           onClick={(e) => {
             e.preventDefault();
-            updateGame(activeUser.character);
+            buyVolunteer(activeUser.character);
           }}
         >
           buy a volunteer
@@ -258,20 +273,20 @@ function ScoreCardModal(props) {
   );
 }
 
-function Board() {
+function Board({ game }) {
   return (
     <div className="d-flex flex-column text-center align-content-center gap-3">
-      <GreatHall></GreatHall>
+      <GreatHall game={game}></GreatHall>
       <div className="d-flex justify-content-between">
-        <Session></Session>
-        <Welcome></Welcome>
-        <Interview></Interview>
+        <Session game={game}></Session>
+        <Welcome game={game}></Welcome>
+        <Interview game={game}></Interview>
       </div>
     </div>
   );
 }
 
-function GreatHall() {
+function GreatHall({ game }) {
   const tables = 16;
   const students = 14;
   const volunteers = 14;
@@ -298,7 +313,7 @@ function GreatHall() {
   );
 }
 
-function Session() {
+function Session({ game }) {
   const tables = 8;
   const students = 8;
   const volunteers = 8;
@@ -322,7 +337,7 @@ function Session() {
   );
 }
 
-function Interview() {
+function Interview({ game }) {
   const tables = 4;
   const students = 4;
   const volunteers = 4;
@@ -345,26 +360,19 @@ function Interview() {
     </div>
   );
 }
-function Welcome() {
-  const tables = 12;
-  const students = 10;
-  const volunteers = 10;
-  const exits = 4;
-  const exiting = 0;
-  const staffNotAvailable = 0;
-  const extraStaff = 0;
-  const studentsWaiting = 0;
 
+function Welcome({ game }) {
+  const tables = 16;
   return (
     <div className="w-50 card" style={{ height: "200px" }}>
       Welcome
       <div className="d-flex flex-wrap justify-content-between">
-        <div>exit {exiting + "/" + exits}</div>
-        <div>volunteers {volunteers}</div>
-        <div>students Waiting {studentsWaiting}</div>
-        <div>extra volunteers {extraStaff}</div>
-        <div> staffNotAvailable {staffNotAvailable}</div>
-        <div>students {students + "/" + tables}</div>
+        <div>exit {game.Welcome.exiting + "/" + game.Welcome.exits}</div>
+        <div>volunteers {game.Welcome.volunteers}</div>
+        <div>students Waiting {game.Welcome.studentsWaiting}</div>
+        <div>extra volunteers {game.Welcome.extraStaff}</div>
+        <div> staffNotAvailable {game.Welcome.staffNotAvailable}</div>
+        <div>students {game.Welcome.students + "/" + tables}</div>
       </div>
     </div>
   );
