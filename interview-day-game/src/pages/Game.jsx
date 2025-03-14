@@ -63,12 +63,12 @@ function Game() {
     },
   ]);
 
-  function updateBoard() {
-    console.log("updateBoard", game);
+  function updateBoard(gameBoard) {
+    console.log("updateBoard", gameBoard);
     channel.send({
       type: "broadcast",
       event: "update-board",
-      payload: game,
+      payload: gameBoard,
     });
   }
 
@@ -170,23 +170,16 @@ function Actions({ updateBoard, game, setGame }) {
   console.log(activeUser);
   console.log(players);
   function buyVolunteer(character) {
-    console.log("buyVolunteer", character);
-
     if (character === "becky") {
-      console.log("becky");
-      console.log(game);
-      console.log(game);
-
-      setGame((prev) => {
-        return {
-          ...prev,
-          Welcome: {
-            ...prev.Welcome,
-            volunteers: prev.Welcome.volunteers + 1,
-          },
-        };
-      });
-      console.log(game);
+      const local = {
+        ...game,
+        Welcome: {
+          ...game.Welcome,
+          volunteers: game.Welcome.volunteers + 1,
+        },
+      };
+      setGame(local);
+      updateBoard(local);
     } else if (character === "adam") {
       setGame((prev) => {
         return {
@@ -215,8 +208,6 @@ function Actions({ updateBoard, game, setGame }) {
         };
       });
     }
-
-    updateBoard();
   }
 
   return (
