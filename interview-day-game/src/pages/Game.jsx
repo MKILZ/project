@@ -8,7 +8,8 @@ function Game() {
   const { lobby } = useParams();
   const hoursInDay = 7;
   const channel = supabase.channel(lobby + "changes");
-  const { activeUser, setActiveUser, players, setPlayers } = useContext(AppContext);
+  const { activeUser, setActiveUser, players, setPlayers } =
+    useContext(AppContext);
   const [scoreCardModal, setScoreCardModal] = useState(false);
   const [settingsModalShow, setSettingsModalShow] = useState(false);
   const [game, setGame] = useState({
@@ -215,50 +216,48 @@ function Actions({ updateBoard, game, setGame }) {
       <div className="card d-flex p-2">
         {activeUser.character === "becky" && (
           <div>
-          <img
-          src = "https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-becky-barnard.jpg?itok=d8fal0xg"
-          alt="beckey"
-          className="rounded-circle"
-          style={{ width: "75px", height: "100px", objectFit: "cover" }}
-          />
-          <h3>Welcome</h3>
+            <img
+              src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-becky-barnard.jpg?itok=d8fal0xg"
+              alt="beckey"
+              className="rounded-circle"
+              style={{ width: "75px", height: "100px", objectFit: "cover" }}
+            />
+            <h3>Welcome</h3>
           </div>
-
         )}
         {activeUser.character === "adam" && (
           <div>
-          <img
-          src = "https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-adam-britten.jpg?itok=fAYbnhXs"
-          alt="adam"
-          className="rounded-circle"
-          style={{ width: "75px", height: "100px", objectFit: "cover" }}
-          />
-          <h3>Session</h3>
+            <img
+              src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-adam-britten.jpg?itok=fAYbnhXs"
+              alt="adam"
+              className="rounded-circle"
+              style={{ width: "75px", height: "100px", objectFit: "cover" }}
+            />
+            <h3>Session</h3>
           </div>
         )}
         {activeUser.character === "theresa" && (
           <div>
-          <img
-          src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-theresa-luensmann.jpg?itok=unLlsXcF"
-          alt="Theresa"
-          className="rounded-circle"
-          style={{ width: "75px", height: "100px", objectFit: "cover" }}
-          />
-          <h3>Interview</h3>
+            <img
+              src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-theresa-luensmann.jpg?itok=unLlsXcF"
+              alt="Theresa"
+              className="rounded-circle"
+              style={{ width: "75px", height: "100px", objectFit: "cover" }}
+            />
+            <h3>Interview</h3>
           </div>
         )}
         {activeUser.character === "kenny" && (
           <div>
-          <img
-          src="https://media.licdn.com/dms/image/v2/D5603AQFJz9OJXxUNsQ/profile-displayphoto-shrink_400_400/B56ZRMqLRMH0Ao-/0/1736452912894?e=2147483647&v=beta&t=uhRnWRaaN4llVldNwHHS8qzxZgX0wUtQtaoS0iLqTrQ"
-          alt="kenny"
-          className="rounded-circle"
-          style={{ width: "75px", height: "100px", objectFit: "cover" }}
-          />
-          <h3>Great Hall</h3>
+            <img
+              src="https://media.licdn.com/dms/image/v2/D5603AQFJz9OJXxUNsQ/profile-displayphoto-shrink_400_400/B56ZRMqLRMH0Ao-/0/1736452912894?e=2147483647&v=beta&t=uhRnWRaaN4llVldNwHHS8qzxZgX0wUtQtaoS0iLqTrQ"
+              alt="kenny"
+              className="rounded-circle"
+              style={{ width: "75px", height: "100px", objectFit: "cover" }}
+            />
+            <h3>Great Hall</h3>
           </div>
         )}
-
       </div>
 
       <div>
