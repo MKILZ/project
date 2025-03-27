@@ -1,1061 +1,457 @@
-import React from "react";
-import RoomBoard from "../components/Room-Board";
-import ExtraVolunteersDish from "../components/Extra-Volunteers-Dish";
-import { Grid, GridItem, Heading, IconButton } from "@chakra-ui/react";
-import { ArrowRight, ArrowLeft, ArrowUp, MoveUpRight, MoveUpLeft } from "lucide-react";
-import { GoQuestion, GoChevronDown, GoChevronUp } from "react-icons/go";
-import { FiSettings } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useContext, useState, act } from "react";
+import { supabase } from "../supabase/supabaseClient";
+import { AppContext } from "../context/useAppContext";
+import { useParams } from "react-router-dom";
+import Modal from "react-bootstrap/Modal";
 
 function Game() {
-  const navigate = useNavigate();
+  const { lobby } = useParams();
+  const hoursInDay = 7;
+  const channel = supabase.channel(lobby + "changes");
+  const { activeUser, setActiveUser, players, setPlayers } =
+    useContext(AppContext);
+  const [scoreCardModal, setScoreCardModal] = useState(false);
+  const [settingsModalShow, setSettingsModalShow] = useState(false);
+  const [game, setGame] = useState({
+    GreatHall: {
+      tables: 16,
+      students: 14,
+      volunteers: 14,
+      exits: 1,
+      exiting: 0,
+      staffNotAvailable: 0,
+      extraStaff: 0,
+      studentsWaiting: 0,
+    },
+    Session: {
+      tables: 8,
+      students: 8,
+      volunteers: 8,
+      exits: 3,
+      exiting: 0,
+      staffNotAvailable: 0,
+      extraStaff: 0,
+      studentsWaiting: 0,
+    },
+    Interview: {
+      tables: 4,
+      students: 4,
+      volunteers: 4,
+      exits: 2,
+      exiting: 0,
+      staffNotAvailable: 0,
+      extraStaff: 0,
+      studentsWaiting: 0,
+    },
+    Welcome: {
+      tables: 12,
+      students: 10,
+      volunteers: 10,
+      exits: 4,
+      exiting: 0,
+      staffNotAvailable: 0,
+      extraStaff: 0,
+      studentsWaiting: 0,
+    },
+  });
+
+  const [scoreCard, setScoreCard] = useState([
+    {
+      hour: 0,
+      parentDiversions: 0,
+      studentsInWaiting: 0,
+      extraStaff: 0,
+    },
+  ]);
+
+  function updateBoard(gameBoard) {
+    console.log("updateBoard", gameBoard);
+    channel.send({
+      type: "broadcast",
+      event: "update-board",
+      payload: gameBoard,
+    });
+  }
+
+  useEffect(() => {
+    if (!activeUser) {
+      // navigate("/");
+    }
+
+    const fetchPlayers = async () => {
+      const { data, error } = await supabase
+        .from("games")
+        .select("players")
+        .eq("lobby", lobby);
+
+      if (error) {
+        console.error(error);
+      } else {
+        setPlayers(data[0].players);
+      }
+    };
+    fetchPlayers();
+
+    if (players.indexOf(activeUser.userName) === 0) {
+      setActiveUser((prev) => {
+        return { ...prev, character: "becky" };
+      });
+    } else if (players.indexOf(activeUser.userName) === 1) {
+      setActiveUser((prev) => {
+        return { ...prev, character: "adam" };
+      });
+    } else if (players.indexOf(activeUser.userName) === 2) {
+      setActiveUser((prev) => {
+        return { ...prev, character: "theresa" };
+      });
+    } else if (players.indexOf(activeUser.userName) === 3) {
+      setActiveUser((prev) => {
+        return { ...prev, character: "kenny" };
+      });
+    }
+
+    setScoreCard(
+      [...Array(hoursInDay)].map((_, i) => ({
+        hour: i,
+        parentDiversions: 0,
+        studentsInWaiting: 0,
+        extraStaff: 0,
+      }))
+    );
+
+    channel
+      .on("broadcast", { event: "update-board" }, (payload) => {
+        console.log("update-board:", payload.payload);
+        setGame(payload.payload);
+      })
+      .subscribe();
+  }, [lobby]);
+
   return (
-    <Grid 
-      style={{ backgroundColor: "#622A2A", width: "100vw", height: "100vh"}}
-      templateColumns="repeat(5, 1fr)"
-      templateRows="repeat(4, 1fr)"
-      position="relative">
-        {/* Rules and Settings Button */}
-        <GridItem
-          padding={15}
-          position={'absolute'}>
-            <IconButton 
-              aria-label="Rules"
-              onClick={() => navigate("/rules")}
-              rounded='full'
-              size='xl'
-              colorPalette="white">
-                <GoQuestion/>
-            </IconButton>
-        </GridItem>
-        <GridItem
-          paddingTop={15}
-          paddingLeft={1725}
-          position={'absolute'}>
-            <IconButton 
-              aria-label="Settings"
-              onClick={() => navigate("/settings")}
-              rounded='full'
-              size='xl'
-              colorPalette="white">
-                <FiSettings/>
-            </IconButton>
-        </GridItem>
-
-        {/* Lunch and Lunch Arrows */}
-        <GridItem 
-          top={-81}
-          paddingLeft={410}
-          column={2} 
-          row={1}
-          position="fixed">
-            <GoChevronDown
-              size="225px" 
-              color="white"/>
-        </GridItem>
-        <GridItem 
-          paddingTop={115}
-          column={1} 
-          row={1}>
-            <ArrowLeft 
-              size="250px" 
-              color="white"/>
-        </GridItem>
-        <GridItem
-          paddingTop={75}
-          column={2} 
-          row={1}>
-            <RoomBoard 
-              width="450px" 
-              height="300px">
-                <Grid
-                  templateColumns="repeat(10, 1fr)"
-                  templateRows="repeat(4, 1fr)"
-                  gap={3}>
-                    <GridItem
-                      left={450}
-                      top={100}
-                      position='absolute'>
-                        <Heading
-                          colorPalette='black'
-                          size='5xl'>Lunch</Heading>
-                    </GridItem>
-                    <GridItem
-                      gridRow={2}
-                      gridColumn={2}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={2}
-                      gridColumn={3}
-                      justifyItems='center'>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={2}
-                      gridColumn={4}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={2}
-                      gridColumn={5}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={2}
-                      gridColumn={6}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={2}
-                      gridColumn={7}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={2}
-                      gridColumn={8}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={2}
-                      gridColumn={9}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={3}
-                      gridColumn={2}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={3}
-                      gridColumn={3}
-                      justifyItems='center'>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={3}
-                      gridColumn={4}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={3}
-                      gridColumn={5}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={3}
-                      gridColumn={6}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={3}
-                      gridColumn={7}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={3}
-                      gridColumn={8}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={3}
-                      gridColumn={9}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={4}
-                      gridColumn={2}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={4}
-                      gridColumn={3}
-                      justifyItems='center'>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={4}
-                      gridColumn={4}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={4}
-                      gridColumn={5}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={4}
-                      gridColumn={6}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={4}
-                      gridColumn={7}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={4}
-                      gridColumn={8}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={4}
-                      gridColumn={9}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                </Grid> 
-                </RoomBoard>
-        </GridItem>
-
-        {/* Presentation and Presentation Arrows */}
-        <GridItem 
-          top={-81}
-          paddingLeft={1160}
-          column={2} 
-          row={1}
-          position="fixed">
-            <GoChevronDown
-              size="225px" 
-              color="white"/>
-        </GridItem>
-        <GridItem 
-          paddingTop={115}
-          column={3} 
-          row={1}>
-            <ArrowLeft 
-              size="250px" 
-              color="white"/>
-        </GridItem>
-        <GridItem
-          paddingTop={75}
-          column={4} 
-          row={1}>
-            <RoomBoard 
-              width="450px" 
-              height="300px"> 
-                <Grid
-                  templateColumns="repeat(10, 1fr)"
-                  templateRows="repeat(4, 1fr)"
-                  gap={3}>
-                    <GridItem
-                      left={1125}
-                      top={100}
-                      position='absolute'>
-                        <Heading
-                          colorPalette='black'
-                          size='5xl'>Presentation</Heading>
-                    </GridItem>
-                    <GridItem
-                      gridRow={2}
-                      gridColumn={2}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={2}
-                      gridColumn={3}
-                      justifyItems='center'>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={2}
-                      gridColumn={4}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={2}
-                      gridColumn={5}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={2}
-                      gridColumn={6}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={2}
-                      gridColumn={7}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={2}
-                      gridColumn={8}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={2}
-                      gridColumn={9}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={3}
-                      gridColumn={2}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={3}
-                      gridColumn={3}
-                      justifyItems='center'>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={3}
-                      gridColumn={4}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={3}
-                      gridColumn={5}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={3}
-                      gridColumn={6}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={3}
-                      gridColumn={7}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={3}
-                      gridColumn={8}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={3}
-                      gridColumn={9}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={4}
-                      gridColumn={2}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={4}
-                      gridColumn={3}
-                      justifyItems='center'>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={4}
-                      gridColumn={4}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={4}
-                      gridColumn={5}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                </Grid> </RoomBoard>
-        </GridItem>
-        <GridItem 
-          paddingTop={115}
-          column={5} 
-          row={1}>
-            <ArrowRight 
-              size="250px" 
-              color="white"/>
-        </GridItem>
-
-        {/* Diagonal Arrows */}
-        <GridItem 
-          position={'absolute'}
-          colSpan={5}
-          column={3} 
-          row={2}
-          paddingTop={320}
-          paddingLeft={730}>
-            <MoveUpRight 
-              size="350px" 
-              color="white"/>
-        </GridItem>
-        <GridItem 
-          position={'absolute'}
-          colSpan={5}
-          column={3} 
-          row={2}
-          paddingTop={320}
-          paddingLeft={700}>
-            <MoveUpLeft 
-              size="350px" 
-              color="white"/>
-        </GridItem>
-
-        {/* Extra Volunteers */}
-        <GridItem
-          position={'absolute'}
-          colSpan={5}
-          column={2} 
-          row={2}
-          paddingTop={425}
-          paddingLeft={325}>
-          <ExtraVolunteersDish
-            size="150px">
-              <Heading
-                size='2xl'>
-                  Volunteers
-              </Heading>
-            </ExtraVolunteersDish>
-        </GridItem>
-
-        {/* Hour Box */}
-        <GridItem
-          position={'absolute'}
-          colSpan={5}
-          column={1} 
-          row={2}
-          paddingTop={370}
-          paddingLeft={30}>
-            <RoomBoard 
-              width="200px" 
-              height="300px"
-              backgroundColor="black"> 
-                <Grid
-                  templateColumns="repeat(2, 1fr)"
-                  templateRows="repeat(3, 1fr)"
-                  alignItems="center"
-                  justifyItems="center"
-                  gap={3}>
-                    <GridItem
-                      column={1}
-                      row={1}
-                      colSpan={2}>
-                      <Heading
-                        colorPalette='black'
-                        size='3xl'>
-                          Hour
-                      </Heading>
-                    </GridItem>
-
-                    {/* Red Box */}
-                    <GridItem
-                      column={1}
-                      row={2}>
-                        <RoomBoard 
-                          width="80px" 
-                          height="80px"
-                          backgroundColor="red"> 
-                            <Heading
-                            colorPalette='black'
-                            size='xl'>
-                              1
-                          </Heading>
-                        </RoomBoard>
-                    </GridItem>
-
-                    {/* Blue Box */}
-                    <GridItem
-                      column={2}
-                      row={2}>
-                        <RoomBoard 
-                          width="80px" 
-                          height="80px"
-                          backgroundColor="blue"> 
-                            <Heading
-                            colorPalette='black'
-                            size='xl'>
-                              2
-                          </Heading>
-                        </RoomBoard>
-                    </GridItem>
-                    {/* Green Box */}
-                    <GridItem
-                      column={1}
-                      row={3}>
-                        <RoomBoard 
-                          width="80px" 
-                          height="80px"
-                          backgroundColor="green"> 
-                            <Heading
-                            colorPalette='black'
-                            size='xl'>
-                              3
-                          </Heading>
-                        </RoomBoard>
-                    </GridItem>
-
-                    {/* Purple Box */}
-                    <GridItem
-                      column={2}
-                      row={3}>
-                        <RoomBoard 
-                          width="80px" 
-                          height="80px"
-                          backgroundColor="purple"> 
-                            <Heading
-                            colorPalette='black'
-                            size='xl'>
-                              4
-                          </Heading>
-                        </RoomBoard>
-                    </GridItem>
-                </Grid>
-            </RoomBoard>
-          </GridItem>
-        
-        {/* Welcome Session and Arrows */}
-        <GridItem 
-          paddingTop={290}
-          column={1} 
-          row={3}>
-            <ArrowRight 
-              size="250px" 
-              color="white"/>
-        </GridItem>
-        <GridItem 
-          paddingTop={380}
-          paddingLeft={490}
-          column={2} 
-          row={2}
-          position='absolute'>
-            <ArrowUp 
-              size="250px" 
-              color="white"/>
-        </GridItem>
-        <GridItem
-          paddingTop={250}
-          column={2} 
-          row={3}>
-            <RoomBoard 
-              width="450px" 
-              height="300px">
-                <Grid
-                  templateColumns="repeat(10, 1fr)"
-                  templateRows="repeat(4, 1fr)"
-                  gap={3}>
-                    <GridItem
-                      paddingLeft={7}
-                      top={650}
-                      position='absolute'>
-                        <Heading
-                          colorPalette='black'
-                          size='5xl'>Welcome Session</Heading>
-                    </GridItem>
-                    <GridItem
-                      gridRow={2}
-                      gridColumn={2}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={2}
-                      gridColumn={3}
-                      justifyItems='center'>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={2}
-                      gridColumn={4}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={2}
-                      gridColumn={5}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={2}
-                      gridColumn={6}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={2}
-                      gridColumn={7}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={2}
-                      gridColumn={8}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={2}
-                      gridColumn={9}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={3}
-                      gridColumn={2}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={3}
-                      gridColumn={3}
-                      justifyItems='center'>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={3}
-                      gridColumn={4}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={3}
-                      gridColumn={5}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={3}
-                      gridColumn={6}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={3}
-                      gridColumn={7}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={3}
-                      gridColumn={8}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={3}
-                      gridColumn={9}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={4}
-                      gridColumn={2}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={4}
-                      gridColumn={3}
-                      justifyItems='center'>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={4}
-                      gridColumn={4}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={4}
-                      gridColumn={5}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={4}
-                      gridColumn={6}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={4}
-                      gridColumn={7}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={4}
-                      gridColumn={8}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      gridRow={4}
-                      gridColumn={9}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                </Grid>  </RoomBoard>
-        </GridItem>
-        <GridItem 
-          paddingTop={860}
-          paddingLeft={410}
-          column={2} 
-          row={4}
-          position="fixed">
-            <GoChevronDown
-              size="225px" 
-              color="white"/>
-        </GridItem>
-
-        {/* Interview and Arrows */}
-        <GridItem 
-          paddingTop={380}
-          paddingLeft={1150}
-          column={2} 
-          row={2}
-          position='absolute'>
-            <ArrowUp 
-              size="250px" 
-              color="white"/>
-        </GridItem>
-        <GridItem 
-          paddingTop={290}
-          column={3} 
-          row={3}>
-            <ArrowRight 
-              size="250px" 
-              color="white"/>
-        </GridItem>
-        <GridItem
-          paddingTop={250}
-          column={4} 
-          row={3}>
-            <RoomBoard 
-              width="450px" 
-              height="300px">
-                <Grid
-                  templateColumns="repeat(10, 1fr)"
-                  templateRows="repeat(4, 1fr)"
-                  position="fixed"
-                  maxWidth='450px'
-                  maxHeight='300px'
-                  justifyContent='center'>
-                    <GridItem
-                      row={1}
-                      column={5}
-                      colSpan={10}
-                      justifyItems='center'
-                      paddingTop={30}>
-                        <Heading
-                          colorPalette='black'
-                          size='5xl'>Interview</Heading>
-                    </GridItem>
-                    <GridItem
-                      row={2}
-                      column={2}
-                      justifyItems='center'
-                      paddingLeft={120}
-                      paddingTop={50}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      row={2}
-                      column={3}
-                      justifyItems='center'
-                      paddingLeft={25}
-                      paddingTop={50}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      row={2}
-                      column={4}
-                      justifyItems='center'
-                      paddingLeft={25}
-                      paddingTop={50}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                    <GridItem
-                      row={2}
-                      column={5}
-                      justifyItems='center'
-                      paddingLeft={25}
-                      paddingTop={50}>
-                        <RoomBoard
-                          width="35px"
-                          height="35px"
-                          backgroundColor="gray">
-                        </RoomBoard>
-                    </GridItem>
-                </Grid>
-            </RoomBoard>
-        </GridItem>
-        <GridItem 
-          paddingTop={290}
-          column={5} 
-          row={3}>
-            <ArrowRight 
-              size="250px" 
-              color="white"/>
-        </GridItem>
-        <GridItem 
-          paddingTop={860}
-          paddingLeft={1160}
-          column={4} 
-          row={4}
-          position="fixed">
-            <GoChevronUp
-              size="225px" 
-              color="white"/>
-        </GridItem>
-        
-    </Grid>
+    <div className="pt-2">
+      <div className="position-absolute top-0 start-0 p-2 d-flex flex-column gap-2">
+        <button
+          className="btn btn-secondary"
+          onClick={() => setScoreCardModal(true)}
+        >
+          ScoreCard
+        </button>
+        <button
+          className="btn btn-secondary"
+          onClick={() => setSettingsModalShow(true)}
+        >
+          Settings
+        </button>
+      </div>
+      <Board game={game}></Board>
+      {activeUser.role !== "Host" && (
+        <Actions
+          updateBoard={updateBoard}
+          game={game}
+          setGame={setGame}
+        ></Actions>
+      )}
+      <SettingsModal
+        show={settingsModalShow}
+        onHide={() => setSettingsModalShow(false)}
+      />
+      <ScoreCardModal
+        scoreCard={scoreCard}
+        show={scoreCardModal}
+        onHide={() => setScoreCardModal(false)}
+      />
+    </div>
   );
 }
 
 export default Game;
+
+function Actions({ updateBoard, game, setGame }) {
+  const { activeUser, players } = useContext(AppContext);
+  console.log(activeUser);
+  console.log(players);
+  function buyVolunteer(character) {
+    if (character === "becky") {
+      const local = {
+        ...game,
+        Welcome: {
+          ...game.Welcome,
+          volunteers: game.Welcome.volunteers + 1,
+        },
+      };
+      setGame(local);
+      updateBoard(local);
+    } else if (character === "adam") {
+      setGame((prev) => {
+        return {
+          ...prev,
+          Session: { ...prev.Session, volunteers: prev.Session.volunteers + 1 },
+        };
+      });
+    } else if (character === "theresa") {
+      setGame((prev) => {
+        return {
+          ...prev,
+          Interview: {
+            ...prev.Interview,
+            volunteers: prev.Interview.volunteers + 1,
+          },
+        };
+      });
+    } else if (character === "kenny") {
+      setGame((prev) => {
+        return {
+          ...prev,
+          GreatHall: {
+            ...prev.GreatHall,
+            volunteers: prev.GreatHall.volunteers + 1,
+          },
+        };
+      });
+    }
+  }
+
+  return (
+    <div className="d-flex flex-row w-100 card justify-content-between h-25 gap-2 p-2 mt-2">
+      <div className="card d-flex p-2">
+        {activeUser.character === "becky" && (
+          <div>
+            <img
+              src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-becky-barnard.jpg?itok=d8fal0xg"
+              alt="beckey"
+              className="rounded-circle"
+              style={{ width: "75px", height: "100px", objectFit: "cover" }}
+            />
+            <h3>Welcome</h3>
+          </div>
+        )}
+        {activeUser.character === "adam" && (
+          <div>
+            <img
+              src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-adam-britten.jpg?itok=fAYbnhXs"
+              alt="adam"
+              className="rounded-circle"
+              style={{ width: "75px", height: "100px", objectFit: "cover" }}
+            />
+            <h3>Session</h3>
+          </div>
+        )}
+        {activeUser.character === "theresa" && (
+          <div>
+            <img
+              src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-theresa-luensmann.jpg?itok=unLlsXcF"
+              alt="Theresa"
+              className="rounded-circle"
+              style={{ width: "75px", height: "100px", objectFit: "cover" }}
+            />
+            <h3>Interview</h3>
+          </div>
+        )}
+        {activeUser.character === "kenny" && (
+          <div>
+            <img
+              src="https://media.licdn.com/dms/image/v2/D5603AQFJz9OJXxUNsQ/profile-displayphoto-shrink_400_400/B56ZRMqLRMH0Ao-/0/1736452912894?e=2147483647&v=beta&t=uhRnWRaaN4llVldNwHHS8qzxZgX0wUtQtaoS0iLqTrQ"
+              alt="kenny"
+              className="rounded-circle"
+              style={{ width: "75px", height: "100px", objectFit: "cover" }}
+            />
+            <h3>Great Hall</h3>
+          </div>
+        )}
+      </div>
+
+      <div>
+        <button
+          className="btn btn-secondary"
+          onClick={(e) => {
+            e.preventDefault();
+            buyVolunteer(activeUser.character);
+          }}
+        >
+          buy a volunteer
+        </button>
+      </div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  );
+}
+
+function ScoreCard() {
+  let hours = [0, 0, 0, 0, 0, 0, 0];
+  return (
+    <div className="d-flex w-100">
+      <table className="table">
+        <thead>
+          <tr>
+            <th scope="col">hour</th>
+            <th scope="col">Parent Diversions</th>
+            <th scope="col">Students in Waiting</th>
+            <th scope="col">Extra Staff</th>
+          </tr>
+        </thead>
+        <tbody>
+          {hours.map((hour, idx) => {
+            return (
+              <tr>
+                <th scope="row">{6 + idx + ":00"}</th>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function ScoreCardModal(props) {
+  return (
+    <Modal
+      {...props}
+      size="xl"
+      aria-labelledby="contained-modal-title-vcenter"
+      centered
+    >
+      <Modal.Header closeButton>
+        <Modal.Title id="contained-modal-title-vcenter">ScoreCard</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <ScoreCard scoreCard={props.scoreCard}></ScoreCard>
+      </Modal.Body>
+    </Modal>
+  );
+}
+
+function Board({ game }) {
+  return (
+    <div className="d-flex flex-column text-center align-content-center gap-3">
+      <GreatHall game={game}></GreatHall>
+      <div className="d-flex justify-content-between">
+        <Session game={game}></Session>
+        <Welcome game={game}></Welcome>
+        <Interview game={game}></Interview>
+      </div>
+    </div>
+  );
+}
+
+function GreatHall({ game }) {
+  const tables = 16;
+  const students = 14;
+  const volunteers = 14;
+  const exits = 1;
+  const exiting = 0;
+  const staffNotAvailable = 0;
+  const extraStaff = 0;
+  const studentsWaiting = 0;
+  return (
+    <div
+      className="w-75 card mx-auto d-flex flex-column"
+      style={{ height: "300px" }}
+    >
+      <div>Great Hall </div>
+      <div className="d-flex justify-content-between">
+        <div>exit {exiting + "/" + exits}</div>
+        <div>volunteers {volunteers}</div>
+        <div>students Waiting {studentsWaiting}</div>
+        <div>extra volunteers {extraStaff}</div>
+        <div> staffNotAvailable {staffNotAvailable}</div>
+        <div>students {students + "/" + tables}</div>
+      </div>
+    </div>
+  );
+}
+
+function Session({ game }) {
+  const tables = 8;
+  const students = 8;
+  const volunteers = 8;
+  const exits = 3;
+  const exiting = 0;
+  const staffNotAvailable = 0;
+  const extraStaff = 0;
+  const studentsWaiting = 0;
+  return (
+    <div className="w-25 card" style={{ height: "400px" }}>
+      Session
+      <div className="d-flex flex-column justify-content-between">
+        <div>exit {exiting + "/" + exits}</div>
+        <div>volunteers {volunteers}</div>
+        <div>students Waiting {studentsWaiting}</div>
+        <div>extra volunteers {extraStaff}</div>
+        <div> staffNotAvailable {staffNotAvailable}</div>
+        <div>students {students + "/" + tables}</div>
+      </div>
+    </div>
+  );
+}
+
+function Interview({ game }) {
+  const tables = 4;
+  const students = 4;
+  const volunteers = 4;
+  const exits = 2;
+  const exiting = 0;
+  const staffNotAvailable = 0;
+  const extraStaff = 0;
+  const studentsWaiting = 0;
+  return (
+    <div className="w-25 card " style={{ height: "400px" }}>
+      Interview
+      <div className="d-flex flex-column justify-content-between">
+        <div>exit {exiting + "/" + exits}</div>
+        <div>volunteers {volunteers}</div>
+        <div>students Waiting {studentsWaiting}</div>
+        <div>extra volunteers {extraStaff}</div>
+        <div> staffNotAvailable {staffNotAvailable}</div>
+        <div>students {students + "/" + tables}</div>
+      </div>
+    </div>
+  );
+}
+
+function Welcome({ game }) {
+  const tables = 16;
+  return (
+    <div className="w-50 card" style={{ height: "200px" }}>
+      Welcome
+      <div className="d-flex flex-wrap justify-content-between">
+        <div>exit {game.Welcome.exiting + "/" + game.Welcome.exits}</div>
+        <div>volunteers {game.Welcome.volunteers}</div>
+        <div>students Waiting {game.Welcome.studentsWaiting}</div>
+        <div>extra volunteers {game.Welcome.extraStaff}</div>
+        <div> staffNotAvailable {game.Welcome.staffNotAvailable}</div>
+        <div>students {game.Welcome.students + "/" + tables}</div>
+      </div>
+    </div>
+  );
+}
+
+function SettingsModal(props) {
+  return (
+    <Modal
+      {...props}
+      size="lg"
+      aria-labelledby="contained-modal-title-vcenter"
+      centered
+    >
+      <Modal.Header closeButton>
+        <Modal.Title id="contained-modal-title-vcenter">Settings</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <div>
+          <h4>Account</h4>
+        </div>
+      </Modal.Body>
+      <Modal.Footer>
+        <button className="btn btn-secondary" onClick={props.onHide}>
+          Close
+        </button>
+      </Modal.Footer>
+    </Modal>
+  );
+}
