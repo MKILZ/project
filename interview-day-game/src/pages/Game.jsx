@@ -12,7 +12,7 @@ function Game() {
     useContext(AppContext);
   const [scoreCardModal, setScoreCardModal] = useState(false);
   const [settingsModalShow, setSettingsModalShow] = useState(false);
-  const [round, setRound] = useState(1);
+  const [round, setRound] = useState(0);
   const [game, setGame] = useState({
     GreatHall: {
       tables: 16,
@@ -75,13 +75,10 @@ function Game() {
   }
 
   function increaseRound() {
-    const newRound = round + 1;
-    console.log("increaseRound", newRound);
-    setRound(newRound);
     channel.send({
       type: "broadcast",
       event: "increase-round",
-      payload: newRound,
+      payload: {},
     });
   }
 
@@ -138,9 +135,11 @@ function Game() {
       })
       .subscribe();
 
-    channel.on("broadcast", { event: "increase-round" }, (payload) => {
-      alert("increase-round: " + payload.payload);
-      setRound(payload.payload);
+    channel.on("broadcast", { event: "increase-round" }, () => {
+      setRound((prev) => {
+        return prev + 1;
+      });
+      console.log(round);
     });
   }, [lobby]);
 
@@ -159,6 +158,7 @@ function Game() {
         >
           Settings
         </button>
+        <h1>{round}</h1>
       </div>
       <Board game={game}></Board>
       <Actions
