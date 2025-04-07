@@ -12,6 +12,7 @@ function Game() {
     useContext(AppContext);
   const [scoreCardModal, setScoreCardModal] = useState(false);
   const [settingsModalShow, setSettingsModalShow] = useState(false);
+  const [round, setRound] = useState(1);
   const [game, setGame] = useState({
     GreatHall: {
       tables: 16,
@@ -73,6 +74,17 @@ function Game() {
     });
   }
 
+  function increaseRound() {
+    const newRound = round + 1;
+    console.log("increaseRound", newRound);
+    setRound(newRound);
+    channel.send({
+      type: "broadcast",
+      event: "increase-round",
+      payload: newRound,
+    });
+  }
+
   useEffect(() => {
     if (!activeUser) {
       // navigate("/");
@@ -125,6 +137,11 @@ function Game() {
         setGame(payload.payload);
       })
       .subscribe();
+
+    channel.on("broadcast", { event: "increase-round" }, (payload) => {
+      alert("increase-round: " + payload.payload);
+      setRound(payload.payload);
+    });
   }, [lobby]);
 
   return (
@@ -144,13 +161,12 @@ function Game() {
         </button>
       </div>
       <Board game={game}></Board>
-      {activeUser.role !== "Host" && (
-        <Actions
-          updateBoard={updateBoard}
-          game={game}
-          setGame={setGame}
-        ></Actions>
-      )}
+      <Actions
+        updateBoard={updateBoard}
+        increaseRound={increaseRound}
+        game={game}
+        setGame={setGame}
+      ></Actions>
       <SettingsModal
         show={settingsModalShow}
         onHide={() => setSettingsModalShow(false)}
@@ -166,10 +182,8 @@ function Game() {
 
 export default Game;
 
-function Actions({ updateBoard, game, setGame }) {
+function Actions({ updateBoard, game, setGame, increaseRound }) {
   const { activeUser, players } = useContext(AppContext);
-  console.log(activeUser);
-  console.log(players);
   function buyVolunteer(character) {
     if (character === "becky") {
       const local = {
@@ -182,12 +196,15 @@ function Actions({ updateBoard, game, setGame }) {
       setGame(local);
       updateBoard(local);
     } else if (character === "adam") {
-      setGame((prev) => {
-        return {
-          ...prev,
-          Session: { ...prev.Session, volunteers: prev.Session.volunteers + 1 },
-        };
-      });
+      const local = {
+        ...game,
+        Session: {
+          ...game.Session,
+          volunteers: game.Session.volunteers + 1,
+        },
+      };
+      setGame(local);
+      updateBoard(local);
     } else if (character === "theresa") {
       setGame((prev) => {
         return {
@@ -270,6 +287,17 @@ function Actions({ updateBoard, game, setGame }) {
         >
           buy a volunteer
         </button>
+
+        {activeUser.role === "Host" && (
+          <button
+            className="btn btn-secondary"
+            onClick={() => {
+              increaseRound();
+            }}
+          >
+            Next Round
+          </button>
+        )}
       </div>
       <div></div>
       <div></div>
@@ -369,7 +397,6 @@ function GreatHall({ game }) {
 function Session({ game }) {
   const tables = 8;
   const students = 8;
-  const volunteers = 8;
   const exits = 3;
   const exiting = 0;
   const staffNotAvailable = 0;
@@ -380,7 +407,7 @@ function Session({ game }) {
       Session
       <div className="d-flex flex-column justify-content-between">
         <div>exit {exiting + "/" + exits}</div>
-        <div>volunteers {volunteers}</div>
+        <div>volunteers {game.Session.volunteers}</div>
         <div>students Waiting {studentsWaiting}</div>
         <div>extra volunteers {extraStaff}</div>
         <div> staffNotAvailable {staffNotAvailable}</div>
