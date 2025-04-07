@@ -1,4 +1,4 @@
-import { useEffect, useContext, useState, act } from "react";
+import { useEffect, useContext, useState, act, useCallback } from "react";
 import { supabase } from "../supabase/supabaseClient";
 import { AppContext } from "../context/useAppContext";
 import { useParams } from "react-router-dom";
@@ -143,6 +143,33 @@ function Game() {
     });
   }, [lobby]);
 
+  useEffect(() => {
+    if (round > 12) {
+      alert("Game Over");
+    }
+  }, [round]);
+
+  const renderHour = useCallback((round) => {
+    const time = [
+      "7:00",
+      "7:30",
+      "8:00",
+      "8:30",
+      "9:00",
+      "9:30",
+      "10:00",
+      "10:30",
+      "11:00",
+      "11:30",
+      "12:00",
+      "12:30",
+      "1:00",
+      "1:30",
+      "2:00",
+      "2:30",
+    ];
+    return time[round];
+  });
   return (
     <div className="pt-2">
       <div className="position-absolute top-0 start-0 p-2 d-flex flex-column gap-2">
@@ -158,7 +185,7 @@ function Game() {
         >
           Settings
         </button>
-        <h1>{round}</h1>
+        <h1>{renderHour(round)}</h1>
       </div>
       <Board game={game}></Board>
       <Actions
