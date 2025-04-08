@@ -151,7 +151,6 @@ function Game() {
 
   const renderHour = useCallback((round) => {
     const time = [
-      "7:00",
       "7:30",
       "8:00",
       "8:30",
@@ -164,9 +163,6 @@ function Game() {
       "12:00",
       "12:30",
       "1:00",
-      "1:30",
-      "2:00",
-      "2:30",
     ];
     return time[round];
   });
