@@ -54,13 +54,14 @@ function Lobby() {
       if (error) {
         console.error(error);
       } else {
-        setPlayers(players.concat(activeUser.userName));
+        fetchPlayers();
+        //setPlayers(players.concat(activeUser.userName));
       }
     };
 
-    if (activeUser) {
-      fetchPlayers();
-    }
+    fetchPlayers();
+
+    
     if (activeUser.role !== "Host" && !players.includes(activeUser.userName)) {
       addSelf();
     }

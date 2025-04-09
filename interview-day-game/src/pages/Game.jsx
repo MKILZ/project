@@ -229,25 +229,25 @@ function Actions({ updateBoard, game, setGame, increaseRound }) {
       setGame(local);
       updateBoard(local);
     } else if (character === "theresa") {
-      setGame((prev) => {
-        return {
-          ...prev,
-          Interview: {
-            ...prev.Interview,
-            volunteers: prev.Interview.volunteers + 1,
-          },
-        };
-      });
+      const local = {
+        ...game,
+        Interview: {
+          ...game.Interview,
+          volunteers: game.Interview.volunteers + 1,
+        },
+      };
+      setGame(local);
+      updateBoard(local);
     } else if (character === "kenny") {
-      setGame((prev) => {
-        return {
-          ...prev,
-          GreatHall: {
-            ...prev.GreatHall,
-            volunteers: prev.GreatHall.volunteers + 1,
-          },
-        };
-      });
+      const local = {
+        ...game,
+        GreatHall: {
+          ...game.GreatHall,
+          volunteers: game.GreatHall.volunteers + 1,
+        },
+      };
+      setGame(local);
+      updateBoard(local);
     }
   }
 
