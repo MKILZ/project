@@ -1,8 +1,9 @@
-import { useEffect, useContext, useState, act, useCallback } from "react";
+import { useEffect, useContext, useState, useCallback } from "react";
 import { supabase } from "../supabase/supabaseClient";
 import { AppContext } from "../context/useAppContext";
 import { useParams } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
+import { arrivalsData } from "../data/ArrivalsData";
 
 function Game() {
   const { lobby } = useParams();
@@ -12,6 +13,7 @@ function Game() {
     useContext(AppContext);
   const [scoreCardModal, setScoreCardModal] = useState(false);
   const [settingsModalShow, setSettingsModalShow] = useState(false);
+  const [arrivalsPopup, setArrivalsPopup] = useState(false);
   const [round, setRound] = useState(0);
   const [game, setGame] = useState({
     GreatHall: {
@@ -147,6 +149,7 @@ function Game() {
     if (round > 12) {
       alert("Game Over");
     }
+    setArrivalsPopup(true)
   }, [round]);
 
   const renderHour = useCallback((round) => {
@@ -181,6 +184,12 @@ function Game() {
         >
           Settings
         </button>
+        <button
+          className="btn btn-secondary"
+          onClick={() => setArrivalsPopup(true)}
+        >
+          Arrivals
+        </button>
         <h1>{renderHour(round)}</h1>
       </div>
       <Board game={game}></Board>
@@ -193,6 +202,12 @@ function Game() {
       <SettingsModal
         show={settingsModalShow}
         onHide={() => setSettingsModalShow(false)}
+      />
+      <ArrivalsPopup
+        round = {round}
+        show={arrivalsPopup}
+        onHide={() => setArrivalsPopup(false)}
+        renderHour={renderHour}
       />
       <ScoreCardModal
         scoreCard={scoreCard}
@@ -229,31 +244,31 @@ function Actions({ updateBoard, game, setGame, increaseRound }) {
       setGame(local);
       updateBoard(local);
     } else if (character === "theresa") {
-      const local = {
-        ...game,
-        Interview: {
-          ...game.Interview,
-          volunteers: game.Interview.volunteers + 1,
-        },
-      };
-      setGame(local);
-      updateBoard(local);
+      setGame((prev) => {
+        return {
+          ...prev,
+          Interview: {
+            ...prev.Interview,
+            volunteers: prev.Interview.volunteers + 1,
+          },
+        };
+      });
     } else if (character === "kenny") {
-      const local = {
-        ...game,
-        GreatHall: {
-          ...game.GreatHall,
-          volunteers: game.GreatHall.volunteers + 1,
-        },
-      };
-      setGame(local);
-      updateBoard(local);
+      setGame((prev) => {
+        return {
+          ...prev,
+          GreatHall: {
+            ...prev.GreatHall,
+            volunteers: prev.GreatHall.volunteers + 1,
+          },
+        };
+      });
     }
   }
 
   return (
     <div className="d-flex flex-row w-100 card justify-content-between h-25 gap-2 p-2 mt-2">
-      <div className="card d-flex p-2">
+     {activeUser && <div className="card d-flex p-2">
         {activeUser.character === "becky" && (
           <div>
             <img
@@ -298,7 +313,7 @@ function Actions({ updateBoard, game, setGame, increaseRound }) {
             <h3>Great Hall</h3>
           </div>
         )}
-      </div>
+      </div>}
 
       <div>
         <button
@@ -500,6 +515,30 @@ function SettingsModal(props) {
       <Modal.Footer>
         <button className="btn btn-secondary" onClick={props.onHide}>
           Close
+        </button>
+      </Modal.Footer>
+    </Modal>
+  );
+}
+
+
+function ArrivalsPopup({ show, onHide, round, renderHour }) {
+  return (
+    <Modal show={show} onHide={onHide} centered>
+      <Modal.Header closeButton>
+        <Modal.Title>Arrivals - {renderHour(round)}</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <p>New students or parents have arrived!</p>
+        <p> Welcome: {arrivalsData.Welcome[round]} </p>
+        <p> Session: {arrivalsData.Session[round]} </p>
+        <p> Interview: {arrivalsData.Interview[round]} </p>
+        <p> Lunch: {arrivalsData.Lunch[round]} </p>
+        {/* You can add any custom info or logic here */}
+      </Modal.Body>
+      <Modal.Footer>
+        <button className="btn btn-primary" onClick={onHide}>
+          Continue
         </button>
       </Modal.Footer>
     </Modal>
