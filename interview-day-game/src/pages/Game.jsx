@@ -582,16 +582,23 @@ function ManageArrivalsPopup({ show, onHide, round, renderHour, game}) {
   const currentDept = characterToDept[activeUser.character];
   
   const maxOutside = arrivalsData[currentDept]?.[round] ?? 0;
+  const [outsideMax, setOutsideMax] = useState(maxOutside);
+
+  useEffect(() => {
+    const updatedMax = arrivalsData[currentDept]?.[round] ?? 0;
+    setOutsideMax(updatedMax);
+  }, [round, currentDept]);
+
 
   //get random number for each other department arrivals
-  //replace when we get the actual data
-  const [maxInternal] = useState({
-    //only gets random if user is not the naemed character
+  const initialMaxInternal = {
     Welcome: activeUser.character !== "becky" ? getRand() : 0,
     Session: activeUser.character !== "adam" ? getRand() : 0,
     Interview: activeUser.character !== "theresa" ? getRand() : 0,
     GreatHall: activeUser.character !== "kenny" ? getRand() : 0,
-  });
+  };
+  
+  const [internalMax, setInternalMax] = useState(initialMaxInternal);
 
   //get num selected from each department
   const [selected, setSelected] = useState({
@@ -650,9 +657,11 @@ function ManageArrivalsPopup({ show, onHide, round, renderHour, game}) {
   //get the max value for each department
   const getMaxValue = (source) => {
     if(source === "Outside") {
-      return maxOutside;
+      //return maxOutside;
+      return outsideMax;
     }
-    return maxInternal[source];
+    return internalMax
+    [source];
   }
   
 
@@ -665,6 +674,53 @@ function ManageArrivalsPopup({ show, onHide, round, renderHour, game}) {
     }
     return map[activeUser.character] === source;
   }
+
+  //function to handle when the user presses confirm
+  const handleConfirm = () => {
+    const newInternalMax = {...internalMax};
+
+    //update the values from other departments
+    Object.keys(selected).forEach((key) => {
+      if (key !== "Outside") {
+        newInternalMax[key] = Math.max(newInternalMax[key] - selected[key], 0);
+      }
+    });
+
+    //update the outside value
+    const newOutsideMax = Math.max(outsideMax - selected["Outside"], 0);
+    setInternalMax(newInternalMax);
+    setOutsideMax(newOutsideMax);
+
+    //reset the accepted arrival counts
+    setSelected({
+      Outside: 0,
+      Welcome: 0,
+      Session: 0,
+      Interview: 0,
+      GreatHall: 0,
+    });
+
+    //FIX THIS
+    //update the game board
+    {/* 
+    const currentDept = characterToDept[activeUser.character];
+    const totalAccepted = Object.values(selected).reduce((acc, val) => acc + val, 0);
+    const updatedGame = {
+      ...game,
+      [currentDept]: {
+        ...game[currentDept],
+        students: game[currentDept].students + totalAccepted,
+      },
+    };
+    setGame(updatedGame);
+    */}
+
+    onHide();
+  };
+
+
+
+
   
   return (
     <Modal show={show} onHide={onHide} centered>
@@ -723,7 +779,7 @@ function ManageArrivalsPopup({ show, onHide, round, renderHour, game}) {
         
       </Modal.Body>
       <Modal.Footer>
-        <button className="btn btn-primary" onClick={onHide}>
+        <button className="btn btn-primary" onClick={handleConfirm}>
           Confirm
         </button>
       </Modal.Footer>
