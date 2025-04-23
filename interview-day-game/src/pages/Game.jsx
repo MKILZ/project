@@ -15,6 +15,7 @@ function Game() {
   const [settingsModalShow, setSettingsModalShow] = useState(false);
   const [arrivalsPopup, setArrivalsPopup] = useState(false);
   const [manageArrivalsPopup, setManageArrivalsPopup] = useState(false);
+  const [readyToExitPopup, setReadyToExitPopup] = useState(false);
   const [round, setRound] = useState(0);
   const [game, setGame] = useState({
     GreatHall: {
@@ -200,6 +201,7 @@ function Game() {
         game={game}
         setGame={setGame}
         setManageArrivalsPopup={setManageArrivalsPopup}
+        setReadyToExitPopup={setReadyToExitPopup}
       ></Actions>
       <SettingsModal
         show={settingsModalShow}
@@ -218,6 +220,13 @@ function Game() {
         renderHour={renderHour}
         game={game}
       />
+      <ReadyToExitPopup
+        show={readyToExitPopup}
+        onHide={() => setReadyToExitPopup(false)}
+        round={round}
+        renderHour={renderHour}
+        game={game}
+      />
       <ScoreCardModal
         scoreCard={scoreCard}
         show={scoreCardModal}
@@ -229,7 +238,7 @@ function Game() {
 
 export default Game;
 
-function Actions({ updateBoard, game, setGame, increaseRound, setManageArrivalsPopup }) {
+function Actions({ updateBoard, game, setGame, increaseRound, setManageArrivalsPopup, setReadyToExitPopup }) {
   const { activeUser, players } = useContext(AppContext);
   function buyVolunteer(character) {
     if (character === "becky") {
@@ -352,6 +361,15 @@ function Actions({ updateBoard, game, setGame, increaseRound, setManageArrivalsP
           onClick={() => setManageArrivalsPopup(true)}
         >
           Manage Arriving Students 
+        </button>
+        )}
+
+        {activeUser.role !== "Host" && (
+        <button
+          className="btn btn-secondary"
+          onClick={() => setReadyToExitPopup(true)}
+        >
+          Ready to Exit 
         </button>
         )}
 
@@ -786,3 +804,53 @@ function ManageArrivalsPopup({ show, onHide, round, renderHour, game}) {
     </Modal>
   );
 } 
+
+function ReadyToExitPopup({ show, onHide, round, renderHour }) {
+  const arrivalSources = ["Outside", "Welcome", "Session", "Interview", "GreatHall"];
+  const { activeUser } = useContext(AppContext);
+  const getRand = () => {
+    return Math.floor(Math.random() * 5);
+  }
+
+  const characterToDept = {
+    becky: "Welcome",
+    adam: "Session",
+    theresa: "Interview",
+    kenny: "GreatHall", // greathall or lunch??
+  };
+  
+  const currentDept = characterToDept[activeUser.character];;
+
+  const isCurrentDepartment = (source) => {
+    const map = {
+      becky: "Welcome",
+      adam: "Session",
+      theresa: "Interview",
+      kenny: "GreatHall",
+    }
+    return map[activeUser.character] === source;
+  }
+  
+  return (
+    <Modal show={show} onHide={onHide} centered>
+      <Modal.Header closeButton>
+        <Modal.Title>Manage Ready to Exit Students - {renderHour(round)}</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+
+        {arrivalSources.map((source) => {
+          if (source !== "Outside" && isCurrentDepartment(source)) return null;
+
+          return (
+            <div key={source} className="row align-items-center mb-2">
+              <div className="col">
+                <strong>{source}: </strong>{ getRand()}
+              </div>
+            </div>
+          );
+        })}
+      </Modal.Body>
+      </Modal>
+
+  );
+}
