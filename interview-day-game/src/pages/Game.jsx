@@ -1,5 +1,5 @@
-import { useEffect, useContext, useState, useCallback } from "react";
-import { supabase } from "../supabase/supabaseClient";
+import { useEffect, useContext, useState, useCallback, act } from "react";
+// import { supabase } from "../supabase/supabaseClient";
 import { AppContext } from "../context/useAppContext";
 import { useParams } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
@@ -58,6 +58,36 @@ function Game() {
     },
   });
 
+  const [incomingsToWelcome, setIncomingsToWelcome] = useState([
+    {
+      Outside: 0,
+    },
+  ])
+
+  const [incomingsToSession, setIncomingsToSession] = useState([
+    {
+      Outside: 0,
+      Welcome: 0,
+    },
+  ])
+
+  const [incomingsToInterview, setIncomingsToInterview] = useState([
+    {
+      Outside: 0,
+      Session: 0,
+      Welcome: 0,
+    },
+  ])
+
+  const [incomingsToLunch, setIncomingsToLunch] = useState([
+    {
+      Outside: 0,
+      Welcome: 0,
+      Session: 0,
+      Interview: 0,
+    },
+  ])
+
   const [scoreCard, setScoreCard] = useState([
     {
       hour: 0,
@@ -66,6 +96,42 @@ function Game() {
       extraStaff: 0,
     },
   ]);
+
+  const [diversions, setDiversions] = useState([
+    0
+  ])
+
+  const [welcomeExtraVolunteers, setWelcomeExtraVolunteers] = useState([
+    {
+      volunteersOff: 0,
+      extraVolunteers: 0,
+      requestedVolunteers: 0
+    },
+  ])
+
+  const [sessionExtraVolunteers, setSessionExtraVolunteers] = useState([
+    {
+      volunteersOff: 0,
+      extraVolunteers: 0,
+      requestedVolunteers: 0
+    },
+  ])
+
+  const [interviewExtraVolunteers, setInterviewExtraVolunteers] = useState([
+    {
+      volunteersOff: 0,
+      extraVolunteers: 0,
+      requestedVolunteers: 0
+    },
+  ])
+
+  const [lunchExtraVolunteers, setLunchExtraVolunteers] = useState([
+    {
+      volunteersOff: 0,
+      extraVolunteers: 0,
+      requestedVolunteers: 0
+    },
+  ])
 
   function updateBoard(gameBoard) {
     console.log("updateBoard", gameBoard);
@@ -82,6 +148,97 @@ function Game() {
       event: "increase-round",
       payload: {},
     });
+  }
+
+  function endOfRoundClientUpdate(sender) {
+    if (sender == "welcome") {
+      setWelcomeExtraVolunteers((prev) => [
+        {
+          ...prev[0],
+          extraVolunteers: prev[0].extraVolunteers + prev[0].requestedVolunteers,
+          requestedVolunteers: 0,
+        },
+      ]);
+    } else if (sender == "session") {
+      setSessionExtraVolunteers((prev) => [
+        {
+          ...prev[0],
+          extraVolunteers: prev[0].extraVolunteers + prev[0].requestedVolunteers,
+          requestedVolunteers: 0,
+        },
+      ]);
+    } else if (sender == "interview") {
+      setInterviewExtraVolunteers((prev) => [
+        {
+          ...prev[0],
+          extraVolunteers: prev[0].extraVolunteers + prev[0].requestedVolunteers,
+          requestedVolunteers: 0,
+        },
+      ]);
+    } else if (sender == "lunch") {
+      setLunchExtraVolunteers((prev) => [
+        {
+          ...prev[0],
+          extraVolunteers: prev[0].extraVolunteers + prev[0].requestedVolunteers,
+          requestedVolunteers: 0,
+        },
+      ]);
+    }
+    // let payload;
+    // if (sender == "session") {
+    //   payload = {
+    //     newVolunteers: requestedVolunteers
+    //   }
+    // }
+    // else if (sender == "welcome") {
+    //   payload = {
+    //     newVolunteers: requestedVolunteers
+    //   }
+    // }
+    // else if (sender == "interview") {
+    //   payload = {
+    //     newVolunteers: requestedVolunteers
+    //   }
+    // }
+    // else if (sender == "lunch") {
+    //   payload = {
+    //     newVolunteers: requestedVolunteers
+    //   }
+    // }
+
+
+    channel.send({
+      type: "broadcast",
+      event: "round-update-" + sender,
+      payload: payload
+    })
+  }
+
+
+  function endOfRoundHostUpdate() {
+    const process = (area) => {
+      return [
+        {
+          ...area[0],
+          extraVolunteers: area[0].extraVolunteers + area[0].requestedVolunteers,
+          requestedVolunteers: 0,
+        },
+      ];
+    };
+
+    const payload = {
+      welcomeExtraVolunteers: process(welcomeExtraVolunteers),
+      sessionExtraVolunteers: process(sessionExtraVolunteers),
+      interviewExtraVolunteers: process(interviewExtraVolunteers),
+      lunchExtraVolunteers: process(lunchExtraVolunteers),
+      diversions: diversions,
+    }
+
+    channel.send({
+      type: "broadcast",
+      event: "end-of-round-update",
+      payload: payload
+    })
   }
 
   useEffect(() => {
@@ -143,7 +300,42 @@ function Game() {
       });
       console.log(round);
     });
+
+    channel.on("broadcast", { event: "end-of-round-update" }, (payload) => {
+      setWelcomeExtraVolunteers(payload.payload.welcomeExtraVolunteers),
+        setSessionExtraVolunteers(payload.payload.sessionExtraVolunteers),
+        setInterviewExtraVolunteers(payload.payload.interviewExtraVolunteers),
+        setLunchExtraVolunteers(payload.payload.lunchExtraVolunteers)
+    });
+
+    channel.on("broadcast", { event: "round-update-welcome" }, (payload) => {
+      if (activeUser.role == "Host") {
+        setWelcomeExtraVolunteers(payload.payload.welcomeExtraVolunteers)
+      }
+
+    });
+
+    channel.on("broadcast", { event: "round-update-session" }, (payload) => {
+      if (activeUser.role == "Host") {
+        setSessionExtraVolunteers(payload.payload.sessionExtraVolunteers)
+      }
+    });
+
+    channel.on("broadcast", { event: "round-update-interview" }, (payload) => {
+      if (activeUser.role == "Host") {
+        setInterviewExtraVolunteers(payload.payload.interviewExtraVolunteers)
+      }
+    });
+
+    channel.on("broadcast", { event: "round-update-lunch" }, (payload) => {
+      if (activeUser.role == "Host") {
+        setLunchExtraVolunteers(payload.payload.lunchExtraVolunteers)
+      }
+    });
+
   }, [lobby]);
+
+
 
   useEffect(() => {
     if (round > 12) {
@@ -204,7 +396,7 @@ function Game() {
         onHide={() => setSettingsModalShow(false)}
       />
       <ArrivalsPopup
-        round = {round}
+        round={round}
         show={arrivalsPopup}
         onHide={() => setArrivalsPopup(false)}
         renderHour={renderHour}
@@ -228,7 +420,7 @@ function Actions({ updateBoard, game, setGame, increaseRound }) {
         ...game,
         Welcome: {
           ...game.Welcome,
-          volunteers: game.Welcome.volunteers + 1,
+          requestedVolunteers: game.Welcome.requestedVolunteers + 1,
         },
       };
       setGame(local);
@@ -238,7 +430,7 @@ function Actions({ updateBoard, game, setGame, increaseRound }) {
         ...game,
         Session: {
           ...game.Session,
-          volunteers: game.Session.volunteers + 1,
+          requestedVolunteers: game.Session.requestedVolunteers + 1,
         },
       };
       setGame(local);
@@ -249,7 +441,7 @@ function Actions({ updateBoard, game, setGame, increaseRound }) {
           ...prev,
           Interview: {
             ...prev.Interview,
-            volunteers: prev.Interview.volunteers + 1,
+            requestedVolunteers: prev.Interview.requestedVolunteers + 1,
           },
         };
       });
@@ -259,7 +451,7 @@ function Actions({ updateBoard, game, setGame, increaseRound }) {
           ...prev,
           GreatHall: {
             ...prev.GreatHall,
-            volunteers: prev.GreatHall.volunteers + 1,
+            requestedVolunteers: prev.GreatHall.requestedVolunteers + 1,
           },
         };
       });
@@ -268,7 +460,7 @@ function Actions({ updateBoard, game, setGame, increaseRound }) {
 
   return (
     <div className="d-flex flex-row w-100 card justify-content-between h-25 gap-2 p-2 mt-2">
-     {activeUser && <div className="card d-flex p-2">
+      {activeUser && <div className="card d-flex p-2">
         {activeUser.character === "becky" && (
           <div>
             <img
@@ -544,3 +736,5 @@ function ArrivalsPopup({ show, onHide, round, renderHour }) {
     </Modal>
   );
 }
+
+
