@@ -148,6 +148,18 @@ function Game() {
       });
       console.log(round);
     });
+
+    channel.on("broadcast", { event: "manage_arrivals" }, (payload) => {
+      const { department, newStudents } = payload.payload;
+      setGame((prev) => ({
+        ...prev,
+        [department]: {
+          ...prev[department],
+          students: newStudents,
+        },
+      }));
+    });
+
   }, [lobby]);
 
   useEffect(() => {
@@ -221,6 +233,8 @@ function Game() {
         round={round}
         renderHour={renderHour}
         game={game}
+        lobby = {lobby}
+        channel = {channel}
       />
       <ScoreCardModal
         scoreCard={scoreCard}

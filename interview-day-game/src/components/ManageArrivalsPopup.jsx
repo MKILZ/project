@@ -5,7 +5,7 @@ import { arrivalsData } from "../data/ArrivalsData";
 import { supabase } from "../supabase/supabaseClient";
 
 
-function ManageArrivalsPopup({ show, onHide, round, renderHour, game}) {
+function ManageArrivalsPopup({ show, onHide, round, renderHour, game, lobby, channel}) {
     const { activeUser } = useContext(AppContext);
     const getRand = () => {
       return Math.floor(Math.random() * 5);
@@ -132,14 +132,36 @@ function ManageArrivalsPopup({ show, onHide, round, renderHour, game}) {
 
       //send the selected values to the game via socket
       const totalAccepted = Object.values(selected).reduce((acc, val) => acc + val, 0);
-      supabase.channel(lobby + "changes").send({
+
+      //make sure we have enough room
+      const newTotalStudents = game[currentDept].students + totalAccepted;
+
+      if (newTotalStudents > game[currentDept].tables) {
+        alert("Not enough tables for all students!");
+        return;
+      }
+
+      if (newTotalStudents > game[currentDept].volunteers) {
+        alert("Not enough volunteers for all students!");
+        return;
+      }
+
+    //   supabase.channel(lobby + "changes").send({
+    //     type: "broadcast",
+    //     event: "manage_arrivals",
+    //     payload: {
+    //         department: currentDept,
+    //         newStudents: game[currentDept].students + totalAccepted,
+    //     },
+    //   });
+      channel.send({
         type: "broadcast",
         event: "manage_arrivals",
         payload: {
-            department: currentDept,
-            newStudents: game[currentDept].students + totalAccepted,
+          department: currentDept,
+          newStudents: game[currentDept].students + totalAccepted,
         },
-      });
+      });  
       
   
       //reset the accepted arrival counts
