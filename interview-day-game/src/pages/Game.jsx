@@ -204,7 +204,7 @@ function Game() {
         onHide={() => setSettingsModalShow(false)}
       />
       <ArrivalsPopup
-        round = {round}
+        round={round}
         show={arrivalsPopup}
         onHide={() => setArrivalsPopup(false)}
         renderHour={renderHour}
@@ -268,7 +268,7 @@ function Actions({ updateBoard, game, setGame, increaseRound }) {
 
   return (
     <div className="d-flex flex-row w-100 card justify-content-between h-25 gap-2 p-2 mt-2">
-     {activeUser && <div className="card d-flex p-2">
+      {activeUser && <div className="card d-flex p-2">
         {activeUser.character === "becky" && (
           <div>
             <img
@@ -522,13 +522,13 @@ function SettingsModal(props) {
 }
 
 
-function ArrivalsPopup({ show, onHide, round, renderHour }) {
+export function ArrivalsPopup({ show, onHide, round, renderHour }) {
   return (
     <Modal show={show} onHide={onHide} centered>
       <Modal.Header closeButton>
-        <Modal.Title>Arrivals - {renderHour(round)}</Modal.Title>
+        <Modal.Title data-testid="arrivals-title">Arrivals - {renderHour(round)}</Modal.Title>
       </Modal.Header>
-      <Modal.Body>
+      <Modal.Body data-testid="arrivals-subtitle">
         <p>New students or parents have arrived!</p>
         <p> Welcome: {arrivalsData.Welcome[round]} </p>
         <p> Session: {arrivalsData.Session[round]} </p>
