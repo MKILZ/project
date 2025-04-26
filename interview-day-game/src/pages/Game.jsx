@@ -4,6 +4,8 @@ import { AppContext } from "../context/useAppContext";
 import { useParams } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
 import { arrivalsData } from "../data/ArrivalsData";
+import ArrivalsPopup from "../components/ArrivalsPopup";
+import ManageArrivalsPopup from "../components/ManageArrivalsPopup";
 
 function Game() {
   const { lobby } = useParams();
@@ -14,6 +16,7 @@ function Game() {
   const [scoreCardModal, setScoreCardModal] = useState(false);
   const [settingsModalShow, setSettingsModalShow] = useState(false);
   const [arrivalsPopup, setArrivalsPopup] = useState(false);
+  const [manageArrivalsPopup, setManageArrivalsPopup] = useState(false);
   const [round, setRound] = useState(0);
   const [isReady, setIsReady] = useState(false);
 
@@ -180,13 +183,24 @@ function Game() {
         }
       }
     });
+
+    channel.on("broadcast", { event: "manage_arrivals" }, (payload) => {
+      const { department, newStudents } = payload.payload;
+      setGame((prev) => ({
+        ...prev,
+        [department]: {
+          ...prev[department],
+          students: newStudents,
+        },
+      }));
+    });
   }, [lobby]);
 
   useEffect(() => {
     if (round > 12) {
       alert("Game Over");
     }
-    setArrivalsPopup(true)
+    setArrivalsPopup(true);
   }, [round]);
 
   const renderHour = useCallback((round) => {
@@ -236,6 +250,7 @@ function Game() {
         readyUp={readyUp}
         game={game}
         setGame={setGame}
+        setManageArrivalsPopup={setManageArrivalsPopup}
         setIsReady={setIsReady}
         isReady={isReady}
       ></Actions>
@@ -244,10 +259,19 @@ function Game() {
         onHide={() => setSettingsModalShow(false)}
       />
       <ArrivalsPopup
-        round = {round}
+        round={round}
         show={arrivalsPopup}
         onHide={() => setArrivalsPopup(false)}
         renderHour={renderHour}
+      />
+      <ManageArrivalsPopup
+        show={manageArrivalsPopup}
+        onHide={() => setManageArrivalsPopup(false)}
+        round={round}
+        renderHour={renderHour}
+        game={game}
+        lobby={lobby}
+        channel={channel}
       />
       <ScoreCardModal
         scoreCard={scoreCard}
@@ -264,10 +288,10 @@ function Actions({
   updateBoard,
   game,
   setGame,
-  increaseRound,
   readyUp,
   isReady,
   setIsReady,
+  setManageArrivalsPopup,
 }) {
   const { activeUser, players } = useContext(AppContext);
   function buyVolunteer(character) {
@@ -316,52 +340,54 @@ function Actions({
 
   return (
     <div className="d-flex flex-row w-100 card justify-content-between h-25 gap-2 p-2 mt-2">
-     {activeUser && <div className="card d-flex p-2">
-        {activeUser.character === "becky" && (
-          <div>
-            <img
-              src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-becky-barnard.jpg?itok=d8fal0xg"
-              alt="beckey"
-              className="rounded-circle"
-              style={{ width: "75px", height: "100px", objectFit: "cover" }}
-            />
-            <h3>Welcome</h3>
-          </div>
-        )}
-        {activeUser.character === "adam" && (
-          <div>
-            <img
-              src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-adam-britten.jpg?itok=fAYbnhXs"
-              alt="adam"
-              className="rounded-circle"
-              style={{ width: "75px", height: "100px", objectFit: "cover" }}
-            />
-            <h3>Session</h3>
-          </div>
-        )}
-        {activeUser.character === "theresa" && (
-          <div>
-            <img
-              src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-theresa-luensmann.jpg?itok=unLlsXcF"
-              alt="Theresa"
-              className="rounded-circle"
-              style={{ width: "75px", height: "100px", objectFit: "cover" }}
-            />
-            <h3>Interview</h3>
-          </div>
-        )}
-        {activeUser.character === "kenny" && (
-          <div>
-            <img
-              src="https://media.licdn.com/dms/image/v2/D5603AQFJz9OJXxUNsQ/profile-displayphoto-shrink_400_400/B56ZRMqLRMH0Ao-/0/1736452912894?e=2147483647&v=beta&t=uhRnWRaaN4llVldNwHHS8qzxZgX0wUtQtaoS0iLqTrQ"
-              alt="kenny"
-              className="rounded-circle"
-              style={{ width: "75px", height: "100px", objectFit: "cover" }}
-            />
-            <h3>Great Hall</h3>
-          </div>
-        )}
-      </div>}
+      {activeUser && (
+        <div className="card d-flex p-2">
+          {activeUser.character === "becky" && (
+            <div>
+              <img
+                src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-becky-barnard.jpg?itok=d8fal0xg"
+                alt="beckey"
+                className="rounded-circle"
+                style={{ width: "75px", height: "100px", objectFit: "cover" }}
+              />
+              <h3>Welcome</h3>
+            </div>
+          )}
+          {activeUser.character === "adam" && (
+            <div>
+              <img
+                src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-adam-britten.jpg?itok=fAYbnhXs"
+                alt="adam"
+                className="rounded-circle"
+                style={{ width: "75px", height: "100px", objectFit: "cover" }}
+              />
+              <h3>Session</h3>
+            </div>
+          )}
+          {activeUser.character === "theresa" && (
+            <div>
+              <img
+                src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-theresa-luensmann.jpg?itok=unLlsXcF"
+                alt="Theresa"
+                className="rounded-circle"
+                style={{ width: "75px", height: "100px", objectFit: "cover" }}
+              />
+              <h3>Interview</h3>
+            </div>
+          )}
+          {activeUser.character === "kenny" && (
+            <div>
+              <img
+                src="https://media.licdn.com/dms/image/v2/D5603AQFJz9OJXxUNsQ/profile-displayphoto-shrink_400_400/B56ZRMqLRMH0Ao-/0/1736452912894?e=2147483647&v=beta&t=uhRnWRaaN4llVldNwHHS8qzxZgX0wUtQtaoS0iLqTrQ"
+                alt="kenny"
+                className="rounded-circle"
+                style={{ width: "75px", height: "100px", objectFit: "cover" }}
+              />
+              <h3>Great Hall</h3>
+            </div>
+          )}
+        </div>
+      )}
 
       <div>
         <button
@@ -386,6 +412,15 @@ function Actions({
             disabled={isReady}
           >
             {isReady ? "Ready!" : "Ready Up!"}
+          </button>
+        )}
+
+        {activeUser.role !== "Host" && (
+          <button
+            className="btn btn-secondary"
+            onClick={() => setManageArrivalsPopup(true)}
+          >
+            Manage Arriving Students
           </button>
         )}
       </div>
@@ -565,30 +600,6 @@ function SettingsModal(props) {
       <Modal.Footer>
         <button className="btn btn-secondary" onClick={props.onHide}>
           Close
-        </button>
-      </Modal.Footer>
-    </Modal>
-  );
-}
-
-
-function ArrivalsPopup({ show, onHide, round, renderHour }) {
-  return (
-    <Modal show={show} onHide={onHide} centered>
-      <Modal.Header closeButton>
-        <Modal.Title>Arrivals - {renderHour(round)}</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <p>New students or parents have arrived!</p>
-        <p> Welcome: {arrivalsData.Welcome[round]} </p>
-        <p> Session: {arrivalsData.Session[round]} </p>
-        <p> Interview: {arrivalsData.Interview[round]} </p>
-        <p> Lunch: {arrivalsData.Lunch[round]} </p>
-        {/* You can add any custom info or logic here */}
-      </Modal.Body>
-      <Modal.Footer>
-        <button className="btn btn-primary" onClick={onHide}>
-          Continue
         </button>
       </Modal.Footer>
     </Modal>
