@@ -7,8 +7,6 @@ import { arrivalsData } from "../data/ArrivalsData";
 import ArrivalsPopup from "../components/ArrivalsPopup";
 import ManageArrivalsPopup from "../components/ManageArrivalsPopup";
 
-
-
 function Game() {
   const { lobby } = useParams();
   const hoursInDay = 7;
@@ -20,6 +18,9 @@ function Game() {
   const [arrivalsPopup, setArrivalsPopup] = useState(false);
   const [manageArrivalsPopup, setManageArrivalsPopup] = useState(false);
   const [round, setRound] = useState(0);
+  const [isReady, setIsReady] = useState(false);
+
+  const [readyPlayers, setReadyPlayers] = useState([]);
   const [game, setGame] = useState({
     GreatHall: {
       tables: 16,
@@ -81,7 +82,19 @@ function Game() {
     });
   }
 
+  function readyUp() {
+    //function that adds the player to the readyPlayers array
+    channel.send({
+      type: "broadcast",
+      event: "ready-up",
+      payload: { player: activeUser.userName },
+    });
+  }
+
   function increaseRound() {
+    setRound((prev) => {
+      return prev + 1;
+    });
     channel.send({
       type: "broadcast",
       event: "increase-round",
@@ -143,10 +156,32 @@ function Game() {
       .subscribe();
 
     channel.on("broadcast", { event: "increase-round" }, () => {
+      console.log("increase-round");
       setRound((prev) => {
         return prev + 1;
       });
-      console.log(round);
+      setReadyPlayers([]);
+      setIsReady(false);
+    });
+
+    channel.on("broadcast", { event: "ready-up" }, (payload) => {
+      const newPlayer = payload.payload.player;
+      console.log("ready-up:", newPlayer);
+      console.log("readyPlayers:", readyPlayers);
+      let playersReady = 0;
+      //if player is host add player to readyPlayers
+      if (activeUser.role === "Host") {
+        setReadyPlayers((prev) => {
+          playersReady = prev.length + 1;
+          return [...prev, newPlayer];
+        });
+        // check if all players are ready
+        if (playersReady === 4) {
+          increaseRound();
+          setReadyPlayers([]);
+          setIsReady(false);
+        }
+      }
     });
 
     channel.on("broadcast", { event: "manage_arrivals" }, (payload) => {
@@ -159,14 +194,13 @@ function Game() {
         },
       }));
     });
-
   }, [lobby]);
 
   useEffect(() => {
     if (round > 12) {
       alert("Game Over");
     }
-    setArrivalsPopup(true)
+    setArrivalsPopup(true);
   }, [round]);
 
   const renderHour = useCallback((round) => {
@@ -213,16 +247,19 @@ function Game() {
       <Actions
         updateBoard={updateBoard}
         increaseRound={increaseRound}
+        readyUp={readyUp}
         game={game}
         setGame={setGame}
         setManageArrivalsPopup={setManageArrivalsPopup}
+        setIsReady={setIsReady}
+        isReady={isReady}
       ></Actions>
       <SettingsModal
         show={settingsModalShow}
         onHide={() => setSettingsModalShow(false)}
       />
       <ArrivalsPopup
-        round = {round}
+        round={round}
         show={arrivalsPopup}
         onHide={() => setArrivalsPopup(false)}
         renderHour={renderHour}
@@ -233,8 +270,8 @@ function Game() {
         round={round}
         renderHour={renderHour}
         game={game}
-        lobby = {lobby}
-        channel = {channel}
+        lobby={lobby}
+        channel={channel}
       />
       <ScoreCardModal
         scoreCard={scoreCard}
@@ -247,7 +284,15 @@ function Game() {
 
 export default Game;
 
-function Actions({ updateBoard, game, setGame, increaseRound, setManageArrivalsPopup }) {
+function Actions({
+  updateBoard,
+  game,
+  setGame,
+  readyUp,
+  isReady,
+  setIsReady,
+  setManageArrivalsPopup,
+}) {
   const { activeUser, players } = useContext(AppContext);
   function buyVolunteer(character) {
     if (character === "becky") {
@@ -295,52 +340,54 @@ function Actions({ updateBoard, game, setGame, increaseRound, setManageArrivalsP
 
   return (
     <div className="d-flex flex-row w-100 card justify-content-between h-25 gap-2 p-2 mt-2">
-     {activeUser && <div className="card d-flex p-2">
-        {activeUser.character === "becky" && (
-          <div>
-            <img
-              src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-becky-barnard.jpg?itok=d8fal0xg"
-              alt="beckey"
-              className="rounded-circle"
-              style={{ width: "75px", height: "100px", objectFit: "cover" }}
-            />
-            <h3>Welcome</h3>
-          </div>
-        )}
-        {activeUser.character === "adam" && (
-          <div>
-            <img
-              src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-adam-britten.jpg?itok=fAYbnhXs"
-              alt="adam"
-              className="rounded-circle"
-              style={{ width: "75px", height: "100px", objectFit: "cover" }}
-            />
-            <h3>Session</h3>
-          </div>
-        )}
-        {activeUser.character === "theresa" && (
-          <div>
-            <img
-              src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-theresa-luensmann.jpg?itok=unLlsXcF"
-              alt="Theresa"
-              className="rounded-circle"
-              style={{ width: "75px", height: "100px", objectFit: "cover" }}
-            />
-            <h3>Interview</h3>
-          </div>
-        )}
-        {activeUser.character === "kenny" && (
-          <div>
-            <img
-              src="https://media.licdn.com/dms/image/v2/D5603AQFJz9OJXxUNsQ/profile-displayphoto-shrink_400_400/B56ZRMqLRMH0Ao-/0/1736452912894?e=2147483647&v=beta&t=uhRnWRaaN4llVldNwHHS8qzxZgX0wUtQtaoS0iLqTrQ"
-              alt="kenny"
-              className="rounded-circle"
-              style={{ width: "75px", height: "100px", objectFit: "cover" }}
-            />
-            <h3>Great Hall</h3>
-          </div>
-        )}
-      </div>}
+      {activeUser && (
+        <div className="card d-flex p-2">
+          {activeUser.character === "becky" && (
+            <div>
+              <img
+                src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-becky-barnard.jpg?itok=d8fal0xg"
+                alt="beckey"
+                className="rounded-circle"
+                style={{ width: "75px", height: "100px", objectFit: "cover" }}
+              />
+              <h3>Welcome</h3>
+            </div>
+          )}
+          {activeUser.character === "adam" && (
+            <div>
+              <img
+                src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-adam-britten.jpg?itok=fAYbnhXs"
+                alt="adam"
+                className="rounded-circle"
+                style={{ width: "75px", height: "100px", objectFit: "cover" }}
+              />
+              <h3>Session</h3>
+            </div>
+          )}
+          {activeUser.character === "theresa" && (
+            <div>
+              <img
+                src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-theresa-luensmann.jpg?itok=unLlsXcF"
+                alt="Theresa"
+                className="rounded-circle"
+                style={{ width: "75px", height: "100px", objectFit: "cover" }}
+              />
+              <h3>Interview</h3>
+            </div>
+          )}
+          {activeUser.character === "kenny" && (
+            <div>
+              <img
+                src="https://media.licdn.com/dms/image/v2/D5603AQFJz9OJXxUNsQ/profile-displayphoto-shrink_400_400/B56ZRMqLRMH0Ao-/0/1736452912894?e=2147483647&v=beta&t=uhRnWRaaN4llVldNwHHS8qzxZgX0wUtQtaoS0iLqTrQ"
+                alt="kenny"
+                className="rounded-circle"
+                style={{ width: "75px", height: "100px", objectFit: "cover" }}
+              />
+              <h3>Great Hall</h3>
+            </div>
+          )}
+        </div>
+      )}
 
       <div>
         <button
@@ -349,33 +396,34 @@ function Actions({ updateBoard, game, setGame, increaseRound, setManageArrivalsP
             e.preventDefault();
             buyVolunteer(activeUser.character);
           }}
+          disabled={isReady}
         >
           buy a volunteer
         </button>
-
-        {activeUser.role === "Host" && (
+      </div>
+      <div>
+        {activeUser.role !== "Host" && (
           <button
-            className="btn btn-secondary"
+            className={`btn ${isReady ? "btn-success" : "btn-secondary"}`}
             onClick={() => {
-              increaseRound();
+              readyUp();
+              setIsReady(true); // turn the button green
             }}
+            disabled={isReady}
           >
-            Next Round
+            {isReady ? "Ready!" : "Ready Up!"}
           </button>
         )}
 
         {activeUser.role !== "Host" && (
-        <button
-          className="btn btn-secondary"
-          onClick={() => setManageArrivalsPopup(true)}
-        >
-          Manage Arriving Students 
-        </button>
+          <button
+            className="btn btn-secondary"
+            onClick={() => setManageArrivalsPopup(true)}
+          >
+            Manage Arriving Students
+          </button>
         )}
-
       </div>
-      <div></div>
-      <div></div>
       <div></div>
     </div>
   );
@@ -557,4 +605,3 @@ function SettingsModal(props) {
     </Modal>
   );
 }
-
