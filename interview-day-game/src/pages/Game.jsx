@@ -77,7 +77,7 @@ function Game() {
     });
   }
 
-  function readyUp(){
+  function readyUp() {
     //function that adds the player to the readyPlayers array
     channel.send({
       type: "broadcast",
@@ -87,6 +87,9 @@ function Game() {
   }
 
   function increaseRound() {
+    setRound((prev) => {
+      return prev + 1;
+    });
     channel.send({
       type: "broadcast",
       event: "increase-round",
@@ -150,40 +153,31 @@ function Game() {
     channel.on("broadcast", { event: "increase-round" }, () => {
       console.log("increase-round");
       setRound((prev) => {
-        return prev + 1
+        return prev + 1;
       });
-      console.log("hellooooo");
       setReadyPlayers([]);
       setIsReady(false);
-      console.log("done");
-    
     });
 
     channel.on("broadcast", { event: "ready-up" }, (payload) => {
       const newPlayer = payload.payload.player;
-
-      setReadyPlayers((prev) => {
-
-        //if player is host add player to readyPlayers
-        if(activeUser.role === "Host"){
-          console.log("added to ready players: ", newPlayer);
-          const updatedReadyPlayers = [...prev, newPlayer];
-          console.log("updated ready players: ", updatedReadyPlayers);
-
-          // check if all players are ready
-          if (updatedReadyPlayers.length === players.length) {
-            console.log("NEXT ROUND!");
-            increaseRound();
-            console.log("test1");
-            setReadyPlayers([]);
-            setIsReady(false);
-            console.log("test2");
-          }
-          return updatedReadyPlayers;
+      console.log("ready-up:", newPlayer);
+      console.log("readyPlayers:", readyPlayers);
+      let playersReady = 0;
+      //if player is host add player to readyPlayers
+      if (activeUser.role === "Host") {
+        setReadyPlayers((prev) => {
+          playersReady = prev.length + 1;
+          return [...prev, newPlayer];
+        });
+        // check if all players are ready
+        if (playersReady === 4) {
+          increaseRound();
+          setReadyPlayers([]);
+          setIsReady(false);
         }
-
+      }
     });
-  })
   }, [lobby]);
 
   useEffect(() => {
@@ -249,11 +243,17 @@ function Game() {
   );
 }
 
-
 export default Game;
 
-
-function Actions({ updateBoard, game, setGame, increaseRound, readyUp, isReady, setIsReady }) {
+function Actions({
+  updateBoard,
+  game,
+  setGame,
+  increaseRound,
+  readyUp,
+  isReady,
+  setIsReady,
+}) {
   const { activeUser, players } = useContext(AppContext);
   function buyVolunteer(character) {
     if (character === "becky") {
@@ -359,17 +359,6 @@ function Actions({ updateBoard, game, setGame, increaseRound, readyUp, isReady, 
         >
           buy a volunteer
         </button>
-
-        {activeUser.role === "Host" && (
-          <button
-            className="btn btn-secondary"
-            onClick={() => {
-              increaseRound();
-            }}
-          >
-            Next Round
-          </button>
-        )}
       </div>
       <div>
         {activeUser.role !== "Host" && (
