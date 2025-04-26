@@ -4,6 +4,7 @@ import { AppContext } from "../context/useAppContext";
 import { useParams } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
 import { arrivalsData } from "../data/ArrivalsData";
+import { useNavigate } from "react-router-dom";
 
 function Game() {
   const { lobby } = useParams();
@@ -16,6 +17,7 @@ function Game() {
   const [arrivalsPopup, setArrivalsPopup] = useState(false);
   const [manageArrivalsPopup, setManageArrivalsPopup] = useState(false);
   const [readyToExitPopup, setReadyToExitPopup] = useState(false);
+  const [endOfRoundStats, setEndOfRoundStats] = useState(false);
   const [round, setRound] = useState(0);
   const [game, setGame] = useState({
     GreatHall: {
@@ -148,10 +150,12 @@ function Game() {
   }, [lobby]);
 
   useEffect(() => {
-    if (round > 12) {
-      alert("Game Over");
+    if (round >= 12) {
+      console.log("Game Over");
+      setEndOfRoundStats(true);
+    } else {
+      setArrivalsPopup(true)
     }
-    setArrivalsPopup(true)
   }, [round]);
 
   const renderHour = useCallback((round) => {
@@ -202,6 +206,7 @@ function Game() {
         setGame={setGame}
         setManageArrivalsPopup={setManageArrivalsPopup}
         setReadyToExitPopup={setReadyToExitPopup}
+        setEndOfRoundStats={setEndOfRoundStats}
       ></Actions>
       <SettingsModal
         show={settingsModalShow}
@@ -232,6 +237,10 @@ function Game() {
         show={scoreCardModal}
         onHide={() => setScoreCardModal(false)}
       />
+      <EndOfRoundStats
+        show={endOfRoundStats}
+        onHide={() => setEndOfRoundStats(false)}
+        />
     </div>
   );
 }
@@ -852,5 +861,30 @@ function ReadyToExitPopup({ show, onHide, round, renderHour }) {
       </Modal.Body>
       </Modal>
 
+  );
+}
+
+function EndOfRoundStats({ show, onHide }) {
+  const navigate = useNavigate();
+  const getRand = () => {
+    return Math.floor(Math.random() * 5);
+  }
+  return (
+    <Modal show={show} onHide={onHide} centered>
+      <Modal.Header closeButton>
+        <Modal.Title>Game Over</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <p>Check out your statistics: </p>
+        <p> Parent Diversions: { getRand()} </p>
+        <p> Students in Waiting: { getRand()} </p>
+        <p> Extra Staff Called: { getRand()} </p>
+      </Modal.Body>
+      <Modal.Footer>
+        <button className="btn btn-primary" onClick={useNavigate("/")}>
+          Continue
+        </button>
+      </Modal.Footer>
+    </Modal>
   );
 }
