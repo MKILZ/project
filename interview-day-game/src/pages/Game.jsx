@@ -4,6 +4,8 @@ import { AppContext } from "../context/useAppContext";
 import { useParams } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
 import { arrivalsData } from "../data/ArrivalsData";
+import ArrivalsPopup from "../components/ArrivalsPopup";
+import ManageArrivalsPopup from "../components/ManageArrivalsPopup";
 
 function Game() {
   const { lobby } = useParams();
@@ -17,6 +19,9 @@ function Game() {
   const [manageArrivalsPopup, setManageArrivalsPopup] = useState(false);
   const [readyToExitPopup, setReadyToExitPopup] = useState(false);
   const [round, setRound] = useState(0);
+  const [isReady, setIsReady] = useState(false);
+
+  const [readyPlayers, setReadyPlayers] = useState([]);
   const [game, setGame] = useState({
     GreatHall: {
       tables: 16,
@@ -78,7 +83,19 @@ function Game() {
     });
   }
 
+  function readyUp() {
+    //function that adds the player to the readyPlayers array
+    channel.send({
+      type: "broadcast",
+      event: "ready-up",
+      payload: { player: activeUser.userName },
+    });
+  }
+
   function increaseRound() {
+    setRound((prev) => {
+      return prev + 1;
+    });
     channel.send({
       type: "broadcast",
       event: "increase-round",
@@ -140,10 +157,43 @@ function Game() {
       .subscribe();
 
     channel.on("broadcast", { event: "increase-round" }, () => {
+      console.log("increase-round");
       setRound((prev) => {
         return prev + 1;
       });
-      console.log(round);
+      setReadyPlayers([]);
+      setIsReady(false);
+    });
+
+    channel.on("broadcast", { event: "ready-up" }, (payload) => {
+      const newPlayer = payload.payload.player;
+      console.log("ready-up:", newPlayer);
+      console.log("readyPlayers:", readyPlayers);
+      let playersReady = 0;
+      //if player is host add player to readyPlayers
+      if (activeUser.role === "Host") {
+        setReadyPlayers((prev) => {
+          playersReady = prev.length + 1;
+          return [...prev, newPlayer];
+        });
+        // check if all players are ready
+        if (playersReady === 4) {
+          increaseRound();
+          setReadyPlayers([]);
+          setIsReady(false);
+        }
+      }
+    });
+
+    channel.on("broadcast", { event: "manage_arrivals" }, (payload) => {
+      const { department, newStudents } = payload.payload;
+      setGame((prev) => ({
+        ...prev,
+        [department]: {
+          ...prev[department],
+          students: newStudents,
+        },
+      }));
     });
   }, [lobby]);
 
@@ -151,7 +201,7 @@ function Game() {
     if (round > 12) {
       alert("Game Over");
     }
-    setArrivalsPopup(true)
+    setArrivalsPopup(true);
   }, [round]);
 
   const renderHour = useCallback((round) => {
@@ -198,17 +248,20 @@ function Game() {
       <Actions
         updateBoard={updateBoard}
         increaseRound={increaseRound}
+        readyUp={readyUp}
         game={game}
         setGame={setGame}
         setManageArrivalsPopup={setManageArrivalsPopup}
         setReadyToExitPopup={setReadyToExitPopup}
+        setIsReady={setIsReady}
+        isReady={isReady}
       ></Actions>
       <SettingsModal
         show={settingsModalShow}
         onHide={() => setSettingsModalShow(false)}
       />
       <ArrivalsPopup
-        round = {round}
+        round={round}
         show={arrivalsPopup}
         onHide={() => setArrivalsPopup(false)}
         renderHour={renderHour}
@@ -219,6 +272,8 @@ function Game() {
         round={round}
         renderHour={renderHour}
         game={game}
+        lobby={lobby}
+        channel={channel}
       />
       <ReadyToExitPopup
         show={readyToExitPopup}
@@ -238,7 +293,16 @@ function Game() {
 
 export default Game;
 
-function Actions({ updateBoard, game, setGame, increaseRound, setManageArrivalsPopup, setReadyToExitPopup }) {
+function Actions({
+  updateBoard,
+  game,
+  setGame,
+  readyUp,
+  isReady,
+  setIsReady,
+  setManageArrivalsPopup,
+  setReadyToExitPopup,
+}) {
   const { activeUser, players } = useContext(AppContext);
   function buyVolunteer(character) {
     if (character === "becky") {
@@ -286,52 +350,54 @@ function Actions({ updateBoard, game, setGame, increaseRound, setManageArrivalsP
 
   return (
     <div className="d-flex flex-row w-100 card justify-content-between h-25 gap-2 p-2 mt-2">
-     {activeUser && <div className="card d-flex p-2">
-        {activeUser.character === "becky" && (
-          <div>
-            <img
-              src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-becky-barnard.jpg?itok=d8fal0xg"
-              alt="beckey"
-              className="rounded-circle"
-              style={{ width: "75px", height: "100px", objectFit: "cover" }}
-            />
-            <h3>Welcome</h3>
-          </div>
-        )}
-        {activeUser.character === "adam" && (
-          <div>
-            <img
-              src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-adam-britten.jpg?itok=fAYbnhXs"
-              alt="adam"
-              className="rounded-circle"
-              style={{ width: "75px", height: "100px", objectFit: "cover" }}
-            />
-            <h3>Session</h3>
-          </div>
-        )}
-        {activeUser.character === "theresa" && (
-          <div>
-            <img
-              src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-theresa-luensmann.jpg?itok=unLlsXcF"
-              alt="Theresa"
-              className="rounded-circle"
-              style={{ width: "75px", height: "100px", objectFit: "cover" }}
-            />
-            <h3>Interview</h3>
-          </div>
-        )}
-        {activeUser.character === "kenny" && (
-          <div>
-            <img
-              src="https://media.licdn.com/dms/image/v2/D5603AQFJz9OJXxUNsQ/profile-displayphoto-shrink_400_400/B56ZRMqLRMH0Ao-/0/1736452912894?e=2147483647&v=beta&t=uhRnWRaaN4llVldNwHHS8qzxZgX0wUtQtaoS0iLqTrQ"
-              alt="kenny"
-              className="rounded-circle"
-              style={{ width: "75px", height: "100px", objectFit: "cover" }}
-            />
-            <h3>Great Hall</h3>
-          </div>
-        )}
-      </div>}
+      {activeUser && (
+        <div className="card d-flex p-2">
+          {activeUser.character === "becky" && (
+            <div>
+              <img
+                src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-becky-barnard.jpg?itok=d8fal0xg"
+                alt="beckey"
+                className="rounded-circle"
+                style={{ width: "75px", height: "100px", objectFit: "cover" }}
+              />
+              <h3>Welcome</h3>
+            </div>
+          )}
+          {activeUser.character === "adam" && (
+            <div>
+              <img
+                src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-adam-britten.jpg?itok=fAYbnhXs"
+                alt="adam"
+                className="rounded-circle"
+                style={{ width: "75px", height: "100px", objectFit: "cover" }}
+              />
+              <h3>Session</h3>
+            </div>
+          )}
+          {activeUser.character === "theresa" && (
+            <div>
+              <img
+                src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-theresa-luensmann.jpg?itok=unLlsXcF"
+                alt="Theresa"
+                className="rounded-circle"
+                style={{ width: "75px", height: "100px", objectFit: "cover" }}
+              />
+              <h3>Interview</h3>
+            </div>
+          )}
+          {activeUser.character === "kenny" && (
+            <div>
+              <img
+                src="https://media.licdn.com/dms/image/v2/D5603AQFJz9OJXxUNsQ/profile-displayphoto-shrink_400_400/B56ZRMqLRMH0Ao-/0/1736452912894?e=2147483647&v=beta&t=uhRnWRaaN4llVldNwHHS8qzxZgX0wUtQtaoS0iLqTrQ"
+                alt="kenny"
+                className="rounded-circle"
+                style={{ width: "75px", height: "100px", objectFit: "cover" }}
+              />
+              <h3>Great Hall</h3>
+            </div>
+          )}
+        </div>
+      )}
 
       <div>
         <button
@@ -340,42 +406,43 @@ function Actions({ updateBoard, game, setGame, increaseRound, setManageArrivalsP
             e.preventDefault();
             buyVolunteer(activeUser.character);
           }}
+          disabled={isReady}
         >
           buy a volunteer
         </button>
-
-        {activeUser.role === "Host" && (
+      </div>
+      <div>
+        {activeUser.role !== "Host" && (
           <button
-            className="btn btn-secondary"
+            className={`btn ${isReady ? "btn-success" : "btn-secondary"}`}
             onClick={() => {
-              increaseRound();
+              readyUp();
+              setIsReady(true); // turn the button green
             }}
+            disabled={isReady}
           >
-            Next Round
+            {isReady ? "Ready!" : "Ready Up!"}
           </button>
         )}
 
         {activeUser.role !== "Host" && (
-        <button
-          className="btn btn-secondary"
-          onClick={() => setManageArrivalsPopup(true)}
-        >
-          Manage Arriving Students 
-        </button>
+          <button
+            className="btn btn-secondary"
+            onClick={() => setManageArrivalsPopup(true)}
+          >
+            Manage Arriving Students
+          </button>
         )}
 
         {activeUser.role !== "Host" && (
-        <button
-          className="btn btn-secondary"
-          onClick={() => setReadyToExitPopup(true)}
-        >
-          Ready to Exit 
-        </button>
+          <button
+            className="btn btn-secondary"
+            onClick={() => setReadyToExitPopup(true)}
+          >
+            Ready to Exit
+          </button>
         )}
-
       </div>
-      <div></div>
-      <div></div>
       <div></div>
     </div>
   );
@@ -558,259 +625,18 @@ function SettingsModal(props) {
   );
 }
 
-
-function ArrivalsPopup({ show, onHide, round, renderHour }) {
-  return (
-    <Modal show={show} onHide={onHide} centered>
-      <Modal.Header closeButton>
-        <Modal.Title>Arrivals - {renderHour(round)}</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <p>New students or parents have arrived!</p>
-        <p> Welcome: {arrivalsData.Welcome[round]} </p>
-        <p> Session: {arrivalsData.Session[round]} </p>
-        <p> Interview: {arrivalsData.Interview[round]} </p>
-        <p> Lunch: {arrivalsData.Lunch[round]} </p>
-        {/* You can add any custom info or logic here */}
-      </Modal.Body>
-      <Modal.Footer>
-        <button className="btn btn-primary" onClick={onHide}>
-          Continue
-        </button>
-      </Modal.Footer>
-    </Modal>
-  );
-}
-
-function ManageArrivalsPopup({ show, onHide, round, renderHour, game}) {
-  const { activeUser } = useContext(AppContext);
-  const getRand = () => {
-    return Math.floor(Math.random() * 5);
-  }
-
-  const arrivalSources = ["Outside", "Welcome", "Session", "Interview", "GreatHall"];
-
-  const characterToDept = {
-    becky: "Welcome",
-    adam: "Session",
-    theresa: "Interview",
-    kenny: "GreatHall", // greathall or lunch??
-  };
-  
-  const currentDept = characterToDept[activeUser.character];
-  
-  const maxOutside = arrivalsData[currentDept]?.[round] ?? 0;
-  const [outsideMax, setOutsideMax] = useState(maxOutside);
-
-  useEffect(() => {
-    const updatedMax = arrivalsData[currentDept]?.[round] ?? 0;
-    setOutsideMax(updatedMax);
-  }, [round, currentDept]);
-
-
-  //get random number for each other department arrivals
-  const initialMaxInternal = {
-    Welcome: activeUser.character !== "becky" ? getRand() : 0,
-    Session: activeUser.character !== "adam" ? getRand() : 0,
-    Interview: activeUser.character !== "theresa" ? getRand() : 0,
-    GreatHall: activeUser.character !== "kenny" ? getRand() : 0,
-  };
-  
-  const [internalMax, setInternalMax] = useState(initialMaxInternal);
-
-  //get num selected from each department
-  const [selected, setSelected] = useState({
-    Outside: 0,
-    Welcome: 0,
-    Session: 0,
-    Interview: 0,
-    GreatHall: 0,
-  });
-
-  //FIX THIS
-  //get the max number of students each department can accept
-  {/* 
-  const maxArrivalsAllowed = Math.max(
-    game[currentDept].volunteers - game[currentDept].students, 0
-  );
-  */}
-
-  const increment = (source, maxVal) => {
-    setSelected((prev) => {
-      const newValue = prev[source] + 1;
-      const updatedTotal = totalNumAccpeted + 1;
-
-      //check if the new value is greater than the max value
-      {/*
-      return {
-        ...prev,
-        [source]:
-          newValue > maxVal || updatedTotal > maxArrivalsAllowed
-            ? prev[source]
-            : newValue,
-      };
-      */}
-      //check if the new value is greater than the max value
-      return {
-        ...prev,
-        //make sure it doesn't go above the max
-        [source]: newValue > maxVal ? maxVal : newValue,
-      };
-    });
-  };
-
-  const decrement = (source) => {
-    setSelected((prev) => {
-      const newValue = prev[source] - 1;
-      return {
-        ...prev,
-        //make sure it doesn't go below 0
-        [source]: newValue < 0 ? 0 : newValue,
-      };
-    });
-  }
-
-  const totalNumAccpeted = Object.values(selected).reduce((acc, val) => acc + val, 0);
-
-  //get the max value for each department
-  const getMaxValue = (source) => {
-    if(source === "Outside") {
-      //return maxOutside;
-      return outsideMax;
-    }
-    return internalMax
-    [source];
-  }
-  
-
-  const isCurrentDepartment = (source) => {
-    const map = {
-      becky: "Welcome",
-      adam: "Session",
-      theresa: "Interview",
-      kenny: "GreatHall",
-    }
-    return map[activeUser.character] === source;
-  }
-
-  //function to handle when the user presses confirm
-  const handleConfirm = () => {
-    const newInternalMax = {...internalMax};
-
-    //update the values from other departments
-    Object.keys(selected).forEach((key) => {
-      if (key !== "Outside") {
-        newInternalMax[key] = Math.max(newInternalMax[key] - selected[key], 0);
-      }
-    });
-
-    //update the outside value
-    const newOutsideMax = Math.max(outsideMax - selected["Outside"], 0);
-    setInternalMax(newInternalMax);
-    setOutsideMax(newOutsideMax);
-
-    //reset the accepted arrival counts
-    setSelected({
-      Outside: 0,
-      Welcome: 0,
-      Session: 0,
-      Interview: 0,
-      GreatHall: 0,
-    });
-
-    //FIX THIS
-    //update the game board
-    {/* 
-    const currentDept = characterToDept[activeUser.character];
-    const totalAccepted = Object.values(selected).reduce((acc, val) => acc + val, 0);
-    const updatedGame = {
-      ...game,
-      [currentDept]: {
-        ...game[currentDept],
-        students: game[currentDept].students + totalAccepted,
-      },
-    };
-    setGame(updatedGame);
-    */}
-
-    onHide();
-  };
-
-
-
-
-  
-  return (
-    <Modal show={show} onHide={onHide} centered>
-      <Modal.Header closeButton>
-        <Modal.Title>Manage Arrivals - {renderHour(round)}</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-      
-      <div className="mb-3">
-          <strong>Max Students Allowed to Arrive: 3</strong>
-          {/*{maxArrivalsAllowed}*/}
-      </div>
-      
-
-      <div className="row fw-bold mb-2">
-          <div className="col">Number of Arrivals</div>
-          <div className="col">Arrivals Accepted</div>
-        </div>
-
-        {arrivalSources.map((source) => {
-          if (source !== "Outside" && isCurrentDepartment(source)) return null;
-
-          const maxVal = getMaxValue(source);
-          return (
-            <div key={source} className="row align-items-center mb-2">
-              {/* Left: Number of arrivals */}
-              <div className="col">
-                <strong>{source}:</strong> {maxVal}
-              </div>
-
-              {/* Right: Selected + buttons */}
-              <div className="col d-flex align-items-center">
-                <strong className="me-2">{source}</strong>
-                <span className="mx-2">{selected[source]}</span>
-                <button
-                  className="btn btn-sm btn-outline-secondary mx-1"
-                  onClick={() => increment(source, maxVal)}
-                >
-                  ▲
-                </button>
-                <button
-                  className="btn btn-sm btn-outline-secondary mx-1"
-                  onClick={() => decrement(source)}
-                >
-                  ▼
-                </button>
-              </div>
-            </div>
-          );
-        })}
-
-        <div className="text-end mt-3">
-          <strong>Total Accepted:</strong> {totalNumAccpeted}
-        </div>
-
-        
-      </Modal.Body>
-      <Modal.Footer>
-        <button className="btn btn-primary" onClick={handleConfirm}>
-          Confirm
-        </button>
-      </Modal.Footer>
-    </Modal>
-  );
-} 
-
 function ReadyToExitPopup({ show, onHide, round, renderHour }) {
-  const arrivalSources = ["Outside", "Welcome", "Session", "Interview", "GreatHall"];
+  const arrivalSources = [
+    "Outside",
+    "Welcome",
+    "Session",
+    "Interview",
+    "GreatHall",
+  ];
   const { activeUser } = useContext(AppContext);
   const getRand = () => {
     return Math.floor(Math.random() * 5);
-  }
+  };
 
   const characterToDept = {
     becky: "Welcome",
@@ -818,8 +644,8 @@ function ReadyToExitPopup({ show, onHide, round, renderHour }) {
     theresa: "Interview",
     kenny: "GreatHall", // greathall or lunch??
   };
-  
-  const currentDept = characterToDept[activeUser.character];;
+
+  const currentDept = characterToDept[activeUser.character];
 
   const isCurrentDepartment = (source) => {
     const map = {
@@ -827,30 +653,31 @@ function ReadyToExitPopup({ show, onHide, round, renderHour }) {
       adam: "Session",
       theresa: "Interview",
       kenny: "GreatHall",
-    }
+    };
     return map[activeUser.character] === source;
-  }
-  
+  };
+
   return (
     <Modal show={show} onHide={onHide} centered>
       <Modal.Header closeButton>
-        <Modal.Title>Manage Ready to Exit Students - {renderHour(round)}</Modal.Title>
+        <Modal.Title>
+          Manage Ready to Exit Students - {renderHour(round)}
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-
         {arrivalSources.map((source) => {
           if (source !== "Outside" && isCurrentDepartment(source)) return null;
 
           return (
             <div key={source} className="row align-items-center mb-2">
               <div className="col">
-                <strong>{source}: </strong>{ getRand()}
+                <strong>{source}: </strong>
+                {getRand()}
               </div>
             </div>
           );
         })}
       </Modal.Body>
-      </Modal>
-
+    </Modal>
   );
 }
