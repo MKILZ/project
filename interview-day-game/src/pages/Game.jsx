@@ -4,6 +4,8 @@ import { AppContext } from "../context/useAppContext";
 import { useParams } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
 import { arrivalsData } from "../data/ArrivalsData";
+import ArrivalsPopup from "../components/ArrivalsPopup";
+import ManageArrivalsPopup from "../components/ManageArrivalsPopup";
 
 function Game() {
   const { lobby } = useParams();
@@ -14,7 +16,12 @@ function Game() {
   const [scoreCardModal, setScoreCardModal] = useState(false);
   const [settingsModalShow, setSettingsModalShow] = useState(false);
   const [arrivalsPopup, setArrivalsPopup] = useState(false);
+  const [manageArrivalsPopup, setManageArrivalsPopup] = useState(false);
+  const [readyToExitPopup, setReadyToExitPopup] = useState(false);
   const [round, setRound] = useState(0);
+  const [isReady, setIsReady] = useState(false);
+
+  const [readyPlayers, setReadyPlayers] = useState([]);
   const [game, setGame] = useState({
     GreatHall: {
       tables: 16,
@@ -62,14 +69,14 @@ function Game() {
     {
       Outside: 0,
     },
-  ])
+  ]);
 
   const [incomingsToSession, setIncomingsToSession] = useState([
     {
       Outside: 0,
       Welcome: 0,
     },
-  ])
+  ]);
 
   const [incomingsToInterview, setIncomingsToInterview] = useState([
     {
@@ -77,7 +84,7 @@ function Game() {
       Session: 0,
       Welcome: 0,
     },
-  ])
+  ]);
 
   const [incomingsToLunch, setIncomingsToLunch] = useState([
     {
@@ -86,7 +93,7 @@ function Game() {
       Session: 0,
       Interview: 0,
     },
-  ])
+  ]);
 
   const [scoreCard, setScoreCard] = useState([
     {
@@ -97,41 +104,39 @@ function Game() {
     },
   ]);
 
-  const [diversions, setDiversions] = useState([
-    0
-  ])
+  const [diversions, setDiversions] = useState([0]);
 
   const [welcomeExtraVolunteers, setWelcomeExtraVolunteers] = useState([
     {
       volunteersOff: 0,
       extraVolunteers: 0,
-      requestedVolunteers: 0
+      requestedVolunteers: 0,
     },
-  ])
+  ]);
 
   const [sessionExtraVolunteers, setSessionExtraVolunteers] = useState([
     {
       volunteersOff: 0,
       extraVolunteers: 0,
-      requestedVolunteers: 0
+      requestedVolunteers: 0,
     },
-  ])
+  ]);
 
   const [interviewExtraVolunteers, setInterviewExtraVolunteers] = useState([
     {
       volunteersOff: 0,
       extraVolunteers: 0,
-      requestedVolunteers: 0
+      requestedVolunteers: 0,
     },
-  ])
+  ]);
 
   const [lunchExtraVolunteers, setLunchExtraVolunteers] = useState([
     {
       volunteersOff: 0,
       extraVolunteers: 0,
-      requestedVolunteers: 0
+      requestedVolunteers: 0,
     },
-  ])
+  ]);
 
   function updateBoard(gameBoard) {
     console.log("updateBoard", gameBoard);
@@ -142,7 +147,19 @@ function Game() {
     });
   }
 
+  function readyUp() {
+    //function that adds the player to the readyPlayers array
+    channel.send({
+      type: "broadcast",
+      event: "ready-up",
+      payload: { player: activeUser.userName },
+    });
+  }
+
   function increaseRound() {
+    setRound((prev) => {
+      return prev + 1;
+    });
     channel.send({
       type: "broadcast",
       event: "increase-round",
@@ -155,7 +172,8 @@ function Game() {
       setWelcomeExtraVolunteers((prev) => [
         {
           ...prev[0],
-          extraVolunteers: prev[0].extraVolunteers + prev[0].requestedVolunteers,
+          extraVolunteers:
+            prev[0].extraVolunteers + prev[0].requestedVolunteers,
           requestedVolunteers: 0,
         },
       ]);
@@ -163,7 +181,8 @@ function Game() {
       setSessionExtraVolunteers((prev) => [
         {
           ...prev[0],
-          extraVolunteers: prev[0].extraVolunteers + prev[0].requestedVolunteers,
+          extraVolunteers:
+            prev[0].extraVolunteers + prev[0].requestedVolunteers,
           requestedVolunteers: 0,
         },
       ]);
@@ -171,7 +190,8 @@ function Game() {
       setInterviewExtraVolunteers((prev) => [
         {
           ...prev[0],
-          extraVolunteers: prev[0].extraVolunteers + prev[0].requestedVolunteers,
+          extraVolunteers:
+            prev[0].extraVolunteers + prev[0].requestedVolunteers,
           requestedVolunteers: 0,
         },
       ]);
@@ -179,7 +199,8 @@ function Game() {
       setLunchExtraVolunteers((prev) => [
         {
           ...prev[0],
-          extraVolunteers: prev[0].extraVolunteers + prev[0].requestedVolunteers,
+          extraVolunteers:
+            prev[0].extraVolunteers + prev[0].requestedVolunteers,
           requestedVolunteers: 0,
         },
       ]);
@@ -206,21 +227,20 @@ function Game() {
     //   }
     // }
 
-
     channel.send({
       type: "broadcast",
       event: "round-update-" + sender,
-      payload: payload
-    })
+      payload: payload,
+    });
   }
-
 
   function endOfRoundHostUpdate() {
     const process = (area) => {
       return [
         {
           ...area[0],
-          extraVolunteers: area[0].extraVolunteers + area[0].requestedVolunteers,
+          extraVolunteers:
+            area[0].extraVolunteers + area[0].requestedVolunteers,
           requestedVolunteers: 0,
         },
       ];
@@ -232,13 +252,13 @@ function Game() {
       interviewExtraVolunteers: process(interviewExtraVolunteers),
       lunchExtraVolunteers: process(lunchExtraVolunteers),
       diversions: diversions,
-    }
+    };
 
     channel.send({
       type: "broadcast",
       event: "end-of-round-update",
-      payload: payload
-    })
+      payload: payload,
+    });
   }
 
   useEffect(() => {
@@ -295,53 +315,82 @@ function Game() {
       .subscribe();
 
     channel.on("broadcast", { event: "increase-round" }, () => {
+      console.log("increase-round");
       setRound((prev) => {
         return prev + 1;
       });
-      console.log(round);
+      setReadyPlayers([]);
+      setIsReady(false);
+    });
+
+    channel.on("broadcast", { event: "ready-up" }, (payload) => {
+      const newPlayer = payload.payload.player;
+      console.log("ready-up:", newPlayer);
+      console.log("readyPlayers:", readyPlayers);
+      let playersReady = 0;
+      //if player is host add player to readyPlayers
+      if (activeUser.role === "Host") {
+        setReadyPlayers((prev) => {
+          playersReady = prev.length + 1;
+          return [...prev, newPlayer];
+        });
+        // check if all players are ready
+        if (playersReady === 4) {
+          increaseRound();
+          setReadyPlayers([]);
+          setIsReady(false);
+        }
+      }
+    });
+
+    channel.on("broadcast", { event: "manage_arrivals" }, (payload) => {
+      const { department, newStudents } = payload.payload;
+      setGame((prev) => ({
+        ...prev,
+        [department]: {
+          ...prev[department],
+          students: newStudents,
+        },
+      }));
     });
 
     channel.on("broadcast", { event: "end-of-round-update" }, (payload) => {
       setWelcomeExtraVolunteers(payload.payload.welcomeExtraVolunteers),
         setSessionExtraVolunteers(payload.payload.sessionExtraVolunteers),
         setInterviewExtraVolunteers(payload.payload.interviewExtraVolunteers),
-        setLunchExtraVolunteers(payload.payload.lunchExtraVolunteers)
+        setLunchExtraVolunteers(payload.payload.lunchExtraVolunteers);
     });
 
     channel.on("broadcast", { event: "round-update-welcome" }, (payload) => {
       if (activeUser.role == "Host") {
-        setWelcomeExtraVolunteers(payload.payload.welcomeExtraVolunteers)
+        setWelcomeExtraVolunteers(payload.payload.welcomeExtraVolunteers);
       }
-
     });
 
     channel.on("broadcast", { event: "round-update-session" }, (payload) => {
       if (activeUser.role == "Host") {
-        setSessionExtraVolunteers(payload.payload.sessionExtraVolunteers)
+        setSessionExtraVolunteers(payload.payload.sessionExtraVolunteers);
       }
     });
 
     channel.on("broadcast", { event: "round-update-interview" }, (payload) => {
       if (activeUser.role == "Host") {
-        setInterviewExtraVolunteers(payload.payload.interviewExtraVolunteers)
+        setInterviewExtraVolunteers(payload.payload.interviewExtraVolunteers);
       }
     });
 
     channel.on("broadcast", { event: "round-update-lunch" }, (payload) => {
       if (activeUser.role == "Host") {
-        setLunchExtraVolunteers(payload.payload.lunchExtraVolunteers)
+        setLunchExtraVolunteers(payload.payload.lunchExtraVolunteers);
       }
     });
-
   }, [lobby]);
-
-
 
   useEffect(() => {
     if (round > 12) {
       alert("Game Over");
     }
-    setArrivalsPopup(true)
+    setArrivalsPopup(true);
   }, [round]);
 
   const renderHour = useCallback((round) => {
@@ -388,8 +437,13 @@ function Game() {
       <Actions
         updateBoard={updateBoard}
         increaseRound={increaseRound}
+        readyUp={readyUp}
         game={game}
         setGame={setGame}
+        setManageArrivalsPopup={setManageArrivalsPopup}
+        setReadyToExitPopup={setReadyToExitPopup}
+        setIsReady={setIsReady}
+        isReady={isReady}
       ></Actions>
       <SettingsModal
         show={settingsModalShow}
@@ -397,9 +451,26 @@ function Game() {
       />
       <ArrivalsPopup
         round={round}
+        round={round}
         show={arrivalsPopup}
         onHide={() => setArrivalsPopup(false)}
         renderHour={renderHour}
+      />
+      <ManageArrivalsPopup
+        show={manageArrivalsPopup}
+        onHide={() => setManageArrivalsPopup(false)}
+        round={round}
+        renderHour={renderHour}
+        game={game}
+        lobby={lobby}
+        channel={channel}
+      />
+      <ReadyToExitPopup
+        show={readyToExitPopup}
+        onHide={() => setReadyToExitPopup(false)}
+        round={round}
+        renderHour={renderHour}
+        game={game}
       />
       <ScoreCardModal
         scoreCard={scoreCard}
@@ -412,7 +483,16 @@ function Game() {
 
 export default Game;
 
-function Actions({ updateBoard, game, setGame, increaseRound }) {
+function Actions({
+  updateBoard,
+  game,
+  setGame,
+  readyUp,
+  isReady,
+  setIsReady,
+  setManageArrivalsPopup,
+  setReadyToExitPopup,
+}) {
   const { activeUser, players } = useContext(AppContext);
   function buyVolunteer(character) {
     if (character === "becky") {
@@ -460,52 +540,54 @@ function Actions({ updateBoard, game, setGame, increaseRound }) {
 
   return (
     <div className="d-flex flex-row w-100 card justify-content-between h-25 gap-2 p-2 mt-2">
-      {activeUser && <div className="card d-flex p-2">
-        {activeUser.character === "becky" && (
-          <div>
-            <img
-              src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-becky-barnard.jpg?itok=d8fal0xg"
-              alt="beckey"
-              className="rounded-circle"
-              style={{ width: "75px", height: "100px", objectFit: "cover" }}
-            />
-            <h3>Welcome</h3>
-          </div>
-        )}
-        {activeUser.character === "adam" && (
-          <div>
-            <img
-              src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-adam-britten.jpg?itok=fAYbnhXs"
-              alt="adam"
-              className="rounded-circle"
-              style={{ width: "75px", height: "100px", objectFit: "cover" }}
-            />
-            <h3>Session</h3>
-          </div>
-        )}
-        {activeUser.character === "theresa" && (
-          <div>
-            <img
-              src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-theresa-luensmann.jpg?itok=unLlsXcF"
-              alt="Theresa"
-              className="rounded-circle"
-              style={{ width: "75px", height: "100px", objectFit: "cover" }}
-            />
-            <h3>Interview</h3>
-          </div>
-        )}
-        {activeUser.character === "kenny" && (
-          <div>
-            <img
-              src="https://media.licdn.com/dms/image/v2/D5603AQFJz9OJXxUNsQ/profile-displayphoto-shrink_400_400/B56ZRMqLRMH0Ao-/0/1736452912894?e=2147483647&v=beta&t=uhRnWRaaN4llVldNwHHS8qzxZgX0wUtQtaoS0iLqTrQ"
-              alt="kenny"
-              className="rounded-circle"
-              style={{ width: "75px", height: "100px", objectFit: "cover" }}
-            />
-            <h3>Great Hall</h3>
-          </div>
-        )}
-      </div>}
+      {activeUser && (
+        <div className="card d-flex p-2">
+          {activeUser.character === "becky" && (
+            <div>
+              <img
+                src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-becky-barnard.jpg?itok=d8fal0xg"
+                alt="beckey"
+                className="rounded-circle"
+                style={{ width: "75px", height: "100px", objectFit: "cover" }}
+              />
+              <h3>Welcome</h3>
+            </div>
+          )}
+          {activeUser.character === "adam" && (
+            <div>
+              <img
+                src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-adam-britten.jpg?itok=fAYbnhXs"
+                alt="adam"
+                className="rounded-circle"
+                style={{ width: "75px", height: "100px", objectFit: "cover" }}
+              />
+              <h3>Session</h3>
+            </div>
+          )}
+          {activeUser.character === "theresa" && (
+            <div>
+              <img
+                src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-theresa-luensmann.jpg?itok=unLlsXcF"
+                alt="Theresa"
+                className="rounded-circle"
+                style={{ width: "75px", height: "100px", objectFit: "cover" }}
+              />
+              <h3>Interview</h3>
+            </div>
+          )}
+          {activeUser.character === "kenny" && (
+            <div>
+              <img
+                src="https://media.licdn.com/dms/image/v2/D5603AQFJz9OJXxUNsQ/profile-displayphoto-shrink_400_400/B56ZRMqLRMH0Ao-/0/1736452912894?e=2147483647&v=beta&t=uhRnWRaaN4llVldNwHHS8qzxZgX0wUtQtaoS0iLqTrQ"
+                alt="kenny"
+                className="rounded-circle"
+                style={{ width: "75px", height: "100px", objectFit: "cover" }}
+              />
+              <h3>Great Hall</h3>
+            </div>
+          )}
+        </div>
+      )}
 
       <div>
         <button
@@ -514,23 +596,43 @@ function Actions({ updateBoard, game, setGame, increaseRound }) {
             e.preventDefault();
             buyVolunteer(activeUser.character);
           }}
+          disabled={isReady}
         >
           buy a volunteer
         </button>
+      </div>
+      <div>
+        {activeUser.role !== "Host" && (
+          <button
+            className={`btn ${isReady ? "btn-success" : "btn-secondary"}`}
+            onClick={() => {
+              readyUp();
+              setIsReady(true); // turn the button green
+            }}
+            disabled={isReady}
+          >
+            {isReady ? "Ready!" : "Ready Up!"}
+          </button>
+        )}
 
-        {activeUser.role === "Host" && (
+        {activeUser.role !== "Host" && (
           <button
             className="btn btn-secondary"
-            onClick={() => {
-              increaseRound();
-            }}
+            onClick={() => setManageArrivalsPopup(true)}
           >
-            Next Round
+            Manage Arriving Students
+          </button>
+        )}
+
+        {activeUser.role !== "Host" && (
+          <button
+            className="btn btn-secondary"
+            onClick={() => setReadyToExitPopup(true)}
+          >
+            Ready to Exit
           </button>
         )}
       </div>
-      <div></div>
-      <div></div>
       <div></div>
     </div>
   );
@@ -713,28 +815,59 @@ function SettingsModal(props) {
   );
 }
 
+function ReadyToExitPopup({ show, onHide, round, renderHour }) {
+  const arrivalSources = [
+    "Outside",
+    "Welcome",
+    "Session",
+    "Interview",
+    "GreatHall",
+  ];
+  const { activeUser } = useContext(AppContext);
+  const getRand = () => {
+    return Math.floor(Math.random() * 5);
+  };
 
-function ArrivalsPopup({ show, onHide, round, renderHour }) {
+  const characterToDept = {
+    becky: "Welcome",
+    adam: "Session",
+    theresa: "Interview",
+    kenny: "GreatHall", // greathall or lunch??
+  };
+
+  const currentDept = characterToDept[activeUser.character];
+
+  const isCurrentDepartment = (source) => {
+    const map = {
+      becky: "Welcome",
+      adam: "Session",
+      theresa: "Interview",
+      kenny: "GreatHall",
+    };
+    return map[activeUser.character] === source;
+  };
+
   return (
     <Modal show={show} onHide={onHide} centered>
       <Modal.Header closeButton>
-        <Modal.Title>Arrivals - {renderHour(round)}</Modal.Title>
+        <Modal.Title>
+          Manage Ready to Exit Students - {renderHour(round)}
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <p>New students or parents have arrived!</p>
-        <p> Welcome: {arrivalsData.Welcome[round]} </p>
-        <p> Session: {arrivalsData.Session[round]} </p>
-        <p> Interview: {arrivalsData.Interview[round]} </p>
-        <p> Lunch: {arrivalsData.Lunch[round]} </p>
-        {/* You can add any custom info or logic here */}
+        {arrivalSources.map((source) => {
+          if (source !== "Outside" && isCurrentDepartment(source)) return null;
+
+          return (
+            <div key={source} className="row align-items-center mb-2">
+              <div className="col">
+                <strong>{source}: </strong>
+                {getRand()}
+              </div>
+            </div>
+          );
+        })}
       </Modal.Body>
-      <Modal.Footer>
-        <button className="btn btn-primary" onClick={onHide}>
-          Continue
-        </button>
-      </Modal.Footer>
     </Modal>
   );
 }
-
-
