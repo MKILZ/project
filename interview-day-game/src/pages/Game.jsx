@@ -4,6 +4,7 @@ import { AppContext } from "../context/useAppContext";
 import { useParams } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
 import { arrivalsData } from "../data/ArrivalsData";
+import { Presentation } from "lucide-react";
 
 function Game() {
   const { lobby } = useParams();
@@ -18,7 +19,7 @@ function Game() {
   const [readyToExitPopup, setReadyToExitPopup] = useState(false);
   const [round, setRound] = useState(0);
   const [game, setGame] = useState({
-    GreatHall: {
+    Lunch: {
       tables: 16,
       students: 14,
       volunteers: 14,
@@ -28,7 +29,7 @@ function Game() {
       extraStaff: 0,
       studentsWaiting: 0,
     },
-    Session: {
+    Presentations: {
       tables: 8,
       students: 8,
       volunteers: 8,
@@ -254,9 +255,9 @@ function Actions({ updateBoard, game, setGame, increaseRound, setManageArrivalsP
     } else if (character === "adam") {
       const local = {
         ...game,
-        Session: {
-          ...game.Session,
-          volunteers: game.Session.volunteers + 1,
+        Presentations: {
+          ...game.Presentations,
+          volunteers: game.Presentations.volunteers + 1,
         },
       };
       setGame(local);
@@ -275,9 +276,9 @@ function Actions({ updateBoard, game, setGame, increaseRound, setManageArrivalsP
       setGame((prev) => {
         return {
           ...prev,
-          GreatHall: {
-            ...prev.GreatHall,
-            volunteers: prev.GreatHall.volunteers + 1,
+          Lunch: {
+            ...prev.Lunch,
+            volunteers: prev.Lunch.volunteers + 1,
           },
         };
       });
@@ -306,7 +307,7 @@ function Actions({ updateBoard, game, setGame, increaseRound, setManageArrivalsP
               className="rounded-circle"
               style={{ width: "75px", height: "100px", objectFit: "cover" }}
             />
-            <h3>Session</h3>
+            <h3>Presentations</h3>
           </div>
         )}
         {activeUser.character === "theresa" && (
@@ -328,7 +329,7 @@ function Actions({ updateBoard, game, setGame, increaseRound, setManageArrivalsP
               className="rounded-circle"
               style={{ width: "75px", height: "100px", objectFit: "cover" }}
             />
-            <h3>Great Hall</h3>
+            <h3>Lunch</h3>
           </div>
         )}
       </div>}
@@ -432,9 +433,9 @@ function ScoreCardModal(props) {
 function Board({ game }) {
   return (
     <div className="d-flex flex-column text-center align-content-center gap-3">
-      <GreatHall game={game}></GreatHall>
+      <Lunch game={game}></Lunch>
       <div className="d-flex justify-content-between">
-        <Session game={game}></Session>
+        <Presentations game={game}></Presentations>
         <Welcome game={game}></Welcome>
         <Interview game={game}></Interview>
       </div>
@@ -442,7 +443,7 @@ function Board({ game }) {
   );
 }
 
-function GreatHall({ game }) {
+function Lunch({ game }) {
   const tables = 16;
   const students = 14;
   const volunteers = 14;
@@ -456,7 +457,7 @@ function GreatHall({ game }) {
       className="w-75 card mx-auto d-flex flex-column"
       style={{ height: "300px" }}
     >
-      <div>Great Hall </div>
+      <div>Lunch </div>
       <div className="d-flex justify-content-between">
         <div>exit {exiting + "/" + exits}</div>
         <div>volunteers {volunteers}</div>
@@ -469,7 +470,7 @@ function GreatHall({ game }) {
   );
 }
 
-function Session({ game }) {
+function Presentations({ game }) {
   const tables = 8;
   const students = 8;
   const exits = 3;
@@ -479,10 +480,10 @@ function Session({ game }) {
   const studentsWaiting = 0;
   return (
     <div className="w-25 card" style={{ height: "400px" }}>
-      Session
+      Presentations
       <div className="d-flex flex-column justify-content-between">
         <div>exit {exiting + "/" + exits}</div>
-        <div>volunteers {game.Session.volunteers}</div>
+        <div>volunteers {game.Presentations.volunteers}</div>
         <div>students Waiting {studentsWaiting}</div>
         <div>extra volunteers {extraStaff}</div>
         <div> staffNotAvailable {staffNotAvailable}</div>
@@ -568,7 +569,7 @@ function ArrivalsPopup({ show, onHide, round, renderHour }) {
       <Modal.Body>
         <p>New students or parents have arrived!</p>
         <p> Welcome: {arrivalsData.Welcome[round]} </p>
-        <p> Session: {arrivalsData.Session[round]} </p>
+        <p> Presentations: {arrivalsData.Presentations[round]} </p>
         <p> Interview: {arrivalsData.Interview[round]} </p>
         <p> Lunch: {arrivalsData.Lunch[round]} </p>
         {/* You can add any custom info or logic here */}
@@ -588,13 +589,13 @@ function ManageArrivalsPopup({ show, onHide, round, renderHour, game}) {
     return Math.floor(Math.random() * 5);
   }
 
-  const arrivalSources = ["Outside", "Welcome", "Session", "Interview", "GreatHall"];
+  const arrivalSources = ["Outside", "Welcome", "Presentations", "Interview", "Lunch"];
 
   const characterToDept = {
     becky: "Welcome",
-    adam: "Session",
+    adam: "Presentations",
     theresa: "Interview",
-    kenny: "GreatHall", // greathall or lunch??
+    kenny: "Lunch", 
   };
   
   const currentDept = characterToDept[activeUser.character];
@@ -611,9 +612,9 @@ function ManageArrivalsPopup({ show, onHide, round, renderHour, game}) {
   //get random number for each other department arrivals
   const initialMaxInternal = {
     Welcome: activeUser.character !== "becky" ? getRand() : 0,
-    Session: activeUser.character !== "adam" ? getRand() : 0,
+    Presentations: activeUser.character !== "adam" ? getRand() : 0,
     Interview: activeUser.character !== "theresa" ? getRand() : 0,
-    GreatHall: activeUser.character !== "kenny" ? getRand() : 0,
+    Lunch: activeUser.character !== "kenny" ? getRand() : 0,
   };
   
   const [internalMax, setInternalMax] = useState(initialMaxInternal);
@@ -622,9 +623,9 @@ function ManageArrivalsPopup({ show, onHide, round, renderHour, game}) {
   const [selected, setSelected] = useState({
     Outside: 0,
     Welcome: 0,
-    Session: 0,
+    Presentations: 0,
     Interview: 0,
-    GreatHall: 0,
+    Lunch: 0,
   });
 
   //FIX THIS
@@ -686,9 +687,9 @@ function ManageArrivalsPopup({ show, onHide, round, renderHour, game}) {
   const isCurrentDepartment = (source) => {
     const map = {
       becky: "Welcome",
-      adam: "Session",
+      adam: "Presentations",
       theresa: "Interview",
-      kenny: "GreatHall",
+      kenny: "Lunch",
     }
     return map[activeUser.character] === source;
   }
@@ -713,9 +714,9 @@ function ManageArrivalsPopup({ show, onHide, round, renderHour, game}) {
     setSelected({
       Outside: 0,
       Welcome: 0,
-      Session: 0,
+      Presentations: 0,
       Interview: 0,
-      GreatHall: 0,
+      Lunch: 0,
     });
 
     //FIX THIS
@@ -806,7 +807,7 @@ function ManageArrivalsPopup({ show, onHide, round, renderHour, game}) {
 } 
 
 function ReadyToExitPopup({ show, onHide, round, renderHour }) {
-  const arrivalSources = ["Outside", "Welcome", "Session", "Interview", "GreatHall"];
+  const arrivalSources = ["Outside", "Welcome", "Presentations", "Interview", "Lunch"];
   const { activeUser } = useContext(AppContext);
   const getRand = () => {
     return Math.floor(Math.random() * 5);
@@ -814,9 +815,9 @@ function ReadyToExitPopup({ show, onHide, round, renderHour }) {
 
   const characterToDept = {
     becky: "Welcome",
-    adam: "Session",
+    adam: "Presentations",
     theresa: "Interview",
-    kenny: "GreatHall", // greathall or lunch??
+    kenny: "Lunch", 
   };
   
   const currentDept = characterToDept[activeUser.character];;
@@ -824,9 +825,9 @@ function ReadyToExitPopup({ show, onHide, round, renderHour }) {
   const isCurrentDepartment = (source) => {
     const map = {
       becky: "Welcome",
-      adam: "Session",
+      adam: "Presentations",
       theresa: "Interview",
-      kenny: "GreatHall",
+      kenny: "Lunch",
     }
     return map[activeUser.character] === source;
   }
