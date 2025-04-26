@@ -15,6 +15,9 @@ function Game() {
   const [settingsModalShow, setSettingsModalShow] = useState(false);
   const [arrivalsPopup, setArrivalsPopup] = useState(false);
   const [round, setRound] = useState(0);
+  const [isReady, setIsReady] = useState(false);
+
+  const [readyPlayers, setReadyPlayers] = useState([]);
   const [game, setGame] = useState({
     GreatHall: {
       tables: 16,
@@ -76,7 +79,19 @@ function Game() {
     });
   }
 
+  function readyUp() {
+    //function that adds the player to the readyPlayers array
+    channel.send({
+      type: "broadcast",
+      event: "ready-up",
+      payload: { player: activeUser.userName },
+    });
+  }
+
   function increaseRound() {
+    setRound((prev) => {
+      return prev + 1;
+    });
     channel.send({
       type: "broadcast",
       event: "increase-round",
@@ -138,10 +153,32 @@ function Game() {
       .subscribe();
 
     channel.on("broadcast", { event: "increase-round" }, () => {
+      console.log("increase-round");
       setRound((prev) => {
         return prev + 1;
       });
-      console.log(round);
+      setReadyPlayers([]);
+      setIsReady(false);
+    });
+
+    channel.on("broadcast", { event: "ready-up" }, (payload) => {
+      const newPlayer = payload.payload.player;
+      console.log("ready-up:", newPlayer);
+      console.log("readyPlayers:", readyPlayers);
+      let playersReady = 0;
+      //if player is host add player to readyPlayers
+      if (activeUser.role === "Host") {
+        setReadyPlayers((prev) => {
+          playersReady = prev.length + 1;
+          return [...prev, newPlayer];
+        });
+        // check if all players are ready
+        if (playersReady === 4) {
+          increaseRound();
+          setReadyPlayers([]);
+          setIsReady(false);
+        }
+      }
     });
   }, [lobby]);
 
@@ -196,8 +233,11 @@ function Game() {
       <Actions
         updateBoard={updateBoard}
         increaseRound={increaseRound}
+        readyUp={readyUp}
         game={game}
         setGame={setGame}
+        setIsReady={setIsReady}
+        isReady={isReady}
       ></Actions>
       <SettingsModal
         show={settingsModalShow}
@@ -220,7 +260,15 @@ function Game() {
 
 export default Game;
 
-function Actions({ updateBoard, game, setGame, increaseRound }) {
+function Actions({
+  updateBoard,
+  game,
+  setGame,
+  increaseRound,
+  readyUp,
+  isReady,
+  setIsReady,
+}) {
   const { activeUser, players } = useContext(AppContext);
   function buyVolunteer(character) {
     if (character === "becky") {
@@ -322,23 +370,25 @@ function Actions({ updateBoard, game, setGame, increaseRound }) {
             e.preventDefault();
             buyVolunteer(activeUser.character);
           }}
+          disabled={isReady}
         >
           buy a volunteer
         </button>
-
-        {activeUser.role === "Host" && (
+      </div>
+      <div>
+        {activeUser.role !== "Host" && (
           <button
-            className="btn btn-secondary"
+            className={`btn ${isReady ? "btn-success" : "btn-secondary"}`}
             onClick={() => {
-              increaseRound();
+              readyUp();
+              setIsReady(true); // turn the button green
             }}
+            disabled={isReady}
           >
-            Next Round
+            {isReady ? "Ready!" : "Ready Up!"}
           </button>
         )}
       </div>
-      <div></div>
-      <div></div>
       <div></div>
     </div>
   );
