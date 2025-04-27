@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
 import { arrivalsData } from "../data/ArrivalsData";
 import { useNavigate } from "react-router-dom";
+import EndOfRoundStats from "../components/EndOfRoundStats";
 
 function Game() {
   const { lobby } = useParams();
@@ -18,6 +19,7 @@ function Game() {
   const [manageArrivalsPopup, setManageArrivalsPopup] = useState(false);
   const [readyToExitPopup, setReadyToExitPopup] = useState(false);
   const [endOfRoundStats, setEndOfRoundStats] = useState(false);
+  const [statsLog, setStatsLog] = useState([]);
   const [round, setRound] = useState(0);
   const [game, setGame] = useState({
     GreatHall: {
@@ -60,6 +62,15 @@ function Game() {
       extraStaff: 0,
       studentsWaiting: 0,
     },
+  });
+
+  //have to change this if we update number of volunteers in each department
+  //needed for stats calculations
+  const [startingVolunteers] = useState({
+    GreatHall: 14,
+    Session: 8,
+    Interview: 4,
+    Welcome: 10,
   });
 
   const [scoreCard, setScoreCard] = useState([
@@ -158,6 +169,43 @@ function Game() {
     }
   }, [round]);
 
+  useEffect(() => {
+    if (round === 0) return; // skip the first render
+    
+    console.log("Capturing stats at the end of round", round - 1);
+  
+    setStatsLog((prev) => [
+      ...prev,
+      {
+        round: round - 1,
+        Welcome: {
+          studentsWaiting: game.Welcome.studentsWaiting,
+          volunteers: game.Welcome.volunteers,
+          extraHours: Math.max(0, game.Welcome.volunteers - startingVolunteers.Welcome),
+        },
+        Session: {
+          studentsWaiting: game.Session.studentsWaiting,
+          volunteers: game.Session.volunteers,
+          extraHours: Math.max(0, game.Session.volunteers - startingVolunteers.Session),
+        },
+        Interview: {
+          studentsWaiting: game.Interview.studentsWaiting,
+          volunteers: game.Interview.volunteers,
+          extraHours: Math.max(0, game.Interview.volunteers - startingVolunteers.Interview),
+        },
+        GreatHall: {
+          studentsWaiting: game.GreatHall.studentsWaiting,
+          volunteers: game.GreatHall.volunteers,
+          extraHours: Math.max(0, game.GreatHall.volunteers - startingVolunteers.GreatHall),
+        },
+      },
+    ]);
+  }, [round]);
+
+  useEffect(() => {
+    console.log("Stats log updated:", statsLog);
+  }, [statsLog]);
+
   const renderHour = useCallback((round) => {
     const time = [
       "7:30",
@@ -240,6 +288,7 @@ function Game() {
       <EndOfRoundStats
         show={endOfRoundStats}
         onHide={() => setEndOfRoundStats(false)}
+        statsLog = {statsLog}
         />
     </div>
   );
@@ -864,27 +913,3 @@ function ReadyToExitPopup({ show, onHide, round, renderHour }) {
   );
 }
 
-function EndOfRoundStats({ show, onHide }) {
-  const navigate = useNavigate();
-  const getRand = () => {
-    return Math.floor(Math.random() * 5);
-  }
-  return (
-    <Modal show={show} onHide={onHide} centered>
-      <Modal.Header closeButton>
-        <Modal.Title>Game Over</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <p>Check out your statistics: </p>
-        <p> Parent Diversions: { getRand()} </p>
-        <p> Students in Waiting: { getRand()} </p>
-        <p> Extra Staff Called: { getRand()} </p>
-      </Modal.Body>
-      <Modal.Footer>
-        <button className="btn btn-primary" onClick={useNavigate("/")}>
-          Continue
-        </button>
-      </Modal.Footer>
-    </Modal>
-  );
-}
