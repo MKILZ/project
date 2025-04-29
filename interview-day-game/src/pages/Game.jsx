@@ -1,5 +1,5 @@
-import { useEffect, useContext, useState, useCallback, act } from "react";
-// import { supabase } from "../supabase/supabaseClient";
+import { useEffect, useContext, useState, useCallback } from "react";
+import { supabase } from "../supabase/supabaseClient";
 import { AppContext } from "../context/useAppContext";
 import { useParams } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
@@ -65,11 +65,9 @@ function Game() {
     },
   });
 
-  const [incomingsToWelcome, setIncomingsToWelcome] = useState([
-    {
-      Outside: 0,
-    },
-  ]);
+  const [incomingsToWelcome, setIncomingsToWelcome] = useState({
+    Outside: 0,
+  });
 
   const [incomingsToSession, setIncomingsToSession] = useState([
     {
@@ -205,27 +203,6 @@ function Game() {
         },
       ]);
     }
-    // let payload;
-    // if (sender == "session") {
-    //   payload = {
-    //     newVolunteers: requestedVolunteers
-    //   }
-    // }
-    // else if (sender == "welcome") {
-    //   payload = {
-    //     newVolunteers: requestedVolunteers
-    //   }
-    // }
-    // else if (sender == "interview") {
-    //   payload = {
-    //     newVolunteers: requestedVolunteers
-    //   }
-    // }
-    // else if (sender == "lunch") {
-    //   payload = {
-    //     newVolunteers: requestedVolunteers
-    //   }
-    // }
 
     channel.send({
       type: "broadcast",
