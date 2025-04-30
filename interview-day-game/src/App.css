@@ -1,0 +1,110 @@
+.board-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  height: 100%;
+}
+
+.department-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.department-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 10px rgba(69, 68, 68, 0.2);
+}
+
+.department-card.active {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(69, 68, 68, 0.2);
+  z-index: 1;
+}
+
+.department-card.inactive {
+  /* transform: scale(0.8); */
+  z-index: 1;
+}
+
+.department-card {
+  height: 100%;
+  transition: transform 0.3s ease;
+}
+
+.department-card.active {
+  transform: scale(1.05);
+  z-index: 1;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+}
+
+.table-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.table-box {
+  background-color: #f0f0f0;
+  border-radius: 0.75rem;
+  padding: 0.5rem;
+  min-height: 60px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+}
+
+.circle {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.circle.student {
+  background-color: #0d6efd; /* Bootstrap primary */
+}
+
+.circle.volunteer {
+  background-color: #198754; /* Bootstrap success */
+}
+
+.round-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  /* background: rgba(0, 0, 0, 0.75); */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none; /* prevents blocking clicks */
+}
+
+.round-overlay h1 {
+  color: white;
+  font-size: 6rem;
+  font-weight: bold;
+  text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.pressable-btn {
+  background-color: #0d6efd;
+  color: white;
+  padding: 0.6rem 1.4rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #0a58ca;
+  position: relative;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.pressable-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 3px 0 #0a58ca;
+}

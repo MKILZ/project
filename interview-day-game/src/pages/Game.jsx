@@ -6,6 +6,7 @@ import Modal from "react-bootstrap/Modal";
 import { arrivalsData } from "../data/ArrivalsData";
 import ArrivalsPopup from "../components/ArrivalsPopup";
 import ManageArrivalsPopup from "../components/ManageArrivalsPopup";
+import Department from "../components/Department";
 
 function Game() {
   const { lobby } = useParams();
@@ -20,6 +21,7 @@ function Game() {
   const [readyToExitPopup, setReadyToExitPopup] = useState(false);
   const [round, setRound] = useState(0);
   const [isReady, setIsReady] = useState(false);
+  const [showRoundOverlay, setShowRoundOverlay] = useState(round);
 
   const [readyPlayers, setReadyPlayers] = useState([]);
   const [game, setGame] = useState({
@@ -73,6 +75,25 @@ function Game() {
       extraStaff: 0,
     },
   ]);
+
+  const characterToDept = {
+    becky: "Welcome",
+    adam: "Session",
+    theresa: "Interview",
+    kenny: "Great Hall", // greathall or lunch??
+  };
+
+  const currentDept = characterToDept[activeUser.character];
+
+  const isCurrentDepartment = (source) => {
+    const map = {
+      becky: "Welcome",
+      adam: "Session",
+      theresa: "Interview",
+      kenny: "Great Hall",
+    };
+    return map[activeUser.character] === source;
+  };
 
   function updateBoard(gameBoard) {
     console.log("updateBoard", gameBoard);
@@ -177,7 +198,7 @@ function Game() {
           return [...prev, newPlayer];
         });
         // check if all players are ready
-        if (playersReady === 4) {
+        if (playersReady === 1) {
           increaseRound();
           setReadyPlayers([]);
           setIsReady(false);
@@ -201,7 +222,20 @@ function Game() {
     if (round > 12) {
       alert("Game Over");
     }
-    setArrivalsPopup(true);
+
+    setShowRoundOverlay(round);
+    const timeout = setTimeout(() => {
+      setShowRoundOverlay(null);
+      const timeout2 = setTimeout(() => {
+        setArrivalsPopup(true);
+      }, 500);
+      return () => {
+        clearTimeout(timeout2);
+      };
+    }, 1200); // match animation duration
+    return () => {
+      clearTimeout(timeout);
+    };
   }, [round]);
 
   const renderHour = useCallback((round) => {
@@ -222,40 +256,28 @@ function Game() {
     return time[round];
   });
   return (
-    <div className="pt-2">
-      <div className="position-absolute top-0 start-0 p-2 d-flex flex-column gap-2">
-        <button
-          className="btn btn-secondary"
-          onClick={() => setScoreCardModal(true)}
-        >
-          ScoreCard
-        </button>
-        <button
-          className="btn btn-secondary"
-          onClick={() => setSettingsModalShow(true)}
-        >
-          Settings
-        </button>
-        <button
-          className="btn btn-secondary"
-          onClick={() => setArrivalsPopup(true)}
-        >
-          Arrivals
-        </button>
-        <h1>{renderHour(round)}</h1>
+    <div className="pt-2 d-flex h-100">
+      <RoundOverlay round={showRoundOverlay} renderHour={renderHour} />
+      <div className="w-75 h-100">
+        <Board currentDept={currentDept} game={game}></Board>
       </div>
-      <Board game={game}></Board>
-      <Actions
-        updateBoard={updateBoard}
-        increaseRound={increaseRound}
-        readyUp={readyUp}
-        game={game}
-        setGame={setGame}
-        setManageArrivalsPopup={setManageArrivalsPopup}
-        setReadyToExitPopup={setReadyToExitPopup}
-        setIsReady={setIsReady}
-        isReady={isReady}
-      ></Actions>
+      {/* Right: Player Panel */}
+      <div className="w-25 d-flex flex-column align-items-center gap-3 p-3">
+        <h2>{renderHour(round)}</h2>
+        <h4 className="text-center">Your Station</h4>
+        <Actions
+          updateBoard={updateBoard}
+          increaseRound={increaseRound}
+          readyUp={readyUp}
+          game={game}
+          setGame={setGame}
+          setManageArrivalsPopup={setManageArrivalsPopup}
+          setReadyToExitPopup={setReadyToExitPopup}
+          setIsReady={setIsReady}
+          isReady={isReady}
+        />
+      </div>
+
       <SettingsModal
         show={settingsModalShow}
         onHide={() => setSettingsModalShow(false)}
@@ -276,6 +298,7 @@ function Game() {
         channel={channel}
       />
       <ReadyToExitPopup
+        isCurrentDepartment={isCurrentDepartment}
         show={readyToExitPopup}
         onHide={() => setReadyToExitPopup(false)}
         round={round}
@@ -349,103 +372,175 @@ function Actions({
   }
 
   return (
-    <div className="d-flex flex-row w-100 card justify-content-between h-25 gap-2 p-2 mt-2">
+    <div className="d-flex flex-column align-items-center gap-3 w-100">
       {activeUser && (
-        <div className="card d-flex p-2">
-          {activeUser.character === "becky" && (
-            <div>
-              <img
-                src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-becky-barnard.jpg?itok=d8fal0xg"
-                alt="beckey"
-                className="rounded-circle"
-                style={{ width: "75px", height: "100px", objectFit: "cover" }}
-              />
-              <h3>Welcome</h3>
-            </div>
-          )}
-          {activeUser.character === "adam" && (
-            <div>
-              <img
-                src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-adam-britten.jpg?itok=fAYbnhXs"
-                alt="adam"
-                className="rounded-circle"
-                style={{ width: "75px", height: "100px", objectFit: "cover" }}
-              />
-              <h3>Session</h3>
-            </div>
-          )}
-          {activeUser.character === "theresa" && (
-            <div>
-              <img
-                src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-theresa-luensmann.jpg?itok=unLlsXcF"
-                alt="Theresa"
-                className="rounded-circle"
-                style={{ width: "75px", height: "100px", objectFit: "cover" }}
-              />
-              <h3>Interview</h3>
-            </div>
-          )}
-          {activeUser.character === "kenny" && (
-            <div>
-              <img
-                src="https://media.licdn.com/dms/image/v2/D5603AQFJz9OJXxUNsQ/profile-displayphoto-shrink_400_400/B56ZRMqLRMH0Ao-/0/1736452912894?e=2147483647&v=beta&t=uhRnWRaaN4llVldNwHHS8qzxZgX0wUtQtaoS0iLqTrQ"
-                alt="kenny"
-                className="rounded-circle"
-                style={{ width: "75px", height: "100px", objectFit: "cover" }}
-              />
-              <h3>Great Hall</h3>
-            </div>
-          )}
+        <div className="d-flex flex-column align-items-center text-center">
+          <img
+            src={
+              activeUser.role === "Host"
+                ? "https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_1920x1920/public/node/person/photo/2024-07/people-headshot-steve-cooper.jpg?itok=ibY7HHY5"
+                : activeUser.character === "becky"
+                ? "https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-becky-barnard.jpg?itok=d8fal0xg"
+                : activeUser.character === "adam"
+                ? "https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-adam-britten.jpg?itok=fAYbnhXs"
+                : activeUser.character === "theresa"
+                ? "https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-theresa-luensmann.jpg?itok=unLlsXcF"
+                : "https://media.licdn.com/dms/image/v2/D5603AQFJz9OJXxUNsQ/profile-displayphoto-shrink_400_400/B56ZRMqLRMH0Ao-/0/1736452912894?e=2147483647&v=beta&t=uhRnWRaaN4llVldNwHHS8qzxZgX0wUtQtaoS0iLqTrQ"
+            }
+            alt={activeUser.character || "Host"}
+            className="rounded-circle"
+            style={{ width: "75px", height: "100px", objectFit: "cover" }}
+          />
+          <h4 className="mt-2">
+            {activeUser.role === "Host"
+              ? "Host"
+              : {
+                  becky: "Welcome",
+                  adam: "Session",
+                  theresa: "Interview",
+                  kenny: "Great Hall",
+                }[activeUser.character]}
+          </h4>
         </div>
       )}
 
-      <div>
-        <button
-          className="btn btn-secondary"
-          onClick={(e) => {
-            e.preventDefault();
-            buyVolunteer(activeUser.character);
-          }}
-          disabled={isReady}
-        >
-          buy a volunteer
-        </button>
-      </div>
-      <div>
-        {activeUser.role !== "Host" && (
+      <button
+        className="btn btn-secondary w-100"
+        onClick={() => buyVolunteer(activeUser.character)}
+        disabled={isReady}
+      >
+        Buy a Volunteer
+      </button>
+
+      {activeUser.role !== "Host" && (
+        <>
           <button
-            className={`btn ${isReady ? "btn-success" : "btn-secondary"}`}
+            className={`btn w-100 ${isReady ? "btn-success" : "btn-secondary"}`}
             onClick={() => {
               readyUp();
-              setIsReady(true); // turn the button green
+              setIsReady(true);
             }}
             disabled={isReady}
           >
             {isReady ? "Ready!" : "Ready Up!"}
           </button>
-        )}
 
-        {activeUser.role !== "Host" && (
           <button
-            className="btn btn-secondary"
+            className="btn btn-secondary w-100"
             onClick={() => setManageArrivalsPopup(true)}
           >
             Manage Arriving Students
           </button>
-        )}
 
-        {activeUser.role !== "Host" && (
           <button
-            className="btn btn-secondary"
+            className="btn btn-secondary w-100"
             onClick={() => setReadyToExitPopup(true)}
           >
             Ready to Exit
           </button>
-        )}
-      </div>
-      <div></div>
+        </>
+      )}
     </div>
   );
+
+  // return (
+  //   <div className="d-flex flex-row card gap-2 p-2 mt-2 w-25">
+  //     {activeUser && (
+  //       <div className="card d-flex p-2">
+  //         {activeUser.character === "becky" && (
+  //           <div>
+  //             <img
+  //               src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-becky-barnard.jpg?itok=d8fal0xg"
+  //               alt="beckey"
+  //               className="rounded-circle"
+  //               style={{ width: "75px", height: "100px", objectFit: "cover" }}
+  //             />
+  //             <h3>Welcome</h3>
+  //           </div>
+  //         )}
+  //         {activeUser.character === "adam" && (
+  //           <div>
+  //             <img
+  //               src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-adam-britten.jpg?itok=fAYbnhXs"
+  //               alt="adam"
+  //               className="rounded-circle"
+  //               style={{ width: "75px", height: "100px", objectFit: "cover" }}
+  //             />
+  //             <h3>Session</h3>
+  //           </div>
+  //         )}
+  //         {activeUser.character === "theresa" && (
+  //           <div>
+  //             <img
+  //               src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-theresa-luensmann.jpg?itok=unLlsXcF"
+  //               alt="Theresa"
+  //               className="rounded-circle"
+  //               style={{ width: "75px", height: "100px", objectFit: "cover" }}
+  //             />
+  //             <h3>Interview</h3>
+  //           </div>
+  //         )}
+  //         {activeUser.character === "kenny" && (
+  //           <div>
+  //             <img
+  //               src="https://media.licdn.com/dms/image/v2/D5603AQFJz9OJXxUNsQ/profile-displayphoto-shrink_400_400/B56ZRMqLRMH0Ao-/0/1736452912894?e=2147483647&v=beta&t=uhRnWRaaN4llVldNwHHS8qzxZgX0wUtQtaoS0iLqTrQ"
+  //               alt="kenny"
+  //               className="rounded-circle"
+  //               style={{ width: "75px", height: "100px", objectFit: "cover" }}
+  //             />
+  //             <h3>Great Hall</h3>
+  //           </div>
+  //         )}
+  //       </div>
+  //     )}
+
+  //     <div>
+  //       <button
+  //         className="btn btn-secondary"
+  //         onClick={(e) => {
+  //           e.preventDefault();
+  //           buyVolunteer(activeUser.character);
+  //         }}
+  //         disabled={isReady}
+  //       >
+  //         buy a volunteer
+  //       </button>
+  //     </div>
+  //     <div>
+  //       {activeUser.role !== "Host" && (
+  //         <button
+  //           className={`btn ${isReady ? "btn-success" : "btn-secondary"}`}
+  //           onClick={() => {
+  //             readyUp();
+  //             setIsReady(true); // turn the button green
+  //           }}
+  //           disabled={isReady}
+  //         >
+  //           {isReady ? "Ready!" : "Ready Up!"}
+  //         </button>
+  //       )}
+
+  //       {activeUser.role !== "Host" && (
+  //         <button
+  //           className="btn btn-secondary"
+  //           onClick={() => setManageArrivalsPopup(true)}
+  //         >
+  //           Manage Arriving Students
+  //         </button>
+  //       )}
+
+  //       {activeUser.role !== "Host" && (
+  //         <button
+  //           className="btn btn-secondary"
+  //           onClick={() => setReadyToExitPopup(true)}
+  //         >
+  //           Ready to Exit
+  //         </button>
+  //       )}
+  //     </div>
+
+  //   </div>
+  // );
 }
 
 function ScoreCard() {
@@ -496,105 +591,30 @@ function ScoreCardModal(props) {
   );
 }
 
-function Board({ game }) {
+function Board({ game, currentDept }) {
   return (
-    <div className="d-flex flex-column text-center align-content-center gap-3">
-      <GreatHall game={game}></GreatHall>
-      <div className="d-flex justify-content-between">
-        <Session game={game}></Session>
-        <Welcome game={game}></Welcome>
-        <Interview game={game}></Interview>
-      </div>
-    </div>
-  );
-}
-
-function GreatHall({ game }) {
-  const tables = 16;
-  const students = 14;
-  const volunteers = 14;
-  const exits = 1;
-  const exiting = 0;
-  const staffNotAvailable = 0;
-  const extraStaff = 0;
-  const studentsWaiting = 0;
-  return (
-    <div
-      className="w-75 card mx-auto d-flex flex-column"
-      style={{ height: "300px" }}
-    >
-      <div>Great Hall </div>
-      <div className="d-flex justify-content-between">
-        <div>exit {exiting + "/" + exits}</div>
-        <div>volunteers {volunteers}</div>
-        <div>students Waiting {studentsWaiting}</div>
-        <div>extra volunteers {extraStaff}</div>
-        <div> staffNotAvailable {staffNotAvailable}</div>
-        <div>students {students + "/" + tables}</div>
-      </div>
-    </div>
-  );
-}
-
-function Session({ game }) {
-  const tables = 8;
-  const students = 8;
-  const exits = 3;
-  const exiting = 0;
-  const staffNotAvailable = 0;
-  const extraStaff = 0;
-  const studentsWaiting = 0;
-  return (
-    <div className="w-25 card" style={{ height: "400px" }}>
-      Session
-      <div className="d-flex flex-column justify-content-between">
-        <div>exit {exiting + "/" + exits}</div>
-        <div>volunteers {game.Session.volunteers}</div>
-        <div>students Waiting {studentsWaiting}</div>
-        <div>extra volunteers {extraStaff}</div>
-        <div> staffNotAvailable {staffNotAvailable}</div>
-        <div>students {students + "/" + tables}</div>
-      </div>
-    </div>
-  );
-}
-
-function Interview({ game }) {
-  const tables = 4;
-  const students = 4;
-  const volunteers = 4;
-  const exits = 2;
-  const exiting = 0;
-  const staffNotAvailable = 0;
-  const extraStaff = 0;
-  const studentsWaiting = 0;
-  return (
-    <div className="w-25 card " style={{ height: "400px" }}>
-      Interview
-      <div className="d-flex flex-column justify-content-between">
-        <div>exit {exiting + "/" + exits}</div>
-        <div>volunteers {volunteers}</div>
-        <div>students Waiting {studentsWaiting}</div>
-        <div>extra volunteers {extraStaff}</div>
-        <div> staffNotAvailable {staffNotAvailable}</div>
-        <div>students {students + "/" + tables}</div>
-      </div>
-    </div>
-  );
-}
-
-function Welcome({ game }) {
-  const tables = 16;
-  return (
-    <div className="w-50 card" style={{ height: "200px" }}>
-      Welcome
-      <div className="d-flex flex-wrap justify-content-between">
-        <div>exit {game.Welcome.exiting + "/" + game.Welcome.exits}</div>
-        <div>volunteers {game.Welcome.volunteers}</div>
-        <div>students Waiting {game.Welcome.studentsWaiting}</div>
-        <div>extra volunteers {game.Welcome.extraStaff}</div>
-        <div> staffNotAvailable {game.Welcome.staffNotAvailable}</div>
-        <div>students {game.Welcome.students + "/" + tables}</div>
+    <div className="p-3 h-100 w-100">
+      <div className="d-grid board-grid gap-3 h-100">
+        <Department
+          name="Great Hall"
+          isCurrent={currentDept === "Great Hall"}
+          {...game.GreatHall}
+        />
+        <Department
+          name="Session"
+          isCurrent={currentDept === "Session"}
+          {...game.Session}
+        />
+        <Department
+          name="Welcome"
+          isCurrent={currentDept === "Welcome"}
+          {...game.Welcome}
+        />
+        <Department
+          name="Interview"
+          isCurrent={currentDept === "Interview"}
+          {...game.Interview}
+        />
       </div>
     </div>
   );
@@ -625,7 +645,13 @@ function SettingsModal(props) {
   );
 }
 
-function ReadyToExitPopup({ show, onHide, round, renderHour }) {
+function ReadyToExitPopup({
+  show,
+  onHide,
+  round,
+  renderHour,
+  isCurrentDepartment,
+}) {
   const arrivalSources = [
     "Outside",
     "Welcome",
@@ -636,25 +662,6 @@ function ReadyToExitPopup({ show, onHide, round, renderHour }) {
   const { activeUser } = useContext(AppContext);
   const getRand = () => {
     return Math.floor(Math.random() * 5);
-  };
-
-  const characterToDept = {
-    becky: "Welcome",
-    adam: "Session",
-    theresa: "Interview",
-    kenny: "GreatHall", // greathall or lunch??
-  };
-
-  const currentDept = characterToDept[activeUser.character];
-
-  const isCurrentDepartment = (source) => {
-    const map = {
-      becky: "Welcome",
-      adam: "Session",
-      theresa: "Interview",
-      kenny: "GreatHall",
-    };
-    return map[activeUser.character] === source;
   };
 
   return (
@@ -679,5 +686,26 @@ function ReadyToExitPopup({ show, onHide, round, renderHour }) {
         })}
       </Modal.Body>
     </Modal>
+  );
+}
+
+// RoundOverlay.jsx
+import { AnimatePresence, motion } from "framer-motion";
+function RoundOverlay({ round, renderHour }) {
+  return (
+    <AnimatePresence>
+      {round !== null && (
+        <motion.div
+          key={round}
+          initial={{ x: "100%", opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          exit={{ x: "-100%", opacity: 0 }}
+          transition={{ duration: 1 }}
+          className="round-overlay"
+        >
+          <h1 style={{ color: "black" }}>{renderHour(round)}</h1>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
