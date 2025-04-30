@@ -28,7 +28,7 @@ function Department({
         isCurrent ? "active" : "inactive"
       } p-2`}
     >
-      <h5 className="text-center">{name}</h5>
+      <h5 className="text-center">{isCurrent ? "🌟" + name + "🌟" : name}</h5>
 
       <div className="table-grid">
         {Array.from({ length: tables }).map((_, idx) => (
@@ -41,11 +41,7 @@ function Department({
               ></div>
             ))}
             {Array.from({ length: volunteersPerTable[idx] }).map((_, i) => (
-              <div
-                className="circle volunteer"
-                key={`v-${i}`}
-                title="Volunteer"
-              ></div>
+              <div className="triangle" key={`v-${i}`} title="Volunteer"></div>
             ))}
           </div>
         ))}
@@ -60,6 +56,20 @@ function Department({
           <div>Staff Not Available: {staffNotAvailable}</div>
           <div>Total Students: {students}</div>
           <div>Total Volunteers: {volunteers}</div>
+        </div>
+        <div>
+          <div className="students-waiting-box mt-2 p-2">
+            <div className="fw-bold small mb-1">Students Waiting</div>
+            <div className="d-flex flex-wrap gap-1">
+              {Array.from({ length: studentsWaiting }).map((_, i) => (
+                <div
+                  className="circle student-waiting"
+                  key={`w-${i}`}
+                  title="Waiting Student"
+                ></div>
+              ))}
+            </div>
+          </div>
         </div>
         <div>
           <div className="staff-unavailable-box mt-2 p-2">

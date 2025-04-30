@@ -10,18 +10,7 @@
 
 .department-card:hover {
   transform: scale(1.02);
-  box-shadow: 0 0 10px rgba(69, 68, 68, 0.2);
-}
-
-.department-card.active {
-  transform: scale(1.05);
-  box-shadow: 0 0 15px rgba(69, 68, 68, 0.2);
-  z-index: 1;
-}
-
-.department-card.inactive {
-  /* transform: scale(0.8); */
-  z-index: 1;
+  box-shadow: 0 0 30px rgba(40, 40, 40, 0.2);
 }
 
 .department-card {
@@ -30,9 +19,8 @@
 }
 
 .department-card.active {
-  transform: scale(1.05);
   z-index: 1;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 30px rgba(24, 24, 24, 0.2);
 }
 
 .table-grid {
@@ -40,6 +28,13 @@
   grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   gap: 0.5rem;
   margin-bottom: 1rem;
+}
+
+.arrivals-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  padding: 1rem;
 }
 
 .table-box {
@@ -55,18 +50,63 @@
   position: relative;
 }
 
-.circle {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
+.arrivals-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 1rem;
+  justify-items: center;
+  align-items: center;
+}
+
+.arrival-box {
+  background-color: #f0f0f0;
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  width: 150px;
+  height: 130px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+}
+
+.circle-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  max-width: 100%;
 }
 
 .circle.student {
   background-color: #0d6efd; /* Bootstrap primary */
 }
 
-.circle.volunteer {
-  background-color: #198754; /* Bootstrap success */
+.triangle {
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 14px solid #ff4507; /* color for staff, e.g. Bootstrap warning */
+}
+
+.students-waiting-box {
+  background-color: #cff4fc;
+  border: 1px solid #9eeaf9;
+  border-radius: 10px;
+}
+
+.circle {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+.student-waiting {
+  background-color: #0dcaf0;
+  border: 1px solid #0aa2c0;
 }
 
 .round-overlay {

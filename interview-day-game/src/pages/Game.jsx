@@ -31,9 +31,9 @@ function Game() {
       volunteers: 14,
       exits: 1,
       exiting: 0,
-      staffNotAvailable: 0,
+      staffNotAvailable: 1,
       extraStaff: 0,
-      studentsWaiting: 0,
+      studentsWaiting: 4,
     },
     Session: {
       tables: 8,
@@ -43,7 +43,7 @@ function Game() {
       exiting: 0,
       staffNotAvailable: 2,
       extraStaff: 0,
-      studentsWaiting: 0,
+      studentsWaiting: 2,
     },
     Interview: {
       tables: 4,
@@ -51,9 +51,9 @@ function Game() {
       volunteers: 4,
       exits: 2,
       exiting: 0,
-      staffNotAvailable: 0,
+      staffNotAvailable: 3,
       extraStaff: 0,
-      studentsWaiting: 0,
+      studentsWaiting: 3,
     },
     Welcome: {
       tables: 12,
@@ -61,9 +61,9 @@ function Game() {
       volunteers: 10,
       exits: 4,
       exiting: 0,
-      staffNotAvailable: 0,
+      staffNotAvailable: 1,
       extraStaff: 0,
-      studentsWaiting: 0,
+      studentsWaiting: 1,
     },
   });
 
@@ -414,7 +414,7 @@ function Actions({
         onClick={() => buyVolunteer(activeUser.character)}
         disabled={isReady}
       >
-        Buy a Volunteer
+        Buy a Volunteer 🔺
       </button>
 
       {activeUser.role !== "Host" && (
