@@ -341,9 +341,9 @@ function Actions({
     } else if (character === "adam") {
       const local = {
         ...game,
-        Session: {
-          ...game.Session,
-          volunteers: game.Session.volunteers + 1,
+        Presentations: {
+          ...game.Presentations,
+          volunteers: game.Presentations.volunteers + 1,
         },
       };
       setGame(local);
@@ -362,9 +362,9 @@ function Actions({
       setGame((prev) => {
         return {
           ...prev,
-          GreatHall: {
-            ...prev.GreatHall,
-            volunteers: prev.GreatHall.volunteers + 1,
+          Lunch: {
+            ...prev.Lunch,
+            volunteers: prev.Lunch.volunteers + 1,
           },
         };
       });
