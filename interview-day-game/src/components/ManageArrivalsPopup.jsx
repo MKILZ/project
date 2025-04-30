@@ -230,13 +230,13 @@ function ManageArrivalsPopup({
                 <strong className="me-2">{source}</strong>
                 <span className="mx-2">{selected[source]}</span>
                 <button
-                  className="btn pressable-btn btn pressable-btn-sm btn pressable-btn-outline-secondary mx-1"
+                  className="btn btn-sm btn-outline-secondary mx-1"
                   onClick={() => increment(source, maxVal)}
                 >
                   ▲
                 </button>
                 <button
-                  className="btn pressable-btn btn pressable-btn-sm btn pressable-btn-outline-secondary mx-1"
+                  className="btn btn-sm btn-outline-secondary mx-1"
                   onClick={() => decrement(source)}
                 >
                   ▼
@@ -251,10 +251,7 @@ function ManageArrivalsPopup({
         </div>
       </Modal.Body>
       <Modal.Footer>
-        <button
-          className="btn pressable-btn btn pressable-btn-primary"
-          onClick={handleConfirm}
-        >
+        <button className="btn btn-primary" onClick={handleConfirm}>
           Confirm
         </button>
       </Modal.Footer>

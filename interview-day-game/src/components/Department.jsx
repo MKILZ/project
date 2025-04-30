@@ -24,7 +24,7 @@ function Department({
 
   return (
     <div
-      className={`card department-card ${
+      className={`card department-card rounded-5 ${
         isCurrent ? "active" : "inactive"
       } p-2`}
     >
@@ -50,16 +50,31 @@ function Department({
           </div>
         ))}
       </div>
-
-      <div className="mt-2 small">
-        <div>
-          Exit: {exiting} / {exits}
+      <div className="d-flex justify-content-between  mt-2">
+        <div className="mt-2 small">
+          <div>
+            Exit: {exiting} / {exits}
+          </div>
+          <div>Extra Volunteers: {extraStaff}</div>
+          <div>Students Waiting: {studentsWaiting}</div>
+          <div>Staff Not Available: {staffNotAvailable}</div>
+          <div>Total Students: {students}</div>
+          <div>Total Volunteers: {volunteers}</div>
         </div>
-        <div>Extra Volunteers: {extraStaff}</div>
-        <div>Students Waiting: {studentsWaiting}</div>
-        <div>Staff Not Available: {staffNotAvailable}</div>
-        <div>Total Students: {students}</div>
-        <div>Total Volunteers: {volunteers}</div>
+        <div>
+          <div className="staff-unavailable-box mt-2 p-2">
+            <div className="fw-bold small mb-1">Staff Not Available</div>
+            <div className="d-flex flex-wrap gap-1">
+              {Array.from({ length: staffNotAvailable }).map((_, i) => (
+                <div
+                  className="circle staff-unavailable"
+                  key={`u-${i}`}
+                  title="Unavailable Staff"
+                ></div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

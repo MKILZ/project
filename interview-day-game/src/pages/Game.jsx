@@ -41,7 +41,7 @@ function Game() {
       volunteers: 8,
       exits: 3,
       exiting: 0,
-      staffNotAvailable: 0,
+      staffNotAvailable: 2,
       extraStaff: 0,
       studentsWaiting: 0,
     },
@@ -387,9 +387,14 @@ function Actions({
                 ? "https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-theresa-luensmann.jpg?itok=unLlsXcF"
                 : "https://media.licdn.com/dms/image/v2/D5603AQFJz9OJXxUNsQ/profile-displayphoto-shrink_400_400/B56ZRMqLRMH0Ao-/0/1736452912894?e=2147483647&v=beta&t=uhRnWRaaN4llVldNwHHS8qzxZgX0wUtQtaoS0iLqTrQ"
             }
-            alt={activeUser.character || "Host"}
-            className="rounded-circle"
-            style={{ width: "75px", height: "100px", objectFit: "cover" }}
+            alt={activeUser.character}
+            style={{
+              width: "190px",
+              height: "200px",
+              objectFit: "cover",
+              borderRadius: "0.75rem",
+              border: "2px solid #ccc",
+            }}
           />
           <h4 className="mt-2">
             {activeUser.role === "Host"
@@ -405,7 +410,7 @@ function Actions({
       )}
 
       <button
-        className="btn btn-secondary w-100"
+        className="btn btn-pressable btn-secondary w-100"
         onClick={() => buyVolunteer(activeUser.character)}
         disabled={isReady}
       >
@@ -415,7 +420,9 @@ function Actions({
       {activeUser.role !== "Host" && (
         <>
           <button
-            className={`btn w-100 ${isReady ? "btn-success" : "btn-secondary"}`}
+            className={`btn btn-pressable w-100 ${
+              isReady ? "btn-success" : "btn-secondary"
+            }`}
             onClick={() => {
               readyUp();
               setIsReady(true);
@@ -426,14 +433,14 @@ function Actions({
           </button>
 
           <button
-            className="btn btn-secondary w-100"
+            className="btn btn-pressable btn-secondary w-100"
             onClick={() => setManageArrivalsPopup(true)}
           >
             Manage Arriving Students
           </button>
 
           <button
-            className="btn btn-secondary w-100"
+            className="btn btn-pressable btn-secondary w-100"
             onClick={() => setReadyToExitPopup(true)}
           >
             Ready to Exit
@@ -442,105 +449,6 @@ function Actions({
       )}
     </div>
   );
-
-  // return (
-  //   <div className="d-flex flex-row card gap-2 p-2 mt-2 w-25">
-  //     {activeUser && (
-  //       <div className="card d-flex p-2">
-  //         {activeUser.character === "becky" && (
-  //           <div>
-  //             <img
-  //               src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-becky-barnard.jpg?itok=d8fal0xg"
-  //               alt="beckey"
-  //               className="rounded-circle"
-  //               style={{ width: "75px", height: "100px", objectFit: "cover" }}
-  //             />
-  //             <h3>Welcome</h3>
-  //           </div>
-  //         )}
-  //         {activeUser.character === "adam" && (
-  //           <div>
-  //             <img
-  //               src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-adam-britten.jpg?itok=fAYbnhXs"
-  //               alt="adam"
-  //               className="rounded-circle"
-  //               style={{ width: "75px", height: "100px", objectFit: "cover" }}
-  //             />
-  //             <h3>Session</h3>
-  //           </div>
-  //         )}
-  //         {activeUser.character === "theresa" && (
-  //           <div>
-  //             <img
-  //               src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-theresa-luensmann.jpg?itok=unLlsXcF"
-  //               alt="Theresa"
-  //               className="rounded-circle"
-  //               style={{ width: "75px", height: "100px", objectFit: "cover" }}
-  //             />
-  //             <h3>Interview</h3>
-  //           </div>
-  //         )}
-  //         {activeUser.character === "kenny" && (
-  //           <div>
-  //             <img
-  //               src="https://media.licdn.com/dms/image/v2/D5603AQFJz9OJXxUNsQ/profile-displayphoto-shrink_400_400/B56ZRMqLRMH0Ao-/0/1736452912894?e=2147483647&v=beta&t=uhRnWRaaN4llVldNwHHS8qzxZgX0wUtQtaoS0iLqTrQ"
-  //               alt="kenny"
-  //               className="rounded-circle"
-  //               style={{ width: "75px", height: "100px", objectFit: "cover" }}
-  //             />
-  //             <h3>Great Hall</h3>
-  //           </div>
-  //         )}
-  //       </div>
-  //     )}
-
-  //     <div>
-  //       <button
-  //         className="btn btn-secondary"
-  //         onClick={(e) => {
-  //           e.preventDefault();
-  //           buyVolunteer(activeUser.character);
-  //         }}
-  //         disabled={isReady}
-  //       >
-  //         buy a volunteer
-  //       </button>
-  //     </div>
-  //     <div>
-  //       {activeUser.role !== "Host" && (
-  //         <button
-  //           className={`btn ${isReady ? "btn-success" : "btn-secondary"}`}
-  //           onClick={() => {
-  //             readyUp();
-  //             setIsReady(true); // turn the button green
-  //           }}
-  //           disabled={isReady}
-  //         >
-  //           {isReady ? "Ready!" : "Ready Up!"}
-  //         </button>
-  //       )}
-
-  //       {activeUser.role !== "Host" && (
-  //         <button
-  //           className="btn btn-secondary"
-  //           onClick={() => setManageArrivalsPopup(true)}
-  //         >
-  //           Manage Arriving Students
-  //         </button>
-  //       )}
-
-  //       {activeUser.role !== "Host" && (
-  //         <button
-  //           className="btn btn-secondary"
-  //           onClick={() => setReadyToExitPopup(true)}
-  //         >
-  //           Ready to Exit
-  //         </button>
-  //       )}
-  //     </div>
-
-  //   </div>
-  // );
 }
 
 function ScoreCard() {
@@ -592,29 +500,35 @@ function ScoreCardModal(props) {
 }
 
 function Board({ game, currentDept }) {
+  const departmentOrder = [
+    { name: "Great Hall", data: game.GreatHall },
+    { name: "Session", data: game.Session },
+    { name: "Welcome", data: game.Welcome },
+    { name: "Interview", data: game.Interview },
+  ];
+
+  // Move currentDept to index 1 (top-right)
+  const sortedDepartments = (() => {
+    const index = departmentOrder.findIndex((dep) => dep.name === currentDept);
+    if (index === -1) return departmentOrder;
+
+    const reordered = [...departmentOrder];
+    const [current] = reordered.splice(index, 1);
+    reordered.splice(1, 0, current);
+    return reordered;
+  })();
+
   return (
     <div className="p-3 h-100 w-100">
       <div className="d-grid board-grid gap-3 h-100">
-        <Department
-          name="Great Hall"
-          isCurrent={currentDept === "Great Hall"}
-          {...game.GreatHall}
-        />
-        <Department
-          name="Session"
-          isCurrent={currentDept === "Session"}
-          {...game.Session}
-        />
-        <Department
-          name="Welcome"
-          isCurrent={currentDept === "Welcome"}
-          {...game.Welcome}
-        />
-        <Department
-          name="Interview"
-          isCurrent={currentDept === "Interview"}
-          {...game.Interview}
-        />
+        {sortedDepartments.map((dep) => (
+          <Department
+            key={dep.name}
+            name={dep.name}
+            isCurrent={currentDept === dep.name}
+            {...dep.data}
+          />
+        ))}
       </div>
     </div>
   );
