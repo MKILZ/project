@@ -10,14 +10,14 @@ function Game() {
   const { lobby } = useParams();
   const hoursInDay = 7;
   const channel = supabase.channel(lobby + "changes");
-  const { activeUser, setActiveUser, players, setPlayers } =
-    useContext(AppContext);
+  const { activeUser, setActiveUser, players, setPlayers } = useContext(AppContext);
   const [scoreCardModal, setScoreCardModal] = useState(false);
   const [settingsModalShow, setSettingsModalShow] = useState(false);
   const [arrivalsPopup, setArrivalsPopup] = useState(false);
   const [manageArrivalsPopup, setManageArrivalsPopup] = useState(false);
   const [readyToExitPopup, setReadyToExitPopup] = useState(false);
   const [round, setRound] = useState(0);
+   {/* Hard coding data for each room */}
   const [game, setGame] = useState({
     Lunch: {
       tables: 16,
@@ -60,7 +60,7 @@ function Game() {
       studentsWaiting: 0,
     },
   });
-
+ {/* Hard coding beginning stats for all of the score cards */}
   const [scoreCard, setScoreCard] = useState([
     {
       hour: 0,
@@ -69,7 +69,7 @@ function Game() {
       extraStaff: 0,
     },
   ]);
-
+ {/* Sending data to the database about gameboard data and what round it is */}
   function updateBoard(gameBoard) {
     console.log("updateBoard", gameBoard);
     channel.send({
@@ -91,7 +91,8 @@ function Game() {
     if (!activeUser) {
       // navigate("/");
     }
-
+    
+     {/* Giving a character to each player depending on the order they join the room */}
     const fetchPlayers = async () => {
       const { data, error } = await supabase
         .from("games")
@@ -123,7 +124,7 @@ function Game() {
         return { ...prev, character: "kenny" };
       });
     }
-
+ {/* Give each player a blank score card */}
     setScoreCard(
       [...Array(hoursInDay)].map((_, i) => ({
         hour: i,
@@ -132,7 +133,7 @@ function Game() {
         extraStaff: 0,
       }))
     );
-
+ {/* Grabbing data from the database */}
     channel
       .on("broadcast", { event: "update-board" }, (payload) => {
         console.log("update-board:", payload.payload);
@@ -147,14 +148,15 @@ function Game() {
       console.log(round);
     });
   }, [lobby]);
-
+ {/* There are only 12 rounds in a game so greater than 12 is game over
+  and each player gets their personalized stats breakdown */}
   useEffect(() => {
     if (round > 12) {
       alert("Game Over");
     }
     setArrivalsPopup(true)
   }, [round]);
-
+ {/* Hard coding the rounds which are times in 30 min increments */}
   const renderHour = useCallback((round) => {
     const time = [
       "7:30",
@@ -172,6 +174,7 @@ function Game() {
     ];
     return time[round];
   });
+  {/* Setting the buttons in the top left, scorecard, settings, and arrivals */}
   return (
     <div className="pt-2">
       <div className="position-absolute top-0 start-0 p-2 d-flex flex-column gap-2">
@@ -196,6 +199,7 @@ function Game() {
         <h1>{renderHour(round)}</h1>
       </div>
       <Board game={game}></Board>
+      {/* Updating data that we grabbed from the database */}
       <Actions
         updateBoard={updateBoard}
         increaseRound={increaseRound}
@@ -204,6 +208,7 @@ function Game() {
         setManageArrivalsPopup={setManageArrivalsPopup}
         setReadyToExitPopup={setReadyToExitPopup}
       ></Actions>
+      {/* Creating popups for settings, arrivals, managing arrivals, ready to exit students, and score card */}
       <SettingsModal
         show={settingsModalShow}
         onHide={() => setSettingsModalShow(false)}
@@ -240,6 +245,7 @@ function Game() {
 export default Game;
 
 function Actions({ updateBoard, game, setGame, increaseRound, setManageArrivalsPopup, setReadyToExitPopup }) {
+  {/* When you click the buy volunteer button adding a volunteer to the count specific to your character. The host cannot do this. */}
   const { activeUser, players } = useContext(AppContext);
   function buyVolunteer(character) {
     if (character === "becky") {
@@ -285,6 +291,7 @@ function Actions({ updateBoard, game, setGame, increaseRound, setManageArrivalsP
     }
   }
 
+  {/* Adding the pictures on the screen of your character */}
   return (
     <div className="d-flex flex-row w-100 card justify-content-between h-25 gap-2 p-2 mt-2">
      {activeUser && <div className="card d-flex p-2">
@@ -333,7 +340,7 @@ function Actions({ updateBoard, game, setGame, increaseRound, setManageArrivalsP
           </div>
         )}
       </div>}
-
+{/* Adding the button to buy a volunteer */}
       <div>
         <button
           className="btn btn-secondary"
@@ -344,7 +351,7 @@ function Actions({ updateBoard, game, setGame, increaseRound, setManageArrivalsP
         >
           buy a volunteer
         </button>
-
+{/* Adding the button to go to the next round. Only the host can do this when all of the players are ready */}
         {activeUser.role === "Host" && (
           <button
             className="btn btn-secondary"
@@ -355,7 +362,7 @@ function Actions({ updateBoard, game, setGame, increaseRound, setManageArrivalsP
             Next Round
           </button>
         )}
-
+{/* Everyone except the host can see the manage arrivals button and click it to get a popup */}
         {activeUser.role !== "Host" && (
         <button
           className="btn btn-secondary"
@@ -364,7 +371,7 @@ function Actions({ updateBoard, game, setGame, increaseRound, setManageArrivalsP
           Manage Arriving Students 
         </button>
         )}
-
+{/* Everyone except the host can see the ready to exit button and click it to see a popup */}
         {activeUser.role !== "Host" && (
         <button
           className="btn btn-secondary"
@@ -381,7 +388,7 @@ function Actions({ updateBoard, game, setGame, increaseRound, setManageArrivalsP
     </div>
   );
 }
-
+{/* Updating the scorecard */}
 function ScoreCard() {
   let hours = [0, 0, 0, 0, 0, 0, 0];
   return (
@@ -412,6 +419,7 @@ function ScoreCard() {
   );
 }
 
+{/* Making the scorecard popup look good */}
 function ScoreCardModal(props) {
   return (
     <Modal
