@@ -4,6 +4,8 @@ import { AppContext } from "../context/useAppContext";
 import { useParams } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
 import { arrivalsData } from "../data/ArrivalsData";
+import { useNavigate } from "react-router-dom";
+import EndOfRoundStats from "../components/EndOfRoundStats";
 import ArrivalsPopup from "../components/ArrivalsPopup";
 import ManageArrivalsPopup from "../components/ManageArrivalsPopup";
 import Department from "../components/Department";
@@ -19,6 +21,8 @@ function Game() {
   const [arrivalsPopup, setArrivalsPopup] = useState(false);
   const [manageArrivalsPopup, setManageArrivalsPopup] = useState(false);
   const [readyToExitPopup, setReadyToExitPopup] = useState(false);
+  const [endOfRoundStats, setEndOfRoundStats] = useState(false);
+  const [statsLog, setStatsLog] = useState([]);
   const [round, setRound] = useState(0);
   const [isReady, setIsReady] = useState(false);
   const [showRoundOverlay, setShowRoundOverlay] = useState(round);
@@ -65,6 +69,15 @@ function Game() {
       extraStaff: 0,
       studentsWaiting: 1,
     },
+  });
+
+  //have to change this if we update number of volunteers in each department
+  //needed for stats calculations
+  const [startingVolunteers] = useState({
+    GreatHall: 14,
+    Session: 8,
+    Interview: 4,
+    Welcome: 10,
   });
 
   const [scoreCard, setScoreCard] = useState([
@@ -219,24 +232,63 @@ function Game() {
   }, [lobby]);
 
   useEffect(() => {
-    if (round > 12) {
-      alert("Game Over");
-    }
-
-    setShowRoundOverlay(round);
-    const timeout = setTimeout(() => {
-      setShowRoundOverlay(null);
-      const timeout2 = setTimeout(() => {
-        setArrivalsPopup(true);
-      }, 500);
+    if (round >= 12) {
+      console.log("Game Over");
+      setEndOfRoundStats(true);
+    } else {
+      setArrivalsPopup(true)
+      setShowRoundOverlay(round);
+      const timeout = setTimeout(() => {
+        setShowRoundOverlay(null);
+        const timeout2 = setTimeout(() => {
+          setArrivalsPopup(true);
+        }, 500);
+        return () => {
+          clearTimeout(timeout2);
+        };
+      }, 1200); // match animation duration
       return () => {
-        clearTimeout(timeout2);
+        clearTimeout(timeout);
       };
-    }, 1200); // match animation duration
-    return () => {
-      clearTimeout(timeout);
-    };
+    }
   }, [round]);
+
+  useEffect(() => {
+    if (round === 0) return; // skip the first render
+    
+    console.log("Capturing stats at the end of round", round - 1);
+  
+    setStatsLog((prev) => [
+      ...prev,
+      {
+        round: round - 1,
+        Welcome: {
+          studentsWaiting: game.Welcome.studentsWaiting,
+          volunteers: game.Welcome.volunteers,
+          extraHours: Math.max(0, game.Welcome.volunteers - startingVolunteers.Welcome),
+        },
+        Session: {
+          studentsWaiting: game.Session.studentsWaiting,
+          volunteers: game.Session.volunteers,
+          extraHours: Math.max(0, game.Session.volunteers - startingVolunteers.Session),
+        },
+        Interview: {
+          studentsWaiting: game.Interview.studentsWaiting,
+          volunteers: game.Interview.volunteers,
+          extraHours: Math.max(0, game.Interview.volunteers - startingVolunteers.Interview),
+        },
+        GreatHall: {
+          studentsWaiting: game.GreatHall.studentsWaiting,
+          volunteers: game.GreatHall.volunteers,
+          extraHours: Math.max(0, game.GreatHall.volunteers - startingVolunteers.GreatHall),
+        },
+      },
+    ]);
+  }, [round]);
+
+  useEffect(() => {
+    console.log("Stats log updated:", statsLog);
+  }, [statsLog]);
 
   const renderHour = useCallback((round) => {
     const time = [
@@ -277,7 +329,6 @@ function Game() {
           isReady={isReady}
         />
       </div>
-
       <SettingsModal
         show={settingsModalShow}
         onHide={() => setSettingsModalShow(false)}
@@ -310,6 +361,11 @@ function Game() {
         show={scoreCardModal}
         onHide={() => setScoreCardModal(false)}
       />
+      <EndOfRoundStats
+        show={endOfRoundStats}
+        onHide={() => setEndOfRoundStats(false)}
+        statsLog = {statsLog}
+        />
     </div>
   );
 }
@@ -623,3 +679,4 @@ function RoundOverlay({ round, renderHour }) {
     </AnimatePresence>
   );
 }
+
