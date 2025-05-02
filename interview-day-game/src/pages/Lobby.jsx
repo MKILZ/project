@@ -61,7 +61,6 @@ function Lobby() {
 
     fetchPlayers();
 
-    
     if (activeUser.role !== "Host" && !players.includes(activeUser.userName)) {
       addSelf();
     }
