@@ -4,6 +4,7 @@ import { supabase } from "../supabase/supabaseClient";
 import { AppContext } from "../context/useAppContext";
 import { useNavigate } from "react-router-dom";
 import Carousel from "react-bootstrap/Carousel";
+import Modal from "react-bootstrap/Modal";
 import backgroundMusic from "/Users/marykatenussrallah/project/interview-day-game/src/assets/Local Elevator - Kevin MacLeod.mp3";
 
 
@@ -12,6 +13,9 @@ function Lobby() {
   const { lobby } = useParams();
   const { activeUser, players, setPlayers } = useContext(AppContext);
   const navigate = useNavigate();
+  const [showLobbyFullModal, setShowLobbyFullModal] = useState(false);
+  const [showDuplicateNameModal, setShowDuplicateNameModal] = useState(false);
+
 
   async function copyTextToClipboard(text) {
     try {
@@ -46,24 +50,52 @@ function Lobby() {
         .from("games")
         .select("players")
         .eq("lobby", lobby);
+      // .single();
 
       if (error) {
-        console.error(error);
-      } else {
-        setPlayers(data[0].players);
+        console.error("Error fetching players:", error);
+        return [];
       }
+
+      setPlayers(data[0]?.players || []);
+      return data[0]?.players || [];
+      // setPlayers(data.players);
+      // return data.players;
+      // if (error) {
+      //   console.error(error);
+      // } else {
+      //   setPlayers(data[0].players);
+      // }
     };
 
     const addSelf = async () => {
-      const { data, error } = await supabase.rpc("add_player_to_lobby", {
+      const currentPlayers = await fetchPlayers();
+      // If there are already 4 players in a lobby, don't let more join - have a popup alert the player trying to join
+      if (currentPlayers.length >= 4) {
+        setShowLobbyFullModal(true);
+        return;
+      }
+
+      // If there is already a player with the name a new player is trying to use to join - alert the new player they need to use a different name
+      if (currentPlayers.includes(activeUser.userName)) {
+        setShowDuplicateNameModal(true);
+        return;
+      }
+
+      const { error } = await supabase.rpc("add_player_to_lobby", {
         lobby_id_input: lobby,
         new_player: activeUser.userName,
       });
 
+      // const { data, error } = await supabase.rpc("add_player_to_lobby", {
+      //   lobby_id_input: lobby,
+      //   new_player: activeUser.userName,
+      // });
+
       if (error) {
-        console.error(error);
+        console.error("Error adding self:", error);
       } else {
-        fetchPlayers();
+        await fetchPlayers();
         //setPlayers(players.concat(activeUser.userName));
       }
     };
@@ -74,7 +106,8 @@ function Lobby() {
       addSelf();
     }
 
-    channel
+    // channel
+    const channelSubscription = channel
       .on(
         "postgres_changes",
         {
@@ -92,7 +125,12 @@ function Lobby() {
         navigate("/game/" + lobby);
       })
       .subscribe();
-  }, [lobby]);
+
+    return () => {
+      channelSubscription.unsubscribe();
+    }
+  }, [lobby, activeUser?.userName]);
+
   return (
     <>
       <audio ref={audioRef} loop autoPlay>
@@ -104,6 +142,7 @@ function Lobby() {
           <div className="d-flex justify-content-between">
             <h1
               className=""
+              style={{ cursor: "pointer" }}
               onClick={
                 //onclick copy the lobby code to clipboard
                 () => {
@@ -173,6 +212,86 @@ function Lobby() {
             </div>
           </div>
         </div>
+        <Modal
+          show={showLobbyFullModal}
+          onHide={() => {
+            setShowLobbyFullModal(false);
+            navigate("/");
+          }}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Lobby Full</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            Sorry! There are already 4 players in the game.
+          </Modal.Body>
+          <Modal.Footer>
+            <button
+              className="btn btn-secondary"
+              onClick={() => {
+                setShowLobbyFullModal(false);
+                navigate("/");
+              }}
+            >
+              OK
+            </button>
+          </Modal.Footer>
+        </Modal>
+        <Modal
+          show={showDuplicateNameModal}
+          onHide={() => {
+            setShowDuplicateNameModal(false);
+            navigate("/");
+          }}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Name Taken</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            There's already a player with that name, try a different one :)
+          </Modal.Body>
+          <Modal.Footer>
+            <button
+              className="btn btn-secondary"
+              onClick={() => {
+                setShowDuplicateNameModal(false);
+                navigate("/");
+              }}
+            >
+              OK
+            </button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal
+          show={showDuplicateNameModal}
+          onHide={() => {
+            setShowDuplicateNameModal(false);
+            navigate("/");
+          }}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Name Taken</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            There's already a player with that name, try a different one
+          </Modal.Body>
+          <Modal.Footer>
+            <button
+              className="btn btn-secondary"
+              onClick={() => {
+                setShowDuplicateNameModal(false);
+                navigate("/");
+              }}
+            >
+              OK
+            </button>
+          </Modal.Footer>
+        </Modal>
+
       </div>
     </>
   );
@@ -189,9 +308,6 @@ function CarouselComp() {
           className="d-block w-100"
           alt="adam"
         />
-        <Carousel.Caption>
-          <h3>Director of Student Success</h3>
-        </Carousel.Caption>
       </Carousel.Item>
       <Carousel.Item>
         <img
@@ -199,9 +315,6 @@ function CarouselComp() {
           className="d-block w-100"
           alt="Bekey"
         />
-        <Carousel.Caption>
-          <h3>Events & Projects Coordinator</h3>
-        </Carousel.Caption>
       </Carousel.Item>
       <Carousel.Item>
         <img
@@ -209,9 +322,6 @@ function CarouselComp() {
           className="d-block w-100"
           alt="theresa"
         />
-        <Carousel.Caption>
-          <h3 className="">Director of Outreach </h3>
-        </Carousel.Caption>
       </Carousel.Item>
       <Carousel.Item>
         <img
@@ -219,9 +329,6 @@ function CarouselComp() {
           className="d-block w-100"
           alt="kenny"
         />
-        <Carousel.Caption>
-          <h3>Student Volunteer</h3>
-        </Carousel.Caption>
       </Carousel.Item>
     </Carousel>
   );
