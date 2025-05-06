@@ -10,6 +10,7 @@ import ArrivalsPopup from "../components/ArrivalsPopup";
 import ManageArrivalsPopup from "../components/ManageArrivalsPopup";
 import Department from "../components/Department";
 import { exitingData } from "../data/TransferData";
+import ReadyToExitPopup from "../components/ReadyToExitPopup";
 
 function Game() {
   const { lobby } = useParams();
@@ -417,6 +418,7 @@ function Game() {
         round={round}
         renderHour={renderHour}
         game={game}
+        setGame={setGame}
       />
       <ScoreCardModal
         scoreCard={scoreCard}
@@ -677,49 +679,49 @@ function SettingsModal(props) {
   );
 }
 
-function ReadyToExitPopup({
-  show,
-  onHide,
-  round,
-  renderHour,
-  isCurrentDepartment,
-}) {
-  const arrivalSources = [
-    "Outside",
-    "Welcome",
-    "Session",
-    "Interview",
-    "GreatHall",
-  ];
-  const { activeUser } = useContext(AppContext);
-  const getRand = () => {
-    return Math.floor(Math.random() * 5);
-  };
+// function ReadyToExitPopup({
+//   show,
+//   onHide,
+//   round,
+//   renderHour,
+//   isCurrentDepartment,
+// }) {
+//   const arrivalSources = [
+//     "Outside",
+//     "Welcome",
+//     "Session",
+//     "Interview",
+//     "GreatHall",
+//   ];
+//   const { activeUser } = useContext(AppContext);
+//   const getRand = () => {
+//     return Math.floor(Math.random() * 5);
+//   };
 
-  return (
-    <Modal show={show} onHide={onHide} centered>
-      <Modal.Header closeButton>
-        <Modal.Title>
-          Manage Ready to Exit Students - {renderHour(round)}
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        {arrivalSources.map((source) => {
-          if (source !== "Outside" && isCurrentDepartment(source)) return null;
+//   return (
+//     <Modal show={show} onHide={onHide} centered>
+//       <Modal.Header closeButton>
+//         <Modal.Title>
+//           Manage Ready to Exit Students - {renderHour(round)}
+//         </Modal.Title>
+//       </Modal.Header>
+//       <Modal.Body>
+//         {arrivalSources.map((source) => {
+//           if (source !== "Outside" && isCurrentDepartment(source)) return null;
 
-          return (
-            <div key={source} className="row align-items-center mb-2">
-              <div className="col">
-                <strong>{source}: </strong>
-                {getRand()}
-              </div>
-            </div>
-          );
-        })}
-      </Modal.Body>
-    </Modal>
-  );
-}
+//           return (
+//             <div key={source} className="row align-items-center mb-2">
+//               <div className="col">
+//                 <strong>{source}: </strong>
+//                 {getRand()}
+//               </div>
+//             </div>
+//           );
+//         })}
+//       </Modal.Body>
+//     </Modal>
+//   );
+// }
 
 // RoundOverlay.jsx
 import { AnimatePresence, motion } from "framer-motion";
