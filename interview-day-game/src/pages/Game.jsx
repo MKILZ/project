@@ -9,6 +9,7 @@ import EndOfRoundStats from "../components/EndOfRoundStats";
 import ArrivalsPopup from "../components/ArrivalsPopup";
 import ManageArrivalsPopup from "../components/ManageArrivalsPopup";
 import Department from "../components/Department";
+import { exitingData } from "../data/TransferData";
 
 function Game() {
   const { lobby } = useParams();
@@ -33,11 +34,15 @@ function Game() {
       tables: 16,
       students: 14,
       volunteers: 14,
-      exits: 1,
-      exiting: 0,
       staffNotAvailable: 1,
       extraStaff: 0,
-      studentsWaiting: 4,
+      outsideQueue: 0,
+      exitingTo: {
+        Session: 0,
+        Interview: 0,
+        Welcome: 0,
+        Exit: 0
+      }
     },
     Session: {
       tables: 8,
@@ -48,6 +53,13 @@ function Game() {
       staffNotAvailable: 2,
       extraStaff: 0,
       studentsWaiting: 2,
+      outsideQueue: 0,
+      exitingTo: {
+        Welcome: 0,
+        Interview: 0,
+        GreatHall: 0,
+        Exit: 0
+      }
     },
     Interview: {
       tables: 4,
@@ -58,6 +70,13 @@ function Game() {
       staffNotAvailable: 3,
       extraStaff: 0,
       studentsWaiting: 3,
+      outsideQueue: 0,
+      exitingTo: {
+        Session: 0,
+        Welcome: 0,
+        GreatHall: 0,
+        Exit: 0
+      }
     },
     Welcome: {
       tables: 12,
@@ -67,7 +86,14 @@ function Game() {
       exiting: 0,
       staffNotAvailable: 1,
       extraStaff: 0,
-      studentsWaiting: 1,
+      studentsWaiting: 0,
+      outsideQueue: 0,
+      exitingTo: {
+        Session: 0,
+        Interview: 0,
+        GreatHall: 0,
+        Exit: 0
+      }
     },
   });
 
@@ -232,6 +258,41 @@ function Game() {
   }, [lobby]);
 
   useEffect(() => {
+    const departments = ["Welcome", "Session", "Interview", "GreatHall"];
+
+    setGame((prevGame) => {
+      const updatedGame = { ...prevGame };
+  
+      departments.forEach((dept) => {
+        const roundExits = exitingData[dept]?.[round] || {
+          Welcome: 0,
+          Session: 0,
+          Interview: 0,
+          GreatHall: 0,
+          Exit: 0,
+        };
+
+        const newOutside = arrivalsData[dept]?.[round] || 0;
+  
+        updatedGame[dept] = {
+          ...updatedGame[dept],
+
+          outsideQueue: (updatedGame[dept].outsideQueue || 0) + newOutside,
+          studentsWaiting: (updatedGame[dept].studentsWaiting || 0) + newOutside,
+          
+          exitingTo: {
+            Welcome: (updatedGame[dept].exitingTo?.Welcome || 0) + (roundExits.Welcome || 0),
+            Session: (updatedGame[dept].exitingTo?.Session || 0) + (roundExits.Session || 0),
+            Interview: (updatedGame[dept].exitingTo?.Interview || 0) + (roundExits.Interview || 0),
+            GreatHall: (updatedGame[dept].exitingTo?.GreatHall || 0) + (roundExits.GreatHall || 0),
+            Exit: (updatedGame[dept].exitingTo?.Exit || 0) + (roundExits.Exit || 0),
+          },
+        };
+      });
+  
+      return updatedGame;
+    });
+
     if (round >= 12) {
       console.log("Game Over");
       setEndOfRoundStats(true);
@@ -254,7 +315,7 @@ function Game() {
   }, [round]);
 
   useEffect(() => {
-    if (round === 0) return; // skip the first render
+    if (round === 0) return; // skip the first round render
     
     console.log("Capturing stats at the end of round", round - 1);
   
@@ -345,6 +406,7 @@ function Game() {
         round={round}
         renderHour={renderHour}
         game={game}
+        setGame={setGame}
         lobby={lobby}
         channel={channel}
       />

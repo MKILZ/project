@@ -3,11 +3,10 @@ function Department({
   tables,
   students,
   volunteers,
-  exits,
-  exiting,
   staffNotAvailable,
   extraStaff,
   studentsWaiting,
+  exitingTo,
   isCurrent,
 }) {
   // Distribute students and volunteers across tables
@@ -47,16 +46,21 @@ function Department({
         ))}
       </div>
       <div className="d-flex justify-content-between  mt-2">
-        <div className="mt-2 small">
-          <div>
-            Exit: {exiting} / {exits}
-          </div>
-          <div>Extra Volunteers: {extraStaff}</div>
-          <div>Students Waiting: {studentsWaiting}</div>
-          <div>Staff Not Available: {staffNotAvailable}</div>
-          <div>Total Students: {students}</div>
-          <div>Total Volunteers: {volunteers}</div>
-        </div>
+      <div className="mt-2 small">
+        <div>Extra Volunteers: {extraStaff}</div>
+        <div>Staff Not Available: {staffNotAvailable}</div>
+        <div>Total Students: {students}</div>
+        <div>Total Volunteers: {volunteers}</div>
+
+        <div className="mt-2 fw-bold">Exiting To:</div>
+        {Object.entries(exitingTo)
+          .filter(([destination]) => destination !== name) // name is the current department
+          .map(([destination, count]) => (
+            <div key={destination}>
+              → {destination}: {count}
+            </div>
+        ))}
+      </div>
         <div>
           <div className="students-waiting-box mt-2 p-2">
             <div className="fw-bold small mb-1">Students Waiting</div>
