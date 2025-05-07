@@ -42,8 +42,8 @@ function Game() {
         Session: 0,
         Interview: 0,
         Welcome: 0,
-        Exit: 0
-      }
+        Exit: 0,
+      },
     },
     Session: {
       tables: 8,
@@ -59,8 +59,8 @@ function Game() {
         Welcome: 0,
         Interview: 0,
         GreatHall: 0,
-        Exit: 0
-      }
+        Exit: 0,
+      },
     },
     Interview: {
       tables: 4,
@@ -76,8 +76,8 @@ function Game() {
         Session: 0,
         Welcome: 0,
         GreatHall: 0,
-        Exit: 0
-      }
+        Exit: 0,
+      },
     },
     Welcome: {
       tables: 12,
@@ -93,8 +93,8 @@ function Game() {
         Session: 0,
         Interview: 0,
         GreatHall: 0,
-        Exit: 0
-      }
+        Exit: 0,
+      },
     },
   });
 
@@ -120,7 +120,7 @@ function Game() {
     becky: "Welcome",
     adam: "Session",
     theresa: "Interview",
-    kenny: "Great Hall", // greathall or lunch??
+    kenny: "Great Hall",
   };
 
   const currentDept = characterToDept[activeUser.character];
@@ -263,7 +263,7 @@ function Game() {
 
     setGame((prevGame) => {
       const updatedGame = { ...prevGame };
-  
+
       departments.forEach((dept) => {
         const roundExits = exitingData[dept]?.[round] || {
           Welcome: 0,
@@ -274,23 +274,33 @@ function Game() {
         };
 
         const newOutside = arrivalsData[dept]?.[round] || 0;
-  
+
         updatedGame[dept] = {
           ...updatedGame[dept],
 
           outsideQueue: (updatedGame[dept].outsideQueue || 0) + newOutside,
-          studentsWaiting: (updatedGame[dept].studentsWaiting || 0) + newOutside,
-          
+          studentsWaiting:
+            (updatedGame[dept].studentsWaiting || 0) + newOutside,
+
           exitingTo: {
-            Welcome: (updatedGame[dept].exitingTo?.Welcome || 0) + (roundExits.Welcome || 0),
-            Session: (updatedGame[dept].exitingTo?.Session || 0) + (roundExits.Session || 0),
-            Interview: (updatedGame[dept].exitingTo?.Interview || 0) + (roundExits.Interview || 0),
-            GreatHall: (updatedGame[dept].exitingTo?.GreatHall || 0) + (roundExits.GreatHall || 0),
-            Exit: (updatedGame[dept].exitingTo?.Exit || 0) + (roundExits.Exit || 0),
+            Welcome:
+              (updatedGame[dept].exitingTo?.Welcome || 0) +
+              (roundExits.Welcome || 0),
+            Session:
+              (updatedGame[dept].exitingTo?.Session || 0) +
+              (roundExits.Session || 0),
+            Interview:
+              (updatedGame[dept].exitingTo?.Interview || 0) +
+              (roundExits.Interview || 0),
+            GreatHall:
+              (updatedGame[dept].exitingTo?.GreatHall || 0) +
+              (roundExits.GreatHall || 0),
+            Exit:
+              (updatedGame[dept].exitingTo?.Exit || 0) + (roundExits.Exit || 0),
           },
         };
       });
-  
+
       return updatedGame;
     });
 
@@ -493,9 +503,9 @@ function Actions({
       setGame((prev) => {
         return {
           ...prev,
-          Lunch: {
-            ...prev.Lunch,
-            volunteers: prev.Lunch.volunteers + 1,
+          GreatHall: {
+            ...prev.GreatHall,
+            volunteers: prev.GreatHall.volunteers + 1,
           },
         };
       });
