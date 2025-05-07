@@ -298,7 +298,7 @@ function Game() {
       console.log("Game Over");
       setEndOfRoundStats(true);
     } else {
-      setArrivalsPopup(true)
+      setArrivalsPopup(true);
       setShowRoundOverlay(round);
       const timeout = setTimeout(() => {
         setShowRoundOverlay(null);
@@ -316,10 +316,9 @@ function Game() {
   }, [round]);
 
   useEffect(() => {
-    if (round === 0) return; // skip the first round render
-    
+    if (round === 0) return; // skip the first round rende
     console.log("Capturing stats at the end of round", round - 1);
-  
+
     setStatsLog((prev) => [
       ...prev,
       {
@@ -327,22 +326,34 @@ function Game() {
         Welcome: {
           studentsWaiting: game.Welcome.studentsWaiting,
           volunteers: game.Welcome.volunteers,
-          extraHours: Math.max(0, game.Welcome.volunteers - startingVolunteers.Welcome),
+          extraHours: Math.max(
+            0,
+            game.Welcome.volunteers - startingVolunteers.Welcome
+          ),
         },
         Session: {
           studentsWaiting: game.Session.studentsWaiting,
           volunteers: game.Session.volunteers,
-          extraHours: Math.max(0, game.Session.volunteers - startingVolunteers.Session),
+          extraHours: Math.max(
+            0,
+            game.Session.volunteers - startingVolunteers.Session
+          ),
         },
         Interview: {
           studentsWaiting: game.Interview.studentsWaiting,
           volunteers: game.Interview.volunteers,
-          extraHours: Math.max(0, game.Interview.volunteers - startingVolunteers.Interview),
+          extraHours: Math.max(
+            0,
+            game.Interview.volunteers - startingVolunteers.Interview
+          ),
         },
         GreatHall: {
           studentsWaiting: game.GreatHall.studentsWaiting,
           volunteers: game.GreatHall.volunteers,
-          extraHours: Math.max(0, game.GreatHall.volunteers - startingVolunteers.GreatHall),
+          extraHours: Math.max(
+            0,
+            game.GreatHall.volunteers - startingVolunteers.GreatHall
+          ),
         },
       },
     ]);
@@ -376,7 +387,7 @@ function Game() {
         <Board currentDept={currentDept} game={game}></Board>
       </div>
       {/* Right: Player Panel */}
-      <div className="w-25 d-flex flex-column align-items-center gap-3 p-3">
+      <div className="w-25 d-flex flex-column align-items-center gap-3 p-3 bg-white rounded-5 m-3">
         <h2>{renderHour(round)}</h2>
         <h4 className="text-center">Your Station</h4>
         <Actions
@@ -428,8 +439,8 @@ function Game() {
       <EndOfRoundStats
         show={endOfRoundStats}
         onHide={() => setEndOfRoundStats(false)}
-        statsLog = {statsLog}
-        />
+        statsLog={statsLog}
+      />
     </div>
   );
 }
@@ -743,4 +754,3 @@ function RoundOverlay({ round, renderHour }) {
     </AnimatePresence>
   );
 }
-
