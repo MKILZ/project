@@ -10,6 +10,7 @@ function ManageArrivalsPopup({
   round,
   renderHour,
   game,
+  setGame,
   lobby,
   channel,
 }) {
@@ -35,23 +36,47 @@ function ManageArrivalsPopup({
 
   const currentDept = characterToDept[activeUser.character];
 
-  const maxOutside = arrivalsData[currentDept]?.[round] ?? 0;
+  const maxArrivalsAllowed = Math.max(
+    (game[currentDept]?.volunteers || 0) - (game[currentDept]?.students || 0),
+    0
+  );
+
+  //const maxOutside = arrivalsData[currentDept]?.[round] ?? 0;
+  const maxOutside = game[currentDept]?.outsideQueue ?? 0;
   const [outsideMax, setOutsideMax] = useState(maxOutside);
 
   useEffect(() => {
-    const updatedMax = arrivalsData[currentDept]?.[round] ?? 0;
+    const updatedMax = game[currentDept]?.outsideQueue ?? 0;
     setOutsideMax(updatedMax);
-  }, [round, currentDept]);
+  }, [round, currentDept, game]);
 
   //get random number for each other department arrivals
-  const initialMaxInternal = {
-    Welcome: activeUser.character !== "becky" ? getRand() : 0,
-    Session: activeUser.character !== "adam" ? getRand() : 0,
-    Interview: activeUser.character !== "theresa" ? getRand() : 0,
-    GreatHall: activeUser.character !== "kenny" ? getRand() : 0,
+  // const initialMaxInternal = {
+  //   Welcome: activeUser.character !== "becky" ? getRand() : 0,
+  //   Session: activeUser.character !== "adam" ? getRand() : 0,
+  //   Interview: activeUser.character !== "theresa" ? getRand() : 0,
+  //   GreatHall: activeUser.character !== "kenny" ? getRand() : 0,
+  // };
+
+  const internalSources = ["Welcome", "Session", "Interview", "GreatHall"];
+
+  const getInternalMaxFromGame = () => {
+    const maxes = {};
+    internalSources.forEach((source) => {
+      if (source !== currentDept) {
+        maxes[source] = game[source]?.exitingTo?.[currentDept] ?? 0;
+      }
+    });
+    return maxes;
   };
 
-  const [internalMax, setInternalMax] = useState(initialMaxInternal);
+  const [internalMax, setInternalMax] = useState(getInternalMaxFromGame());
+
+  useEffect(() => {
+    setInternalMax(getInternalMaxFromGame());
+  }, [game, round]);
+
+  //const [internalMax, setInternalMax] = useState(initialMaxInternal);
 
   //get num selected from each department
   const [selected, setSelected] = useState({
@@ -62,39 +87,13 @@ function ManageArrivalsPopup({
     GreatHall: 0,
   });
 
-  //FIX THIS
-  //get the max number of students each department can accept
-  {
-    /* 
-    const maxArrivalsAllowed = Math.max(
-      game[currentDept].volunteers - game[currentDept].students, 0
-    );
-    */
-  }
-
   const increment = (source, maxVal) => {
     setSelected((prev) => {
-      const newValue = prev[source] + 1;
-      const updatedTotal = totalNumAccpeted + 1;
+      const currentTotal = Object.values(prev).reduce((a, b) => a + b, 0);
+      if (currentTotal >= maxArrivalsAllowed) return prev;
 
-      //check if the new value is greater than the max value
-      {
-        /*
-        return {
-          ...prev,
-          [source]:
-            newValue > maxVal || updatedTotal > maxArrivalsAllowed
-              ? prev[source]
-              : newValue,
-        };
-        */
-      }
-      //check if the new value is greater than the max value
-      return {
-        ...prev,
-        //make sure it doesn't go above the max
-        [source]: newValue > maxVal ? maxVal : newValue,
-      };
+      const newValue = Math.min(prev[source] + 1, maxVal);
+      return { ...prev, [source]: newValue };
     });
   };
 
@@ -144,8 +143,6 @@ function ManageArrivalsPopup({
       }
     });
 
-    //update the outside value
-    const newOutsideMax = Math.max(outsideMax - selected["Outside"], 0);
 
     //send the selected values to the game via socket
     const totalAccepted = Object.values(selected).reduce(
@@ -156,35 +153,46 @@ function ManageArrivalsPopup({
     //make sure we have enough room
     const newTotalStudents = game[currentDept].students + totalAccepted;
 
-    if (newTotalStudents > game[currentDept].tables) {
-      alert("Not enough tables for all students!");
-      return;
-    }
-
     if (newTotalStudents > game[currentDept].volunteers) {
       alert("Not enough volunteers for all students!");
       return;
     }
 
-    //   supabase.channel(lobby + "changes").send({
-    //     type: "broadcast",
-    //     event: "manage_arrivals",
-    //     payload: {
-    //         department: currentDept,
-    //         newStudents: game[currentDept].students + totalAccepted,
-    //     },
-    //   });
+    setGame((prev) => {
+      const newGame = { ...prev };
+    
+      // Add students to the current department
+      newGame[currentDept].students += totalAccepted;
+    
+      // Subtract transferred students from source departments
+      Object.keys(selected).forEach((key) => {
+        if (key !== "Outside") {
+          newGame[key].exitingTo[currentDept] -= selected[key];
+          newGame[key].students -= selected[key]; // ✅ FIX: remove students from source
+        }
+      });
+    
+      // Update the outside queue
+      newGame[currentDept].outsideQueue = Math.max(
+        newGame[currentDept].outsideQueue - selected["Outside"],
+        0
+      );
+    
+      return newGame;
+    });
+
     channel.send({
       type: "broadcast",
       event: "manage_arrivals",
       payload: {
         department: currentDept,
-        newStudents: game[currentDept].students + totalAccepted,
+        newStudents: game[currentDept].students,
       },
     });
 
     //reset the accepted arrival counts
     setInternalMax(newInternalMax);
+    const newOutsideMax = Math.max(outsideMax - selected["Outside"], 0);
     setOutsideMax(newOutsideMax);
 
     setSelected({
@@ -205,8 +213,8 @@ function ManageArrivalsPopup({
       </Modal.Header>
       <Modal.Body>
         <div className="mb-3">
-          <strong>Max Students Allowed to Arrive: 3</strong>
-          {/*{maxArrivalsAllowed}*/}
+          <strong>Max Students Allowed to Arrive: </strong>
+          {maxArrivalsAllowed}
         </div>
 
         <div className="row fw-bold mb-2">
