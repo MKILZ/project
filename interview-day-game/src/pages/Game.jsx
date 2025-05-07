@@ -98,6 +98,34 @@ function Game() {
     },
   });
 
+  const [incomingsToWelcome, setIncomingsToWelcome] = useState({
+    Outside: 0,
+  });
+
+  const [incomingsToSession, setIncomingsToSession] = useState([
+    {
+      Outside: 0,
+      Welcome: 0,
+    },
+  ]);
+
+  const [incomingsToInterview, setIncomingsToInterview] = useState([
+    {
+      Outside: 0,
+      Session: 0,
+      Welcome: 0,
+    },
+  ]);
+
+  const [incomingsToLunch, setIncomingsToLunch] = useState([
+    {
+      Outside: 0,
+      Welcome: 0,
+      Session: 0,
+      Interview: 0,
+    },
+  ]);
+
   //have to change this if we update number of volunteers in each department
   //needed for stats calculations
   const [startingVolunteers] = useState({
@@ -116,6 +144,39 @@ function Game() {
     },
   ]);
 
+  const [diversions, setDiversions] = useState([0]);
+
+  const [welcomeExtraVolunteers, setWelcomeExtraVolunteers] = useState([
+    {
+      volunteersOff: 0,
+      extraVolunteers: 0,
+      requestedVolunteers: 0,
+    },
+  ]);
+
+  const [sessionExtraVolunteers, setSessionExtraVolunteers] = useState([
+    {
+      volunteersOff: 0,
+      extraVolunteers: 0,
+      requestedVolunteers: 0,
+    },
+  ]);
+
+  const [interviewExtraVolunteers, setInterviewExtraVolunteers] = useState([
+    {
+      volunteersOff: 0,
+      extraVolunteers: 0,
+      requestedVolunteers: 0,
+    },
+  ]);
+
+  const [lunchExtraVolunteers, setLunchExtraVolunteers] = useState([
+    {
+      volunteersOff: 0,
+      extraVolunteers: 0,
+      requestedVolunteers: 0,
+    },
+  ]);
   const characterToDept = {
     becky: "Welcome",
     adam: "Session",
@@ -161,6 +222,79 @@ function Game() {
       type: "broadcast",
       event: "increase-round",
       payload: {},
+    });
+  }
+
+  function endOfRoundClientUpdate(sender) {
+    if (sender == "welcome") {
+      setWelcomeExtraVolunteers((prev) => [
+        {
+          ...prev[0],
+          extraVolunteers:
+            prev[0].extraVolunteers + prev[0].requestedVolunteers,
+          requestedVolunteers: 0,
+        },
+      ]);
+    } else if (sender == "session") {
+      setSessionExtraVolunteers((prev) => [
+        {
+          ...prev[0],
+          extraVolunteers:
+            prev[0].extraVolunteers + prev[0].requestedVolunteers,
+          requestedVolunteers: 0,
+        },
+      ]);
+    } else if (sender == "interview") {
+      setInterviewExtraVolunteers((prev) => [
+        {
+          ...prev[0],
+          extraVolunteers:
+            prev[0].extraVolunteers + prev[0].requestedVolunteers,
+          requestedVolunteers: 0,
+        },
+      ]);
+    } else if (sender == "lunch") {
+      setLunchExtraVolunteers((prev) => [
+        {
+          ...prev[0],
+          extraVolunteers:
+            prev[0].extraVolunteers + prev[0].requestedVolunteers,
+          requestedVolunteers: 0,
+        },
+      ]);
+    }
+
+    channel.send({
+      type: "broadcast",
+      event: "round-update-" + sender,
+      payload: payload,
+    });
+  }
+
+  function endOfRoundHostUpdate() {
+    const process = (area) => {
+      return [
+        {
+          ...area[0],
+          extraVolunteers:
+            area[0].extraVolunteers + area[0].requestedVolunteers,
+          requestedVolunteers: 0,
+        },
+      ];
+    };
+
+    const payload = {
+      welcomeExtraVolunteers: process(welcomeExtraVolunteers),
+      sessionExtraVolunteers: process(sessionExtraVolunteers),
+      interviewExtraVolunteers: process(interviewExtraVolunteers),
+      lunchExtraVolunteers: process(lunchExtraVolunteers),
+      diversions: diversions,
+    };
+
+    channel.send({
+      type: "broadcast",
+      event: "end-of-round-update",
+      payload: payload,
     });
   }
 
@@ -255,6 +389,37 @@ function Game() {
           students: newStudents,
         },
       }));
+    });
+
+    channel.on("broadcast", { event: "end-of-round-update" }, (payload) => {
+      setWelcomeExtraVolunteers(payload.payload.welcomeExtraVolunteers),
+        setSessionExtraVolunteers(payload.payload.sessionExtraVolunteers),
+        setInterviewExtraVolunteers(payload.payload.interviewExtraVolunteers),
+        setLunchExtraVolunteers(payload.payload.lunchExtraVolunteers);
+    });
+
+    channel.on("broadcast", { event: "round-update-welcome" }, (payload) => {
+      if (activeUser.role == "Host") {
+        setWelcomeExtraVolunteers(payload.payload.welcomeExtraVolunteers);
+      }
+    });
+
+    channel.on("broadcast", { event: "round-update-session" }, (payload) => {
+      if (activeUser.role == "Host") {
+        setSessionExtraVolunteers(payload.payload.sessionExtraVolunteers);
+      }
+    });
+
+    channel.on("broadcast", { event: "round-update-interview" }, (payload) => {
+      if (activeUser.role == "Host") {
+        setInterviewExtraVolunteers(payload.payload.interviewExtraVolunteers);
+      }
+    });
+
+    channel.on("broadcast", { event: "round-update-lunch" }, (payload) => {
+      if (activeUser.role == "Host") {
+        setLunchExtraVolunteers(payload.payload.lunchExtraVolunteers);
+      }
     });
   }, [lobby]);
 
@@ -474,7 +639,7 @@ function Actions({
         ...game,
         Welcome: {
           ...game.Welcome,
-          volunteers: game.Welcome.volunteers + 1,
+          requestedVolunteers: game.Welcome.requestedVolunteers + 1,
         },
       };
       setGame(local);
@@ -495,7 +660,7 @@ function Actions({
           ...prev,
           Interview: {
             ...prev.Interview,
-            volunteers: prev.Interview.volunteers + 1,
+            requestedVolunteers: prev.Interview.requestedVolunteers + 1,
           },
         };
       });
