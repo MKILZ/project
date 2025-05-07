@@ -8,9 +8,9 @@ import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import "../index.css";
 
-function Home() {
+export default function Home() {
   const navigate = useNavigate();
-  const [userName, setUserName] = useState();
+  const [userName, setUserName] = useState("");
   const [createModelShow, setCreateModelShow] = useState(false);
   const [settingsModalShow, setSettingsModalShow] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -114,9 +114,9 @@ function Home() {
   );
 }
 
-export default Home;
+// export default Home;
 
-function SettingsModal(props) {
+export function SettingsModal(props) {
   const { session, setSession } = useContext(AppContext);
   return (
     <Modal
