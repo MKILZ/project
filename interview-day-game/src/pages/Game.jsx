@@ -16,6 +16,7 @@ function Game() {
   const [arrivalsPopup, setArrivalsPopup] = useState(false);
   const [manageArrivalsPopup, setManageArrivalsPopup] = useState(false);
   const [readyToExitPopup, setReadyToExitPopup] = useState(false);
+  const [randomEventPopup, setRandomEventPopup] = useState(false);
   const [round, setRound] = useState(0);
    {/* Hard coding data for each room */}
   const [game, setGame] = useState({
@@ -237,6 +238,12 @@ function Game() {
         scoreCard={scoreCard}
         show={scoreCardModal}
         onHide={() => setScoreCardModal(false)}
+      />
+      <RandomEventPopup
+        round = {round}
+        show={randomEventPopupPopup}
+        onHide={() => setRandomEventPopup(false)}
+        renderHour={renderHour}
       />
     </div>
   );
@@ -861,5 +868,28 @@ function ReadyToExitPopup({ show, onHide, round, renderHour }) {
       </Modal.Body>
       </Modal>
 
+  );
+}
+
+function RandomEventPopup({ show, onHide, round, renderHour }) {
+  return (
+    <Modal show={show} onHide={onHide} centered>
+      <Modal.Header closeButton>
+        <Modal.Title>Event! - {renderHour(round)}</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <p>New students or parents have arrived!</p>
+        <p> Welcome: {arrivalsData.Welcome[round]} </p>
+        <p> Presentations: {arrivalsData.Presentations[round]} </p>
+        <p> Interview: {arrivalsData.Interview[round]} </p>
+        <p> Lunch: {arrivalsData.Lunch[round]} </p>
+        {/* You can add any custom info or logic here */}
+      </Modal.Body>
+      <Modal.Footer>
+        <button className="btn btn-primary" onClick={onHide}>
+          Continue
+        </button>
+      </Modal.Footer>
+    </Modal>
   );
 }
