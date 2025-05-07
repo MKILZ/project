@@ -418,7 +418,6 @@ function Game() {
       />
       <ArrivalsPopup
         round={round}
-        round={round}
         show={arrivalsPopup}
         onHide={() => setArrivalsPopup(false)}
         renderHour={renderHour}
