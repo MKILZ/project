@@ -482,9 +482,9 @@ function Actions({
     } else if (character === "adam") {
       const local = {
         ...game,
-        Presentations: {
-          ...game.Presentations,
-          volunteers: game.Presentations.volunteers + 1,
+        Session: {
+          ...game.Session,
+          volunteers: game.Session.volunteers + 1,
         },
       };
       setGame(local);
@@ -584,7 +584,7 @@ function Actions({
             className="btn btn-pressable btn-secondary w-100"
             onClick={() => setReadyToExitPopup(true)}
           >
-            Ready to Exit
+            Manage Exits
           </button>
         </>
       )}
@@ -699,50 +699,6 @@ function SettingsModal(props) {
     </Modal>
   );
 }
-
-// function ReadyToExitPopup({
-//   show,
-//   onHide,
-//   round,
-//   renderHour,
-//   isCurrentDepartment,
-// }) {
-//   const arrivalSources = [
-//     "Outside",
-//     "Welcome",
-//     "Session",
-//     "Interview",
-//     "GreatHall",
-//   ];
-//   const { activeUser } = useContext(AppContext);
-//   const getRand = () => {
-//     return Math.floor(Math.random() * 5);
-//   };
-
-//   return (
-//     <Modal show={show} onHide={onHide} centered>
-//       <Modal.Header closeButton>
-//         <Modal.Title>
-//           Manage Ready to Exit Students - {renderHour(round)}
-//         </Modal.Title>
-//       </Modal.Header>
-//       <Modal.Body>
-//         {arrivalSources.map((source) => {
-//           if (source !== "Outside" && isCurrentDepartment(source)) return null;
-
-//           return (
-//             <div key={source} className="row align-items-center mb-2">
-//               <div className="col">
-//                 <strong>{source}: </strong>
-//                 {getRand()}
-//               </div>
-//             </div>
-//           );
-//         })}
-//       </Modal.Body>
-//     </Modal>
-//   );
-// }
 
 // RoundOverlay.jsx
 import { AnimatePresence, motion } from "framer-motion";

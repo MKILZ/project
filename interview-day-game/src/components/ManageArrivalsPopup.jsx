@@ -31,7 +31,7 @@ function ManageArrivalsPopup({
     becky: "Welcome",
     adam: "Session",
     theresa: "Interview",
-    kenny: "GreatHall", // greathall or lunch??
+    kenny: "GreatHall", 
   };
 
   const currentDept = characterToDept[activeUser.character];
@@ -41,7 +41,11 @@ function ManageArrivalsPopup({
     0
   );
 
-  //const maxOutside = arrivalsData[currentDept]?.[round] ?? 0;
+  const fakeMaxArrivals = Math.max(
+    (game[currentDept]?.tables || 0) - (game[currentDept]?.students || 0),
+    0
+  );
+
   const maxOutside = game[currentDept]?.outsideQueue ?? 0;
   const [outsideMax, setOutsideMax] = useState(maxOutside);
 
@@ -49,14 +53,6 @@ function ManageArrivalsPopup({
     const updatedMax = game[currentDept]?.outsideQueue ?? 0;
     setOutsideMax(updatedMax);
   }, [round, currentDept, game]);
-
-  //get random number for each other department arrivals
-  // const initialMaxInternal = {
-  //   Welcome: activeUser.character !== "becky" ? getRand() : 0,
-  //   Session: activeUser.character !== "adam" ? getRand() : 0,
-  //   Interview: activeUser.character !== "theresa" ? getRand() : 0,
-  //   GreatHall: activeUser.character !== "kenny" ? getRand() : 0,
-  // };
 
   const internalSources = ["Welcome", "Session", "Interview", "GreatHall"];
 
@@ -75,8 +71,6 @@ function ManageArrivalsPopup({
   useEffect(() => {
     setInternalMax(getInternalMaxFromGame());
   }, [game, round]);
-
-  //const [internalMax, setInternalMax] = useState(initialMaxInternal);
 
   //get num selected from each department
   const [selected, setSelected] = useState({
@@ -213,8 +207,8 @@ function ManageArrivalsPopup({
       </Modal.Header>
       <Modal.Body>
         <div className="mb-3">
-          <strong>Max Students Allowed to Arrive: </strong>
-          {maxArrivalsAllowed}
+          <strong>Number of empty rooms: </strong>
+          {fakeMaxArrivals}
         </div>
 
         <div className="row fw-bold mb-2">
