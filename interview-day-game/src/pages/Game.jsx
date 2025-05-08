@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
 import { arrivalsData } from "../data/ArrivalsData";
 import { Presentation } from "lucide-react";
+import{randomEventsData} from "../data/RandomEventsData";
 
 function Game() {
   const { lobby } = useParams();
@@ -18,6 +19,8 @@ function Game() {
   const [readyToExitPopup, setReadyToExitPopup] = useState(false);
   const [randomEventPopup, setRandomEventPopup] = useState(false);
   const [round, setRound] = useState(0);
+  const [eventTriggered, setEventTriggered] = useState(false);
+  const [randomEventIndex, setRandomEventIndex] = useState(0);
    {/* Hard coding data for each room */}
   const [game, setGame] = useState({
     Lunch: {
@@ -88,6 +91,16 @@ function Game() {
     });
   }
 
+//   function eventOccurs(){
+//     // Host triggers event
+//   channel.send({
+//     type: "broadcast",
+//     event: "random-event",
+//     payload: { triggeredAt: round }
+// });
+
+
+
   useEffect(() => {
     if (!activeUser) {
       // navigate("/");
@@ -148,15 +161,54 @@ function Game() {
       });
       console.log(round);
     });
+    channel.on('broadcast', { event: 'random-event' }, (payload) => {
+      // setRandomEventIndex(() => {
+      //   return Math.floor(Math.random() * randomEventsData.length);
+      // });
+      setRandomEventIndex(payload.payload.index);
+      console.log("Random event index: " + randomEventIndex);
+      // setRandomEventPopup(true);
+    });
   }, [lobby]);
+
  {/* There are only 12 rounds in a game so greater than 12 is game over
   and each player gets their personalized stats breakdown */}
   useEffect(() => {
     if (round > 12) {
       alert("Game Over");
     }
-    setArrivalsPopup(true)
+    else if (round === 2) {
+      setArrivalsPopup(false)
+    }
+     else{
+      setArrivalsPopup(true)
+    }
+   
   }, [round]);
+
+  useEffect(() => {
+    if (round === 2 && !eventTriggered) {
+      setEventTriggered(true);
+  
+      if (activeUser.role === "Host") {
+        const randomIndex = Math.floor(Math.random() * 5);
+        console.log("Random index chosen by host:", randomIndex);  // should show different values over games
+        
+  
+        channel.send({
+          type: "broadcast",
+          event: "random-event",
+          payload: { index: randomIndex }
+        });
+      }
+      // setRandomEventPopup(true);
+    }
+  }, [round, eventTriggered, activeUser]);
+  useEffect(() => {
+    if (randomEventIndex !== null && round === 2) {
+      setRandomEventPopup(true);
+    }
+  }, [randomEventIndex, round]);
  {/* Hard coding the rounds which are times in 30 min increments */}
   const renderHour = useCallback((round) => {
     const time = [
@@ -204,6 +256,7 @@ function Game() {
       <Actions
         updateBoard={updateBoard}
         increaseRound={increaseRound}
+        // eventOccurs={eventOccurs}
         game={game}
         setGame={setGame}
         setManageArrivalsPopup={setManageArrivalsPopup}
@@ -241,9 +294,10 @@ function Game() {
       />
       <RandomEventPopup
         round = {round}
-        show={randomEventPopupPopup}
+        show={randomEventPopup}
         onHide={() => setRandomEventPopup(false)}
         renderHour={renderHour}
+        eventIndex={randomEventIndex}
       />
     </div>
   );
@@ -871,19 +925,23 @@ function ReadyToExitPopup({ show, onHide, round, renderHour }) {
   );
 }
 
-function RandomEventPopup({ show, onHide, round, renderHour }) {
+function RandomEventPopup({ show, onHide, round, renderHour, eventIndex }) {
+  // const getRand = () => {
+  //   return Math.floor(Math.random() * 5);
+  // }
+  // const eventRound = getRand();
   return (
     <Modal show={show} onHide={onHide} centered>
       <Modal.Header closeButton>
         <Modal.Title>Event! - {renderHour(round)}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <p>New students or parents have arrived!</p>
-        <p> Welcome: {arrivalsData.Welcome[round]} </p>
-        <p> Presentations: {arrivalsData.Presentations[round]} </p>
-        <p> Interview: {arrivalsData.Interview[round]} </p>
-        <p> Lunch: {arrivalsData.Lunch[round]} </p>
-        {/* You can add any custom info or logic here */}
+        {/* <p> {randomEventsData[eventIndex]} </p> */}
+        <p>
+          {eventIndex !== null && eventIndex >= 0
+            ? randomEventsData[eventIndex]
+            : "Loading event..."}
+        </p>
       </Modal.Body>
       <Modal.Footer>
         <button className="btn btn-primary" onClick={onHide}>

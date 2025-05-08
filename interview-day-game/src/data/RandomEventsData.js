@@ -1,0 +1,1 @@
+export const randomEventsData = ["A volunteer is late and unable to work for the rest of the day.", "A volunteer got sick and is out for the rest of the day.", "Miscommunications between departments delay transfers for a round.", "Interviewer has a phone call, no one can go into Interview this round.", "Cather is closed. No one can go to lunch this round."]
