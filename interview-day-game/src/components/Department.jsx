@@ -27,7 +27,7 @@ function Department({
         isCurrent ? "active" : "inactive"
       } p-2`}
     >
-      <h5 className="text-center">{isCurrent ? "🌟" + name + "🌟" : name}</h5>
+      <h5 className="text-center">{isCurrent ? `🌟${name}🌟` : name}</h5>
 
       <div className="table-grid">
         {Array.from({ length: tables }).map((_, idx) => (
@@ -45,26 +45,35 @@ function Department({
           </div>
         ))}
       </div>
-      <div className="d-flex justify-content-between  mt-2">
-      <div className="mt-2 small">
-        <div>Extra Volunteers: {extraStaff}</div>
-        <div>Staff Not Available: {staffNotAvailable}</div>
-        <div>Total Students: {students}</div>
-        <div>Total Volunteers: {volunteers}</div>
+      <div />
 
-        <div className="mt-2 fw-bold">Exiting To:</div>
-        {Object.entries(exitingTo)
-          .filter(([destination]) => destination !== name) // name is the current department
-          .map(([destination, count]) => (
-            <div key={destination}>
-              → {destination}: {count}
-            </div>
-        ))}
-      </div>
-        <div>
-          <div className="students-waiting-box mt-2 p-2">
-            <div className="fw-bold small mb-1">Students Waiting</div>
-            <div className="d-flex flex-wrap gap-1">
+      <div className="d-flex flex-column mt-3">
+        <div className="d-flex flex-wrap justify-content-between gap-4">
+          {/* Summary Stats */}
+          <div className="p-3 bg-light rounded shadow-sm border">
+            <h6 className="text-muted mb-2">Summary</h6>
+            <ul className="list-unstyled small mb-0">
+              <li>
+                <strong>Extra Volunteers:</strong> {extraStaff}
+              </li>
+              <li>
+                <strong>Staff Not Available:</strong> {staffNotAvailable}
+              </li>
+              <li>
+                <strong>Total Students:</strong> {students}
+              </li>
+              <li>
+                <strong>Total Volunteers:</strong> {volunteers}
+              </li>
+            </ul>
+          </div>
+
+          {/* Students Waiting */}
+          <div className="p-3 bg-light rounded shadow-sm border">
+            <h6 className="fw-bold small text-primary mb-2">
+              Students Waiting
+            </h6>
+            <div className="d-flex flex-wrap gap-2">
               {Array.from({ length: studentsWaiting }).map((_, i) => (
                 <div
                   className="circle student-waiting"
@@ -74,11 +83,13 @@ function Department({
               ))}
             </div>
           </div>
-        </div>
-        <div>
-          <div className="staff-unavailable-box mt-2 p-2">
-            <div className="fw-bold small mb-1">Staff Not Available</div>
-            <div className="d-flex flex-wrap gap-1">
+
+          {/* Staff Unavailable */}
+          <div className="p-3 bg-light rounded shadow-sm border">
+            <h6 className="fw-bold small text-danger mb-2">
+              Staff Not Available
+            </h6>
+            <div className="d-flex flex-wrap gap-2">
               {Array.from({ length: staffNotAvailable }).map((_, i) => (
                 <div
                   className="circle staff-unavailable"
@@ -88,6 +99,24 @@ function Department({
               ))}
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className="mt-3">
+        <div className="fw-bold text-muted mb-2">Exiting To</div>
+        <div className="d-flex flex-wrap gap-3">
+          {Object.entries(exitingTo)
+            .filter(([destination]) => destination !== name)
+            .map(([destination, count]) => (
+              <div
+                className="badge bg-light text-dark border px-3 py-2 rounded d-flex align-items-center shadow-sm"
+                key={destination}
+              >
+                <span className="me-2">→</span>
+                <strong className="me-1">{destination}:</strong>
+                {count}
+              </div>
+            ))}
         </div>
       </div>
     </div>
