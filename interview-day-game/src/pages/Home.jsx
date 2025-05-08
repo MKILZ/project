@@ -6,69 +6,79 @@ import Modal from "react-bootstrap/Modal";
 import Login from "./Login.jsx";
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
+import "../index.css";
 
-function Home() {
+export default function Home() {
   const navigate = useNavigate();
-  const [userName, setUserName] = useState();
+  const [userName, setUserName] = useState("");
   const [createModelShow, setCreateModelShow] = useState(false);
   const [settingsModalShow, setSettingsModalShow] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const { session, setActiveUser, lobby, setLobby } = useContext(AppContext);
 
   return (
-    <div className="d-flex flex-column justify-content-center align-items-center ">
-      <h1 className="mt-5">Interview day @ Kauffman</h1>
-      <div className="d-flex card bg-gray-100 rounded-lg p-4 gap-3 mt-5">
-        <h3>Join a Room</h3>
-        <input
-          placeholder="Enter Your Name"
-          className="form-control"
-          value={userName}
-          onChange={(e) => setUserName(e.target.value)}
-        />
-        <input
-          className="form-control "
-          placeholder="Enter The Room Code"
-          value={lobby}
-          onChange={(e) => setLobby(e.target.value)}
-        />
-        <div className="d-flex flex-row-reverse gap-2">
-          <button
-            disabled={!lobby || !userName || lobby.length !== 6}
-            className="btn btn-secondary"
-            onClick={async () => {
-              // Check if the lobby exists in the database
-              const { data, error } = await supabase
-                .from("games")
-                .select("*")
-                .eq("lobby", lobby)
-                .single();
+    <div className="d-flex flex-column justify-content-center align-items-center min-vh-100 w-100">
+      {/* White box around text and room code */}
+      <div className="d-flex card flex-column justify-content-center align-items-center mt-5 min-vh-50 w-50" style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: '30px' }}>
+        {/* Div with title to align join box */}
+        <div className="d-inline-flex flex-column justify-content-center align-items-center">
+          <h1 className="display-1 fw-bold text-dark pt-5">Interview Day At</h1>
+          <h1 className="display-1 fw-bold text-dark">The Raikes School</h1>
+          {/* Join code box */}
+          <div className="card bg-gray-100 rounded-lg p-4 mt-5 mb-5 justify-content-center align-items-center w-100">
+            <h3>Join a Room</h3>
+            <input
+              placeholder="Enter Your Name"
+              className="form-control mb-2"
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
+            />
+            <input
+              className="form-control mb-2"
+              placeholder="Enter The Room Code"
+              value={lobby}
+              onChange={(e) => setLobby(e.target.value)}
+            />
+            <div className="d-flex flex-row-reverse gap-2">
+              <button
+                disabled={!lobby || !userName || lobby.length !== 6}
+                className="btn btn-success"
+                onClick={async () => {
+                  // Check if the lobby exists in the database
+                  const { data, error } = await supabase
+                    .from("games")
+                    .select("*")
+                    .eq("lobby", lobby)
+                    .single();
 
-              if (data) {
-                // Set the active user
-                setActiveUser({
-                  role: "Player",
-                  userName: userName,
-                });
+                  if (data) {
+                    // Set the active user
+                    setActiveUser({
+                      role: "Player",
+                      userName: userName,
+                    });
 
-                navigate("/lobby/" + lobby);
-              } else {
-                Swal.fire({
-                  title: "Lobby doesn't exist!",
-                  icon: "error",
-                  confirmButtonText: "Oh my bad",
-                });
-              }
-            }}
-          >
-            Join Room
-          </button>
+                    navigate("/lobby/" + lobby);
+                  } else {
+                    Swal.fire({
+                      title: "Lobby doesn't exist!",
+                      icon: "error",
+                      confirmButtonText: "Oh my bad",
+                    });
+                  }
+                }}
+              >
+                Join Room
+              </button>
+            </div>
         </div>
       </div>
-      <div className="position-absolute top-0 start-0 p-2 d-flex flex-row gap-2">
+    </div>
+    {/* Settings and Login Button */}
+      <div className="position-absolute top-0 start-0 p-2 d-flex flex-column gap-2">
         {!session ? (
           <button
-            className="btn btn-secondary"
+            className="btn btn-dark"
             onClick={() => {
               setShowAuthModal(true);
             }}
@@ -77,14 +87,14 @@ function Home() {
           </button>
         ) : (
           <button
-            className="btn btn-secondary"
+            className="btn btn-dark"
             onClick={() => setCreateModelShow(true)}
           >
             Host Game
           </button>
         )}
         <button
-          className="btn btn-secondary"
+          className="btn btn-dark"
           onClick={() => setSettingsModalShow(true)}
         >
           Settings
@@ -104,9 +114,9 @@ function Home() {
   );
 }
 
-export default Home;
+// export default Home;
 
-function SettingsModal(props) {
+export function SettingsModal(props) {
   const { session, setSession } = useContext(AppContext);
   return (
     <Modal
@@ -213,7 +223,7 @@ function AuthModal(props) {
   return (
     <Modal
       {...props}
-      size="lg"
+      size="md"
       aria-labelledby="contained-modal-title-vcenter"
       centered
     >
