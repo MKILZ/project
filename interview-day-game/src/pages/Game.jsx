@@ -520,6 +520,47 @@ function Actions({
     }
   }
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")
+        return;
+
+      switch (e.key) {
+        case "1":
+          if (!isReady) buyVolunteer(activeUser.character);
+          break;
+        case "2":
+          if (!isReady && activeUser.role !== "Host") {
+            readyUp();
+            setIsReady(true);
+          }
+          break;
+        case "3":
+          if (activeUser.role !== "Host") {
+            setManageArrivalsPopup(true);
+          }
+          break;
+        case "4":
+          if (activeUser.role !== "Host") {
+            setReadyToExitPopup(true);
+          }
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [
+    isReady,
+    activeUser,
+    buyVolunteer,
+    readyUp,
+    setIsReady,
+    setManageArrivalsPopup,
+    setReadyToExitPopup,
+  ]);
   return (
     <div className="d-flex flex-column align-items-center gap-3 w-100">
       {activeUser && (
@@ -563,7 +604,7 @@ function Actions({
         onClick={() => buyVolunteer(activeUser.character)}
         disabled={isReady}
       >
-        Buy a Volunteer 🔺
+        Buy a Volunteer 🔺 (1)
       </button>
 
       {activeUser.role !== "Host" && (
@@ -578,21 +619,21 @@ function Actions({
             }}
             disabled={isReady}
           >
-            {isReady ? "Ready!" : "Ready Up!"}
+            {isReady ? "Ready!" : "Ready Up! (2)"}
           </button>
 
           <button
             className="btn btn-pressable btn-secondary w-100"
             onClick={() => setManageArrivalsPopup(true)}
           >
-            Manage Arriving Students
+            Manage Arriving Students (3)
           </button>
 
           <button
             className="btn btn-pressable btn-secondary w-100"
             onClick={() => setReadyToExitPopup(true)}
           >
-            Manage Exits
+            Manage Exits (4)
           </button>
         </>
       )}
