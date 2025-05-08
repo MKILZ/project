@@ -23,7 +23,7 @@ function Department({
 
   return (
     <div
-      className={`card department-card rounded-5 ${
+      className={`card department-card p-3 rounded-5 ${
         isCurrent ? "active" : "inactive"
       } p-2`}
     >
@@ -73,7 +73,10 @@ function Department({
             <h6 className="fw-bold small text-primary mb-2">
               Students Waiting
             </h6>
-            <div className="d-flex flex-wrap gap-2">
+            <div
+              className="d-flex flex-wrap gap-2"
+              style={{ maxWidth: "200px" }}
+            >
               {Array.from({ length: studentsWaiting }).map((_, i) => (
                 <div
                   className="circle student-waiting"
