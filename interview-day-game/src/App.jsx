@@ -8,6 +8,7 @@ import Lobby from "./pages/Lobby";
 import Game from "./pages/Game";
 import Rules from "./pages/Rules";
 import About from "./pages/About";
+import Leaderboard from "./pages/Leaderboard";
 
 function App() {
   const { theme, setTheme } = useContext(AppContext);
@@ -21,6 +22,7 @@ function App() {
         <Route exact path="/game/:lobby" element={<Game />} />
         <Route exact path="/rules" element={<Rules />} />
         <Route exact path="/about" element={<About />} />
+        <Route exact path="/leaderboard" element={<Leaderboard />} />
       </Routes>
     </BrowserRouter>
   );
