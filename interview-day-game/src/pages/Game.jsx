@@ -11,7 +11,8 @@ import ManageArrivalsPopup from "../components/ManageArrivalsPopup";
 import Department from "../components/Department";
 import { exitingData } from "../data/TransferData";
 import ReadyToExitPopup from "../components/ReadyToExitPopup";
-
+import steveAudio from "../assets/Steve.mp3";
+import wilson2Audio from "../assets/wilson2.m4a";
 function Game() {
   const { lobby } = useParams();
   const hoursInDay = 7;
@@ -32,7 +33,7 @@ function Game() {
   const [readyPlayers, setReadyPlayers] = useState([]);
   const [game, setGame] = useState({
     GreatHall: {
-      tables: 16,
+      tables: 18,
       students: 14,
       volunteers: 14,
       staffNotAvailable: 1,
@@ -46,7 +47,7 @@ function Game() {
       },
     },
     Session: {
-      tables: 8,
+      tables: 12,
       students: 8,
       volunteers: 8,
       exits: 3,
@@ -63,7 +64,7 @@ function Game() {
       },
     },
     Interview: {
-      tables: 4,
+      tables: 6,
       students: 4,
       volunteers: 4,
       exits: 2,
@@ -80,7 +81,7 @@ function Game() {
       },
     },
     Welcome: {
-      tables: 12,
+      tables: 13,
       students: 10,
       volunteers: 10,
       exits: 4,
@@ -168,6 +169,10 @@ function Game() {
     if (!activeUser) {
       // navigate("/");
     }
+    const audio = new window.Audio(steveAudio);
+    audio.play().catch((e) => {
+      console.warn("Autoplay blocked:", e);
+    });
 
     const fetchPlayers = async () => {
       const { data, error } = await supabase
@@ -306,6 +311,10 @@ function Game() {
 
     if (round >= 12) {
       console.log("Game Over");
+      const audio = new window.Audio(wilson2Audio);
+      audio.play().catch((e) => {
+        console.warn("Autoplay blocked:", e);
+      });
       setEndOfRoundStats(true);
     } else {
       setShowRoundOverlay(round);
@@ -525,7 +534,7 @@ function Actions({
                 ? "https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-adam-britten.jpg?itok=fAYbnhXs"
                 : activeUser.character === "theresa"
                 ? "https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-theresa-luensmann.jpg?itok=unLlsXcF"
-                : "https://media.licdn.com/dms/image/v2/D5603AQFJz9OJXxUNsQ/profile-displayphoto-shrink_400_400/B56ZRMqLRMH0Ao-/0/1736452912894?e=2147483647&v=beta&t=uhRnWRaaN4llVldNwHHS8qzxZgX0wUtQtaoS0iLqTrQ"
+                : "https://media.licdn.com/dms/image/v2/D5603AQHSXRUVk33t0A/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1726530605597?e=1752105600&v=beta&t=Gl5KfaDnVkxlDObX_AZL2kzfxDqhlpdoc0S8H6eLl5s"
             }
             alt={activeUser.character}
             style={{

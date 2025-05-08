@@ -1,10 +1,12 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "../supabase/supabaseClient";
 import { AppContext } from "../context/useAppContext";
 import { useNavigate } from "react-router-dom";
 import Carousel from "react-bootstrap/Carousel";
-
+import ThersaAudio from "../assets/Theresa.mp3";
+import AdamAudio from "../assets/adam.mp3";
+import WilsonAudio from "../assets/wilson.m4a";
 function Lobby() {
   const { lobby } = useParams();
   const { activeUser, players, setPlayers } = useContext(AppContext);
@@ -19,6 +21,17 @@ function Lobby() {
     }
   }
   const channel = supabase.channel(lobby + "changes");
+
+  const audioRef = useRef(null);
+
+  const playAudio = (src) => {
+    if (audioRef.current) {
+      audioRef.current.src = src;
+      audioRef.current.play().catch((e) => {
+        console.warn("Audio play failed:", e);
+      });
+    }
+  };
 
   function startGame() {
     channel.send({
@@ -86,6 +99,8 @@ function Lobby() {
   }, [lobby]);
   return (
     <div className="d-flex justify-content-center h-100 w-50 gap-5 mx-auto">
+      <audio ref={audioRef} preload="auto" />
+
       <div className="card p-5 bg-gray-100 mt-5">
         <div className="d-flex justify-content-between">
           <h1
@@ -140,7 +155,7 @@ function Lobby() {
             })}
           </div>
           <div id="carouselExample" className="card" style={{ width: "30rem" }}>
-            <CarouselComp></CarouselComp>
+            <CarouselComp playAudio={playAudio}></CarouselComp>
             <div className="card-body">
               <h5 className="card-title">Character roster</h5>
               <p className="card-text">
@@ -165,7 +180,7 @@ function Lobby() {
 
 export default Lobby;
 
-function CarouselComp() {
+function CarouselComp({ playAudio }) {
   return (
     <Carousel>
       <Carousel.Item>
@@ -173,6 +188,7 @@ function CarouselComp() {
           src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-adam-britten.jpg?itok=fAYbnhXs"
           className="d-block w-100"
           alt="adam"
+          onClick={() => playAudio(AdamAudio)}
         />
         <Carousel.Caption>
           <h3>Director of Student Success</h3>
@@ -193,6 +209,7 @@ function CarouselComp() {
           src="https://raikes.unl.edu/sites/unl.edu.raikes-school/files/styles/1_1_960x960/public/node/person/photo/2024-07/people-headshot-theresa-luensmann.jpg?itok=unLlsXcF"
           className="d-block w-100"
           alt="theresa"
+          onClick={() => playAudio(ThersaAudio)}
         />
         <Carousel.Caption>
           <h3 className="">Director of Outreach </h3>
@@ -200,9 +217,9 @@ function CarouselComp() {
       </Carousel.Item>
       <Carousel.Item>
         <img
-          src="https://media.licdn.com/dms/image/v2/D5603AQFJz9OJXxUNsQ/profile-displayphoto-shrink_400_400/B56ZRMqLRMH0Ao-/0/1736452912894?e=2147483647&v=beta&t=uhRnWRaaN4llVldNwHHS8qzxZgX0wUtQtaoS0iLqTrQ"
-          className="d-block w-100"
-          alt="kenny"
+          src="https://media.licdn.com/dms/image/v2/D5603AQHSXRUVk33t0A/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1726530605597?e=1752105600&v=beta&t=Gl5KfaDnVkxlDObX_AZL2kzfxDqhlpdoc0S8H6eLl5s"
+          alt="wilson"
+          onClick={() => playAudio(WilsonAudio)}
         />
         <Carousel.Caption>
           <h3>Student Volunteer</h3>
