@@ -27,6 +27,9 @@ function Game() {
   const [endOfRoundStats, setEndOfRoundStats] = useState(false);
   const [statsLog, setStatsLog] = useState([]);
   const [round, setRound] = useState(0);
+  {
+    /* Hard coding data for each room */
+  }
   const [isReady, setIsReady] = useState(false);
   const [showRoundOverlay, setShowRoundOverlay] = useState(round);
 
@@ -174,6 +177,9 @@ function Game() {
       console.warn("Autoplay blocked:", e);
     });
 
+    {
+      /* Giving a character to each player depending on the order they join the room */
+    }
     const fetchPlayers = async () => {
       const { data, error } = await supabase
         .from("games")
@@ -205,7 +211,9 @@ function Game() {
         return { ...prev, character: "kenny" };
       });
     }
-
+    {
+      /* Give each player a blank score card */
+    }
     setScoreCard(
       [...Array(hoursInDay)].map((_, i) => ({
         hour: i,
@@ -214,7 +222,9 @@ function Game() {
         extraStaff: 0,
       }))
     );
-
+    {
+      /* Grabbing data from the database */
+    }
     channel
       .on("broadcast", { event: "update-board" }, (payload) => {
         console.log("update-board:", payload.payload);
@@ -262,7 +272,10 @@ function Game() {
       }));
     });
   }, [lobby]);
-
+  {
+    /* There are only 12 rounds in a game so greater than 12 is game over
+  and each player gets their personalized stats breakdown */
+  }
   useEffect(() => {
     const departments = ["Welcome", "Session", "Interview", "GreatHall"];
 
@@ -376,7 +389,9 @@ function Game() {
       },
     ]);
   }, [round]);
-
+  {
+    /* Hard coding the rounds which are times in 30 min increments */
+  }
   useEffect(() => {
     console.log("Stats log updated:", statsLog);
   }, [statsLog]);
@@ -398,6 +413,9 @@ function Game() {
     ];
     return time[round];
   });
+  {
+    /* Setting the buttons in the top left, scorecard, settings, and arrivals */
+  }
   return (
     <div className="pt-2 d-flex h-100">
       <RoundOverlay round={showRoundOverlay} renderHour={renderHour} />
@@ -408,6 +426,7 @@ function Game() {
       <div className="w-25 d-flex flex-column align-items-center gap-3 p-3 bg-white rounded-5 m-3">
         <h2>{renderHour(round)}</h2>
         <h4 className="text-center">Your Station</h4>
+        {/* Updating data that we grabbed from the database */}
         <Actions
           updateBoard={updateBoard}
           increaseRound={increaseRound}
@@ -420,6 +439,7 @@ function Game() {
           isReady={isReady}
         />
       </div>
+      {/* Creating popups for settings, arrivals, managing arrivals, ready to exit students, and score card */}
       <SettingsModal
         show={settingsModalShow}
         onHide={() => setSettingsModalShow(false)}
@@ -475,6 +495,9 @@ function Actions({
   setManageArrivalsPopup,
   setReadyToExitPopup,
 }) {
+  {
+    /* When you click the buy volunteer button adding a volunteer to the count specific to your character. The host cannot do this. */
+  }
   const { activeUser, players } = useContext(AppContext);
   function buyVolunteer(character) {
     if (character === "becky") {
@@ -520,6 +543,9 @@ function Actions({
     }
   }
 
+  {
+    /* Adding the pictures on the screen of your character */
+  }
   return (
     <div className="d-flex flex-column align-items-center gap-3 w-100">
       {activeUser && (
@@ -599,7 +625,9 @@ function Actions({
     </div>
   );
 }
-
+{
+  /* Updating the scorecard */
+}
 function ScoreCard() {
   let hours = [0, 0, 0, 0, 0, 0, 0];
   return (
@@ -630,6 +658,9 @@ function ScoreCard() {
   );
 }
 
+{
+  /* Making the scorecard popup look good */
+}
 function ScoreCardModal(props) {
   return (
     <Modal
