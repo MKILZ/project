@@ -308,17 +308,16 @@ function Game() {
       console.log("Game Over");
       setEndOfRoundStats(true);
     } else {
-      setArrivalsPopup(true);
       setShowRoundOverlay(round);
       const timeout = setTimeout(() => {
         setShowRoundOverlay(null);
         const timeout2 = setTimeout(() => {
           setArrivalsPopup(true);
-        }, 500);
+        }, 100);
         return () => {
           clearTimeout(timeout2);
         };
-      }, 1200); // match animation duration
+      }, 1500); // match animation duration
       return () => {
         clearTimeout(timeout);
       };
