@@ -233,21 +233,22 @@ function Game() {
 
     channel.on("broadcast", { event: "ready-up" }, (payload) => {
       const newPlayer = payload.payload.player;
-      console.log("ready-up:", newPlayer);
-      console.log("readyPlayers:", readyPlayers);
-      let playersReady = 0;
-      //if player is host add player to readyPlayers
+      console.log("Received ready-up from:", newPlayer);
+
       if (activeUser.role === "Host") {
         setReadyPlayers((prev) => {
-          playersReady = prev.length + 1;
-          return [...prev, newPlayer];
+          const updated = [...new Set([...prev, newPlayer])];
+          console.log("Updated ready players:", updated);
+
+          // Check after updating
+          if (updated.length >= 2) {
+            increaseRound();
+            setIsReady(false);
+            return []; // Reset
+          }
+
+          return updated;
         });
-        // check if all players are ready
-        if (playersReady === 2) {
-          increaseRound();
-          setReadyPlayers([]);
-          setIsReady(false);
-        }
       }
     });
 
