@@ -243,7 +243,7 @@ function Game() {
           return [...prev, newPlayer];
         });
         // check if all players are ready
-        if (playersReady === 1) {
+        if (playersReady === 2) {
           increaseRound();
           setReadyPlayers([]);
           setIsReady(false);
@@ -458,7 +458,7 @@ function Game() {
         show={endOfRoundStats}
         onHide={() => setEndOfRoundStats(false)}
         statsLog={statsLog}
-        players = {players}
+        players={players}
       />
     </div>
   );
