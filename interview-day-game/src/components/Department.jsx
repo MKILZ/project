@@ -54,9 +54,6 @@ function Department({
             <h6 className="text-muted mb-2">Summary</h6>
             <ul className="list-unstyled small mb-0">
               <li>
-                <strong>Extra Volunteers:</strong> {extraStaff}
-              </li>
-              <li>
                 <strong>Staff Not Available:</strong> {staffNotAvailable}
               </li>
               <li>
