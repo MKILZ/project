@@ -50,12 +50,14 @@ export default function ArrivalsPopup({ show, onHide, round, renderHour }) {
 
           <div className="arrival-box">
             <p>
-              <strong>Lunch: {arrivalsData.Lunch[round]}</strong>
+              <strong>Great Hall: {arrivalsData.GreatHall[round]}</strong>
             </p>
             <div className="circle-container">
-              {Array.from({ length: arrivalsData.Lunch[round] }).map((_, i) => (
-                <div className="circle student" key={`l-${i}`}></div>
-              ))}
+              {Array.from({ length: arrivalsData.GreatHall[round] }).map(
+                (_, i) => (
+                  <div className="circle student" key={`l-${i}`}></div>
+                )
+              )}
             </div>
           </div>
         </div>
