@@ -458,6 +458,7 @@ function Game() {
         show={endOfRoundStats}
         onHide={() => setEndOfRoundStats(false)}
         statsLog={statsLog}
+        players = {players}
       />
     </div>
   );

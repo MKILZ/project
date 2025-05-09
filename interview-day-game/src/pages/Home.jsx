@@ -99,6 +99,12 @@ export default function Home() {
         >
           Settings
         </button>
+        <button
+          className="btn btn-dark"
+          onClick={() => navigate("/leaderboard")}
+        >
+          Leaderboard
+        </button>
       </div>
 
       <CreateGameModal
