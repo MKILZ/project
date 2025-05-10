@@ -20,7 +20,6 @@ function Game() {
   const channel = supabase.channel(lobby + "changes");
   const { activeUser, setActiveUser, players, setPlayers } =
     useContext(AppContext);
-  const [scoreCardModal, setScoreCardModal] = useState(false);
   const [settingsModalShow, setSettingsModalShow] = useState(false);
   const [arrivalsPopup, setArrivalsPopup] = useState(false);
   const [manageArrivalsPopup, setManageArrivalsPopup] = useState(false);
@@ -108,15 +107,6 @@ function Game() {
     Interview: 4,
     Welcome: 10,
   });
-
-  const [scoreCard, setScoreCard] = useState([
-    {
-      hour: 0,
-      parentDiversions: 0,
-      studentsInWaiting: 0,
-      extraStaff: 0,
-    },
-  ]);
 
   const characterToDept = {
     becky: "Welcome",
@@ -206,15 +196,6 @@ function Game() {
         return { ...prev, character: "kenny" };
       });
     }
-
-    setScoreCard(
-      [...Array(hoursInDay)].map((_, i) => ({
-        hour: i,
-        parentDiversions: 0,
-        studentsInWaiting: 0,
-        extraStaff: 0,
-      }))
-    );
 
     channel
       .on("broadcast", { event: "update-board" }, (payload) => {
@@ -451,11 +432,6 @@ function Game() {
         game={game}
         setGame={setGame}
       />
-      <ScoreCardModal
-        scoreCard={scoreCard}
-        show={scoreCardModal}
-        onHide={() => setScoreCardModal(false)}
-      />
       <EndOfRoundStats
         show={endOfRoundStats}
         onHide={() => setEndOfRoundStats(false)}
@@ -641,54 +617,6 @@ function Actions({
         </>
       )}
     </div>
-  );
-}
-
-function ScoreCard() {
-  let hours = [0, 0, 0, 0, 0, 0, 0];
-  return (
-    <div className="d-flex w-100">
-      <table className="table">
-        <thead>
-          <tr>
-            <th scope="col">hour</th>
-            <th scope="col">Parent Diversions</th>
-            <th scope="col">Students in Waiting</th>
-            <th scope="col">Extra Staff</th>
-          </tr>
-        </thead>
-        <tbody>
-          {hours.map((hour, idx) => {
-            return (
-              <tr>
-                <th scope="row">{6 + idx + ":00"}</th>
-                <td>0</td>
-                <td>0</td>
-                <td>0</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function ScoreCardModal(props) {
-  return (
-    <Modal
-      {...props}
-      size="xl"
-      aria-labelledby="contained-modal-title-vcenter"
-      centered
-    >
-      <Modal.Header closeButton>
-        <Modal.Title id="contained-modal-title-vcenter">ScoreCard</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <ScoreCard scoreCard={props.scoreCard}></ScoreCard>
-      </Modal.Body>
-    </Modal>
   );
 }
 
