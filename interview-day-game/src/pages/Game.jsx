@@ -3,13 +3,16 @@ import { supabase } from "../supabase/supabaseClient";
 import { AppContext } from "../context/useAppContext";
 import { useParams } from "react-router-dom";
 import { arrivalsData } from "../data/ArrivalsData";
+import { exitingData } from "../data/TransferData";
+
 import EndOfRoundStats from "../components/EndOfRoundStats";
 import ArrivalsPopup from "../components/ArrivalsPopup";
 import ManageArrivalsPopup from "../components/ManageArrivalsPopup";
-import { exitingData } from "../data/TransferData";
 import ReadyToExitPopup from "../components/ReadyToExitPopup";
 import Board from "../components/Board";
 import Actions from "../components/Actions";
+import RoundOverlay from "../components/RoundOverlay";
+
 import steveAudio from "../assets/Steve.mp3";
 import wilson2Audio from "../assets/wilson2.m4a";
 
@@ -422,24 +425,3 @@ function Game() {
 }
 
 export default Game;
-
-// RoundOverlay.jsx
-import { AnimatePresence, motion } from "framer-motion";
-function RoundOverlay({ round, renderHour }) {
-  return (
-    <AnimatePresence>
-      {round !== null && (
-        <motion.div
-          key={round}
-          initial={{ x: "100%", opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: "-100%", opacity: 0 }}
-          transition={{ duration: 1 }}
-          className="round-overlay"
-        >
-          <h1 style={{ color: "black" }}>{renderHour(round)}</h1>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
