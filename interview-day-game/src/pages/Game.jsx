@@ -346,10 +346,6 @@ function Game() {
     ]);
   }, [round]);
 
-  useEffect(() => {
-    console.log("Stats log updated:", statsLog);
-  }, [statsLog]);
-
   const renderHour = useCallback((round) => {
     const time = [
       "7:30",
