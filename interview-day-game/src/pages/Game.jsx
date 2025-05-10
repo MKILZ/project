@@ -14,13 +14,13 @@ import ReadyToExitPopup from "../components/ReadyToExitPopup";
 import Board from "../components/Board";
 import steveAudio from "../assets/Steve.mp3";
 import wilson2Audio from "../assets/wilson2.m4a";
+
 function Game() {
   const { lobby } = useParams();
   const hoursInDay = 7;
   const channel = supabase.channel(lobby + "changes");
   const { activeUser, setActiveUser, players, setPlayers } =
     useContext(AppContext);
-  const [settingsModalShow, setSettingsModalShow] = useState(false);
   const [arrivalsPopup, setArrivalsPopup] = useState(false);
   const [manageArrivalsPopup, setManageArrivalsPopup] = useState(false);
   const [readyToExitPopup, setReadyToExitPopup] = useState(false);
@@ -381,6 +381,7 @@ function Game() {
     ];
     return time[round];
   });
+
   return (
     <div className="pt-2 d-flex h-100">
       <RoundOverlay round={showRoundOverlay} renderHour={renderHour} />
@@ -403,10 +404,6 @@ function Game() {
           isReady={isReady}
         />
       </div>
-      <SettingsModal
-        show={settingsModalShow}
-        onHide={() => setSettingsModalShow(false)}
-      />
       <ArrivalsPopup
         round={round}
         show={arrivalsPopup}
@@ -617,31 +614,6 @@ function Actions({
         </>
       )}
     </div>
-  );
-}
-
-function SettingsModal(props) {
-  return (
-    <Modal
-      {...props}
-      size="lg"
-      aria-labelledby="contained-modal-title-vcenter"
-      centered
-    >
-      <Modal.Header closeButton>
-        <Modal.Title id="contained-modal-title-vcenter">Settings</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <div>
-          <h4>Account</h4>
-        </div>
-      </Modal.Body>
-      <Modal.Footer>
-        <button className="btn btn-secondary" onClick={props.onHide}>
-          Close
-        </button>
-      </Modal.Footer>
-    </Modal>
   );
 }
 
