@@ -15,7 +15,6 @@ import wilson2Audio from "../assets/wilson2.m4a";
 
 function Game() {
   const { lobby } = useParams();
-  const hoursInDay = 7;
   const channel = supabase.channel(lobby + "changes");
   const { activeUser, setActiveUser, players, setPlayers } =
     useContext(AppContext);
@@ -27,8 +26,14 @@ function Game() {
   const [round, setRound] = useState(0);
   const [isReady, setIsReady] = useState(false);
   const [showRoundOverlay, setShowRoundOverlay] = useState(round);
+  const characterToDept = {
+    becky: "Welcome",
+    adam: "Session",
+    theresa: "Interview",
+    kenny: "Great Hall",
+  };
 
-  const [readyPlayers, setReadyPlayers] = useState([]);
+  const currentDept = characterToDept[activeUser.character];
   const [game, setGame] = useState({
     GreatHall: {
       tables: 18,
@@ -106,16 +111,7 @@ function Game() {
     Welcome: 10,
   });
 
-  const characterToDept = {
-    becky: "Welcome",
-    adam: "Session",
-    theresa: "Interview",
-    kenny: "Great Hall",
-  };
-
-  const currentDept = characterToDept[activeUser.character];
-
-  const isCurrentDepartment = (source) => {
+  function isCurrentDepartment(source) {
     const map = {
       becky: "Welcome",
       adam: "Session",
@@ -123,7 +119,7 @@ function Game() {
       kenny: "Great Hall",
     };
     return map[activeUser.character] === source;
-  };
+  }
 
   function updateBoard(gameBoard) {
     console.log("updateBoard", gameBoard);
@@ -207,7 +203,6 @@ function Game() {
       setRound((prev) => {
         return prev + 1;
       });
-      setReadyPlayers([]);
       setIsReady(false);
     });
 
@@ -216,19 +211,15 @@ function Game() {
       console.log("Received ready-up from:", newPlayer);
 
       if (activeUser.role === "Host") {
-        setReadyPlayers((prev) => {
-          const updated = [...new Set([...prev, newPlayer])];
-          console.log("Updated ready players:", updated);
+        const updated = [...new Set([...prev, newPlayer])];
+        console.log("Updated ready players:", updated);
 
-          // Check after updating
-          if (updated.length >= 2) {
-            increaseRound();
-            setIsReady(false);
-            return []; // Reset
-          }
-
-          return updated;
-        });
+        // Check after updating
+        if (updated.length >= 2) {
+          increaseRound();
+          setIsReady(false);
+          return []; // Reset
+        }
       }
     });
 
@@ -312,11 +303,8 @@ function Game() {
         clearTimeout(timeout);
       };
     }
-  }, [round]);
 
-  useEffect(() => {
     if (round === 0) return; // skip the first round rende
-    console.log("Capturing stats at the end of round", round - 1);
 
     setStatsLog((prev) => [
       ...prev,
