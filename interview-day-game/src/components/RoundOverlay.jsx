@@ -1,4 +1,4 @@
-// RoundOverlay.jsx
+// RoundOverlay.jsx hour animation at start of round
 import { AnimatePresence, motion } from "framer-motion";
 function RoundOverlay({ round, renderHour }) {
   return (
