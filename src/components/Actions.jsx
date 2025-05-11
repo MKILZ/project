@@ -1,4 +1,4 @@
-import { useEffect, useContext, useState, useCallback } from "react";
+import React, { useEffect, useContext } from "react";
 import { AppContext } from "../context/useAppContext";
 
 function Actions({
@@ -11,7 +11,7 @@ function Actions({
   setManageArrivalsPopup,
   setReadyToExitPopup,
 }) {
-  const { activeUser, players } = useContext(AppContext);
+  const { activeUser } = useContext(AppContext);
   function buyVolunteer(character) {
     if (character === "becky") {
       const local = {

@@ -1,3 +1,5 @@
+import React from "react";
+
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabase/supabaseClient";
 import Modal from "react-bootstrap/Modal";
@@ -21,12 +23,14 @@ function EndOfRoundStats({ show, onHide, statsLog, players }) {
     ["Welcome", "Session", "Interview", "GreatHall"].forEach((dept) => {
       totalStats.totalStudentsWaiting += round[dept].studentsWaiting;
       totalStats.totalExtraHours += round[dept].extraHours;
-      totalStats.departmentStats[dept].studentsWaiting += round[dept].studentsWaiting;
+      totalStats.departmentStats[dept].studentsWaiting +=
+        round[dept].studentsWaiting;
       totalStats.departmentStats[dept].extraHours += round[dept].extraHours;
     });
   });
 
-  const finalScore = totalStats.totalStudentsWaiting + totalStats.totalExtraHours;
+  const finalScore =
+    totalStats.totalStudentsWaiting + totalStats.totalExtraHours;
 
   // Submit score to Supabase
   const submitScore = async () => {
@@ -62,7 +66,9 @@ function EndOfRoundStats({ show, onHide, statsLog, players }) {
         <h5 className="mt-3">Per Department:</h5>
         {Object.keys(totalStats.departmentStats).map((dept) => (
           <p key={dept}>
-            {dept}: {totalStats.departmentStats[dept].studentsWaiting} students waiting, {totalStats.departmentStats[dept].extraHours} extra staff hours
+            {dept}: {totalStats.departmentStats[dept].studentsWaiting} students
+            waiting, {totalStats.departmentStats[dept].extraHours} extra staff
+            hours
           </p>
         ))}
       </Modal.Body>

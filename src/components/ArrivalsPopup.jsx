@@ -1,7 +1,8 @@
+import React from "react";
 import Modal from "react-bootstrap/Modal";
 import { arrivalsData } from "../data/ArrivalsData";
 
-export default function ArrivalsPopup({ show, onHide, round, renderHour }) {
+export default function ArrivalsPopup({ show, onHide, round }) {
   return (
     <Modal show={show} onHide={onHide} centered>
       <Modal.Header className="justify-content-center">

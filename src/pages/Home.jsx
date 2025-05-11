@@ -4,7 +4,7 @@ import { supabase } from "../supabase/supabaseClient";
 import { AppContext } from "../context/useAppContext";
 import Modal from "react-bootstrap/Modal";
 import Login from "./Login.jsx";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Swal from "sweetalert2";
 import "../index.css";
 

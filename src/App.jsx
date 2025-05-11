@@ -1,6 +1,5 @@
 import "./App.css";
-import { AppContext } from "./context/useAppContext";
-import { useContext } from "react";
+import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Lobby from "./pages/Lobby";
@@ -9,7 +8,6 @@ import Rules from "./pages/Rules";
 import Leaderboard from "./pages/Leaderboard";
 
 function App() {
-  const { theme, setTheme } = useContext(AppContext);
   return (
     <BrowserRouter>
       <Routes>

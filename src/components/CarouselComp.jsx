@@ -1,3 +1,5 @@
+import React from "react";
+
 import Carousel from "react-bootstrap/Carousel";
 import ThersaAudio from "../assets/Theresa.mp3";
 import AdamAudio from "../assets/adam.mp3";

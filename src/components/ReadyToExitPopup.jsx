@@ -1,18 +1,23 @@
-import { useContext, useState, useEffect } from "react";
+import React, { useContext, useState } from "react";
 import Modal from "react-bootstrap/Modal";
 import { AppContext } from "../context/useAppContext";
 import Button from "react-bootstrap/Button";
 
 export default function ReadyToExitPopup({
-    show,
-    onHide,
-    round,
-    renderHour,
-    game,
-    setGame,
-    isCurrentDepartment,
+  show,
+  onHide,
+  round,
+  renderHour,
+  game,
+  setGame,
 }) {
-  const arrivalSources = ["Welcome", "Session", "Interview", "GreatHall", "Exit"];
+  const arrivalSources = [
+    "Welcome",
+    "Session",
+    "Interview",
+    "GreatHall",
+    "Exit",
+  ];
   const { activeUser } = useContext(AppContext);
 
   const currentDept =
@@ -63,7 +68,8 @@ export default function ReadyToExitPopup({
       </Modal.Header>
       <Modal.Body>
         {arrivalSources.map((destination) => {
-          if (destination === currentDept || destination === "Exit") return null;
+          if (destination === currentDept || destination === "Exit")
+            return null;
 
           return (
             <div key={destination} className="row align-items-center mb-2">

@@ -1,8 +1,8 @@
+import React from "react";
+
 import { useContext, useState, useEffect } from "react";
 import Modal from "react-bootstrap/Modal";
 import { AppContext } from "../context/useAppContext";
-import { arrivalsData } from "../data/ArrivalsData";
-import { supabase } from "../supabase/supabaseClient";
 
 function ManageArrivalsPopup({
   show,
@@ -11,13 +11,9 @@ function ManageArrivalsPopup({
   renderHour,
   game,
   setGame,
-  lobby,
   channel,
 }) {
   const { activeUser } = useContext(AppContext);
-  const getRand = () => {
-    return Math.floor(Math.random() * 5);
-  };
 
   const arrivalSources = [
     "Outside",
@@ -31,7 +27,7 @@ function ManageArrivalsPopup({
     becky: "Welcome",
     adam: "Session",
     theresa: "Interview",
-    kenny: "GreatHall", 
+    kenny: "GreatHall",
   };
 
   const currentDept = characterToDept[activeUser.character];
@@ -137,7 +133,6 @@ function ManageArrivalsPopup({
       }
     });
 
-
     //send the selected values to the game via socket
     const totalAccepted = Object.values(selected).reduce(
       (acc, val) => acc + val,
@@ -154,10 +149,10 @@ function ManageArrivalsPopup({
 
     setGame((prev) => {
       const newGame = { ...prev };
-    
+
       // Add students to the current department
       newGame[currentDept].students += totalAccepted;
-    
+
       // Subtract transferred students from source departments
       Object.keys(selected).forEach((key) => {
         if (key !== "Outside") {
@@ -165,13 +160,13 @@ function ManageArrivalsPopup({
           newGame[key].students -= selected[key]; // ✅ FIX: remove students from source
         }
       });
-    
+
       // Update the outside queue
       newGame[currentDept].outsideQueue = Math.max(
         newGame[currentDept].outsideQueue - selected["Outside"],
         0
       );
-    
+
       return newGame;
     });
 

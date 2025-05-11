@@ -14,7 +14,7 @@ function Rules() {
         "-- 1) Watch this tutorial video. https://www.youtube.com/watch?v=V892k2bjBBs",
         "-- 2) Click through the slides to read the rules in detail.",
       ],
-      video: "https://www.youtube.com/watch?v=V892k2bjBBs",
+      video: "https://www.youtube.com/embed/watch?v=V892k2bjBBs",
     },
     {
       title: "Flow",

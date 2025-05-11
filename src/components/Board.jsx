@@ -1,4 +1,6 @@
+import React from "react";
 import Department from "./Department";
+
 function Board({ game, currentDept }) {
   const departmentOrder = [
     { name: "Great Hall", data: game.GreatHall },

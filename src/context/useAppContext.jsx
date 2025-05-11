@@ -4,7 +4,6 @@ import { supabase } from "../supabase/supabaseClient";
 export const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
-  const [theme, setTheme] = useState("light");
   const [session, setSession] = useState(null);
   const [activeUser, setActiveUser] = useState();
   const [players, setPlayers] = useState([]);
@@ -95,8 +94,6 @@ export function AppProvider({ children }) {
   return (
     <AppContext.Provider
       value={{
-        theme,
-        setTheme,
         activeUser,
         setActiveUser,
         session,
