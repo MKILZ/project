@@ -19,7 +19,13 @@ export default function Home() {
   return (
     <div className="d-flex flex-column justify-content-center align-items-center min-vh-100 w-100">
       {/* White box around text and room code */}
-      <div className="d-flex card flex-column justify-content-center align-items-center mt-5 min-vh-50 w-50" style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: '30px' }}>
+      <div
+        className="d-flex card flex-column justify-content-center align-items-center mt-5 min-vh-50 w-50"
+        style={{
+          backgroundColor: "rgba(255, 255, 255, 0.95)",
+          borderRadius: "30px",
+        }}
+      >
         {/* Div with title to align join box */}
         <div className="d-inline-flex flex-column justify-content-center align-items-center">
           <h1 className="display-1 fw-bold text-dark pt-5">Interview Day At</h1>
@@ -71,10 +77,10 @@ export default function Home() {
                 Join Room
               </button>
             </div>
+          </div>
         </div>
       </div>
-    </div>
-    {/* Settings and Login Button */}
+      {/* Settings and Login Button */}
       <div className="position-absolute top-0 start-0 p-2 d-flex flex-column gap-2">
         {!session ? (
           <button
@@ -120,8 +126,6 @@ export default function Home() {
   );
 }
 
-// export default Home;
-
 export function SettingsModal(props) {
   const { session, setSession } = useContext(AppContext);
   return (
@@ -131,6 +135,7 @@ export function SettingsModal(props) {
       aria-labelledby="contained-modal-title-vcenter"
       centered
     >
+      {/** STRECTH GOAL TO HAVE MULITPLE COLOR THEMES TOGGLEABLE FROM SETTINGS **/}
       <Modal.Header closeButton>
         <Modal.Title id="contained-modal-title-vcenter">Settings</Modal.Title>
       </Modal.Header>
@@ -176,6 +181,7 @@ function CreateGameModal(props) {
       <Modal.Body>
         <div className="d-flex flex-column gap-3">
           <h4>Room count</h4>
+          {/** STRECTH GOAL TO HAVE MULITPLE ROOMS HOSTED BY ONE HOST **/}
           <input
             type="number"
             value={roomCount}
