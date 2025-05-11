@@ -1,9 +1,7 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import { supabase } from "../supabase/supabaseClient";
-import { AppContext } from "../context/useAppContext";
 
 export default function Login() {
-  const { theme, setTheme, session } = useContext(AppContext);
   const [makingAccount, setMakingAccount] = useState(false);
 
   return (
@@ -52,7 +50,7 @@ function SignIn() {
       email: email,
       password: password,
       options: {
-        emailRedirectTo: "https://example.com/welcome",
+        emailRedirectTo: "https://interview-day-game.onrender.com/",
       },
     });
   }
@@ -95,7 +93,7 @@ function SignUp() {
       email: email,
       password: password,
       options: {
-        emailRedirectTo: "https://example.com/welcome",
+        emailRedirectTo: "https://interview-day-game.onrender.com/",
       },
     });
   }
