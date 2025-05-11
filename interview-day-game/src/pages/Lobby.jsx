@@ -15,7 +15,6 @@ function Lobby() {
   async function copyTextToClipboard(text) {
     try {
       await navigator.clipboard.writeText(text);
-      console.log("Text copied to clipboard");
     } catch (err) {
       console.error("Failed to copy text: ", err);
     }
@@ -92,7 +91,6 @@ function Lobby() {
         }
       )
       .on("broadcast", { event: "start-game" }, (payload) => {
-        console.log("Start game event received:", payload);
         navigate("/game/" + lobby);
       })
       .subscribe();
