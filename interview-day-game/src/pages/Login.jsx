@@ -5,6 +5,7 @@ import { AppContext } from "../context/useAppContext";
 export default function Login() {
   const { theme, setTheme, session } = useContext(AppContext);
   const [makingAccount, setMakingAccount] = useState(false);
+
   return (
     <div className="d-flex flex-column justify-content-center w-50 mx-auto my-5">
       {!makingAccount ? (
@@ -44,6 +45,8 @@ export default function Login() {
 function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  // Function to sign in a user
   async function signUpNewUser(email, password) {
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email,
@@ -85,6 +88,8 @@ function SignIn() {
 function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  // Function to sign up a new user
   async function signUpNewUser(email, password) {
     const { data, error } = await supabase.auth.signUp({
       email: email,

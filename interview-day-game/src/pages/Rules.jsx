@@ -84,9 +84,6 @@ function Rules() {
           <button className="btn btn-light" onClick={() => navigate("/home")}>
             Home
           </button>
-          <button className="btn btn-light" onClick={() => navigate("/login")}>
-            Login
-          </button>
         </div>
       </div>
     </div>
