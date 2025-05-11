@@ -135,7 +135,7 @@ function Lobby() {
 
           {activeUser.role === "Host" ? (
             <button
-              disabled={players.length !== 4} // uncomment in in production
+              // disabled={players.length !== 4} // uncomment in in production
               className="btn btn-secondary"
               onClick={() => {
                 startGame();
