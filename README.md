@@ -1,5 +1,5 @@
 # A demo of the game can be found [here](https://www.youtube.com/watch?v=V892k2bjBBs)
-p
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
