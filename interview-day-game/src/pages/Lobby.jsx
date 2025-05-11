@@ -3,15 +3,18 @@ import { useParams } from "react-router-dom";
 import { supabase } from "../supabase/supabaseClient";
 import { AppContext } from "../context/useAppContext";
 import { useNavigate } from "react-router-dom";
+
 import Carousel from "react-bootstrap/Carousel";
 import ThersaAudio from "../assets/Theresa.mp3";
 import AdamAudio from "../assets/adam.mp3";
 import WilsonAudio from "../assets/wilson.m4a";
+
 function Lobby() {
   const { lobby } = useParams();
   const { activeUser, players, setPlayers } = useContext(AppContext);
   const navigate = useNavigate();
 
+  // Function to copy text to clipboard
   async function copyTextToClipboard(text) {
     try {
       await navigator.clipboard.writeText(text);
@@ -19,10 +22,12 @@ function Lobby() {
       console.error("Failed to copy text: ", err);
     }
   }
+
   const channel = supabase.channel(lobby + "changes");
 
   const audioRef = useRef(null);
 
+  // Function to play audio
   const playAudio = (src) => {
     if (audioRef.current) {
       audioRef.current.src = src;
@@ -32,6 +37,7 @@ function Lobby() {
     }
   };
 
+  // Function to start the game
   function startGame() {
     channel.send({
       type: "broadcast",
@@ -41,9 +47,12 @@ function Lobby() {
   }
 
   useEffect(() => {
+    // Check if the user is logged in if not redirect to home page
     if (!activeUser) {
       navigate("/");
     }
+
+    // Fetch players from the database
     const fetchPlayers = async () => {
       const { data, error } = await supabase
         .from("games")
@@ -57,6 +66,7 @@ function Lobby() {
       }
     };
 
+    // Add the current user to the lobby
     const addSelf = async () => {
       const { data, error } = await supabase.rpc("add_player_to_lobby", {
         lobby_id_input: lobby,
@@ -67,7 +77,6 @@ function Lobby() {
         console.error(error);
       } else {
         fetchPlayers();
-        //setPlayers(players.concat(activeUser.userName));
       }
     };
 
@@ -77,6 +86,7 @@ function Lobby() {
       addSelf();
     }
 
+    // Listen for changes in the players list
     channel
       .on(
         "postgres_changes",
@@ -95,6 +105,7 @@ function Lobby() {
       })
       .subscribe();
   }, [lobby]);
+
   return (
     <div className="d-flex justify-content-center h-100 w-50 gap-5 mx-auto">
       <audio ref={audioRef} preload="auto" />
@@ -128,7 +139,7 @@ function Lobby() {
 
           {activeUser.role === "Host" ? (
             <button
-              // disabled={players.length !== 4} // uncomment in in production
+              disabled={players.length !== 4} // uncomment in in production
               className="btn btn-secondary"
               onClick={() => {
                 startGame();
@@ -159,15 +170,6 @@ function Lobby() {
               <p className="card-text">
                 Each character has a unique role played in the interview day.
               </p>
-              {/* <div
-                href="#"
-                className="btn btn-secondary"
-                onClick={() => {
-                  assignCharacter(players[index], lobby);
-                }}
-              >
-                Ready Up!
-              </div> */}
             </div>
           </div>
         </div>
