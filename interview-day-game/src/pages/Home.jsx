@@ -111,6 +111,9 @@ export default function Home() {
         >
           Leaderboard
         </button>
+        <button className="btn btn-dark" onClick={() => navigate("/rules")}>
+          Rules
+        </button>
       </div>
 
       <CreateGameModal
@@ -135,7 +138,7 @@ export function SettingsModal(props) {
       aria-labelledby="contained-modal-title-vcenter"
       centered
     >
-      {/** STRECTH GOAL TO HAVE MULITPLE COLOR THEMES TOGGLEABLE FROM SETTINGS **/}
+      {/** STRETCH GOAL TO HAVE MULITPLE COLOR THEMES TOGGLEABLE FROM SETTINGS **/}
       <Modal.Header closeButton>
         <Modal.Title id="contained-modal-title-vcenter">Settings</Modal.Title>
       </Modal.Header>
@@ -181,7 +184,7 @@ function CreateGameModal(props) {
       <Modal.Body>
         <div className="d-flex flex-column gap-3">
           <h4>Room count</h4>
-          {/** STRECTH GOAL TO HAVE MULITPLE ROOMS HOSTED BY ONE HOST **/}
+          {/** STRETCH GOAL TO HAVE MULITPLE ROOMS HOSTED BY ONE HOST **/}
           <input
             type="number"
             value={roomCount}
