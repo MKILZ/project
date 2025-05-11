@@ -103,7 +103,7 @@ function Lobby() {
   }, [lobby]);
 
   return (
-    <div className="d-flex justify-content-center h-100 w-50 gap-5 mx-auto">
+    <div className="d-flex justify-content-center h-90 w-50 gap-5 mx-auto">
       <audio ref={audioRef} preload="auto" />
 
       <div className="card p-5 bg-gray-100 mt-5">
