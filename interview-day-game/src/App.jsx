@@ -3,11 +3,9 @@ import { AppContext } from "./context/useAppContext";
 import { useContext } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
-import Login from "./pages/Login";
 import Lobby from "./pages/Lobby";
 import Game from "./pages/Game";
 import Rules from "./pages/Rules";
-import About from "./pages/About";
 import Leaderboard from "./pages/Leaderboard";
 
 function App() {
@@ -17,11 +15,9 @@ function App() {
       <Routes>
         <Route exact path="/" element={<Home />} />
         <Route path="*" element={<Home />} />
-        <Route exact path="/login" element={<Login />} />
         <Route path="/lobby/:lobby" element={<Lobby />} />
         <Route exact path="/game/:lobby" element={<Game />} />
         <Route exact path="/rules" element={<Rules />} />
-        <Route exact path="/about" element={<About />} />
         <Route exact path="/leaderboard" element={<Leaderboard />} />
       </Routes>
     </BrowserRouter>
