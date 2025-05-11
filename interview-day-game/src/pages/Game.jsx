@@ -1,10 +1,13 @@
 import { useEffect, useContext, useState, useCallback } from "react";
+
+//Data
 import { supabase } from "../supabase/supabaseClient";
 import { AppContext } from "../context/useAppContext";
 import { useParams } from "react-router-dom";
 import { arrivalsData } from "../data/ArrivalsData";
 import { exitingData } from "../data/TransferData";
 
+// Components
 import EndOfRoundStats from "../components/EndOfRoundStats";
 import ArrivalsPopup from "../components/ArrivalsPopup";
 import ManageArrivalsPopup from "../components/ManageArrivalsPopup";
@@ -13,13 +16,14 @@ import Board from "../components/Board";
 import Actions from "../components/Actions";
 import RoundOverlay from "../components/RoundOverlay";
 
+//Assets
 import steveAudio from "../assets/Steve.mp3";
 import wilson2Audio from "../assets/wilson2.m4a";
 
 function Game() {
   const { lobby } = useParams();
   const channel = supabase.channel(lobby + "changes");
-  const { activeUser, setActiveUser, players, setPlayers } =
+  const { activeUser, setActiveUser, players, setPlayers, game, setGame } =
     useContext(AppContext);
   const [arrivalsPopup, setArrivalsPopup] = useState(false);
   const [manageArrivalsPopup, setManageArrivalsPopup] = useState(false);
@@ -37,73 +41,6 @@ function Game() {
   };
 
   const currentDept = characterToDept[activeUser.character];
-  const [game, setGame] = useState({
-    GreatHall: {
-      tables: 18,
-      students: 14,
-      volunteers: 14,
-      staffNotAvailable: 1,
-      extraStaff: 0,
-      outsideQueue: 0,
-      exitingTo: {
-        Session: 0,
-        Interview: 0,
-        Welcome: 0,
-        Exit: 0,
-      },
-    },
-    Session: {
-      tables: 12,
-      students: 8,
-      volunteers: 8,
-      exits: 3,
-      exiting: 0,
-      staffNotAvailable: 2,
-      extraStaff: 0,
-      studentsWaiting: 2,
-      outsideQueue: 0,
-      exitingTo: {
-        Welcome: 0,
-        Interview: 0,
-        GreatHall: 0,
-        Exit: 0,
-      },
-    },
-    Interview: {
-      tables: 6,
-      students: 4,
-      volunteers: 4,
-      exits: 2,
-      exiting: 0,
-      staffNotAvailable: 3,
-      extraStaff: 0,
-      studentsWaiting: 3,
-      outsideQueue: 0,
-      exitingTo: {
-        Session: 0,
-        Welcome: 0,
-        GreatHall: 0,
-        Exit: 0,
-      },
-    },
-    Welcome: {
-      tables: 13,
-      students: 10,
-      volunteers: 10,
-      exits: 4,
-      exiting: 0,
-      staffNotAvailable: 1,
-      extraStaff: 0,
-      studentsWaiting: 0,
-      outsideQueue: 0,
-      exitingTo: {
-        Session: 0,
-        Interview: 0,
-        GreatHall: 0,
-        Exit: 0,
-      },
-    },
-  });
 
   //have to change this if we update number of volunteers in each department
   //needed for stats calculations
@@ -114,6 +51,7 @@ function Game() {
     Welcome: 10,
   });
 
+  // Function to check if the current department is the one the user is in
   function isCurrentDepartment(source) {
     const map = {
       becky: "Welcome",
@@ -124,8 +62,8 @@ function Game() {
     return map[activeUser.character] === source;
   }
 
+  // Function to update the game board
   function updateBoard(gameBoard) {
-    console.log("updateBoard", gameBoard);
     channel.send({
       type: "broadcast",
       event: "update-board",
@@ -133,8 +71,8 @@ function Game() {
     });
   }
 
+  //function that adds the player to the readyPlayers array
   function readyUp() {
-    //function that adds the player to the readyPlayers array
     channel.send({
       type: "broadcast",
       event: "ready-up",
@@ -142,6 +80,7 @@ function Game() {
     });
   }
 
+  // Function to handle the increase round
   function increaseRound() {
     setRound((prev) => {
       return prev + 1;
@@ -162,6 +101,7 @@ function Game() {
       console.warn("Autoplay blocked:", e);
     });
 
+    // refetch the players from the database
     const fetchPlayers = async () => {
       const { data, error } = await supabase
         .from("games")
@@ -176,6 +116,7 @@ function Game() {
     };
     fetchPlayers();
 
+    // Set the initial game for the player character/department
     if (players.indexOf(activeUser.userName) === 0) {
       setActiveUser((prev) => {
         return { ...prev, character: "becky" };
@@ -194,28 +135,27 @@ function Game() {
       });
     }
 
+    // Listen for the updaye board event
     channel
       .on("broadcast", { event: "update-board" }, (payload) => {
-        console.log("update-board:", payload.payload);
         setGame(payload.payload);
       })
       .subscribe();
 
+    // Listen for the increase round event
     channel.on("broadcast", { event: "increase-round" }, () => {
-      console.log("increase-round");
       setRound((prev) => {
         return prev + 1;
       });
       setIsReady(false);
     });
 
+    //Listen for player ready up if the player is the host
     channel.on("broadcast", { event: "ready-up" }, (payload) => {
       const newPlayer = payload.payload.player;
-      console.log("Received ready-up from:", newPlayer);
 
       if (activeUser.role === "Host") {
         const updated = [...new Set([...prev, newPlayer])];
-        console.log("Updated ready players:", updated);
 
         // Check after updating
         if (updated.length >= 2) {
@@ -226,6 +166,7 @@ function Game() {
       }
     });
 
+    // Listen for changes in the arrivals data
     channel.on("broadcast", { event: "manage_arrivals" }, (payload) => {
       const { department, newStudents } = payload.payload;
       setGame((prev) => ({
@@ -241,6 +182,7 @@ function Game() {
   useEffect(() => {
     const departments = ["Welcome", "Session", "Interview", "GreatHall"];
 
+    // Update the game state with the new arrivals and exits
     setGame((prevGame) => {
       const updatedGame = { ...prevGame };
 
@@ -284,14 +226,16 @@ function Game() {
       return updatedGame;
     });
 
+    // Check if the round is 12 or more
     if (round >= 12) {
-      console.log("Game Over");
       const audio = new window.Audio(wilson2Audio);
       audio.play().catch((e) => {
         console.warn("Autoplay blocked:", e);
       });
       setEndOfRoundStats(true);
     } else {
+      // Show the arrivals popup after a delay
+      // with a slide-in animation for the hour
       setShowRoundOverlay(round);
       const timeout = setTimeout(() => {
         setShowRoundOverlay(null);
@@ -308,7 +252,7 @@ function Game() {
     }
 
     if (round === 0) return; // skip the first round rende
-
+    // Update the stats log with the current round's data
     setStatsLog((prev) => [
       ...prev,
       {
@@ -349,6 +293,7 @@ function Game() {
     ]);
   }, [round]);
 
+  // Function to render the hour based on the round
   const renderHour = useCallback((round) => {
     const time = [
       "7:30",
@@ -369,6 +314,7 @@ function Game() {
 
   return (
     <div className="pt-2 d-flex h-100">
+      {/** animation for the hour */}
       <RoundOverlay round={showRoundOverlay} renderHour={renderHour} />
       <div className="w-75 h-100">
         <Board currentDept={currentDept} game={game}></Board>
@@ -377,6 +323,7 @@ function Game() {
       <div className="w-25 d-flex flex-column align-items-center gap-3 p-3 bg-white rounded-5 m-3">
         <h2>{renderHour(round)}</h2>
         <h4 className="text-center">Your Station</h4>
+        {/** Player's actions bar */}
         <Actions
           updateBoard={updateBoard}
           increaseRound={increaseRound}
@@ -389,12 +336,14 @@ function Game() {
           isReady={isReady}
         />
       </div>
+
       <ArrivalsPopup
         round={round}
         show={arrivalsPopup}
         onHide={() => setArrivalsPopup(false)}
         renderHour={renderHour}
       />
+      {/** Popup for managing arrivals */}
       <ManageArrivalsPopup
         show={manageArrivalsPopup}
         onHide={() => setManageArrivalsPopup(false)}
@@ -405,6 +354,7 @@ function Game() {
         lobby={lobby}
         channel={channel}
       />
+      {/** Popup for exiting students */}
       <ReadyToExitPopup
         isCurrentDepartment={isCurrentDepartment}
         show={readyToExitPopup}
@@ -414,6 +364,7 @@ function Game() {
         game={game}
         setGame={setGame}
       />
+      {/** End of Round Stats */}
       <EndOfRoundStats
         show={endOfRoundStats}
         onHide={() => setEndOfRoundStats(false)}

@@ -6,6 +6,7 @@ export default function Leaderboard() {
   const [entries, setEntries] = useState([]);
   const navigate = useNavigate();
 
+  // Fetch leaderboard data from Supabase
   useEffect(() => {
     async function fetchLeaderboard() {
       const { data, error } = await supabase
