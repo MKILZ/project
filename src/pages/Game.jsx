@@ -158,7 +158,7 @@ function Game() {
         const updated = [...new Set([...prev, newPlayer])];
 
         // Check after updating
-        if (updated.length >= 2) {
+        if (updated.length >= 4) {
           increaseRound();
           setIsReady(false);
           return []; // Reset
