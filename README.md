@@ -84,25 +84,10 @@ Each role must maintain a **1:1 student-to-volunteer ratio**, and volunteers can
 
 ---
 
-## 🚀 Getting Started
+### 🚀 Getting Started
 
-Follow the steps below to set up and run the project locally using **Vite**.
+The game is hosted and live at:
 
-### 📦 Prerequisites
+👉 https://interview-day-game.onrender.com/
 
-- Node.js (v16 or higher recommended)
-- npm or yarn
-
-### 🛠️ Installation and Intitialization
-
-```bash
-git clone https://github.com/your-username/interview-day-at-raikes.git
-cd interview-day-at-raikes
-npm install
-npm run dev
-
-
-
-
-
-```
+Visit the link above to start playing — no local setup required!
